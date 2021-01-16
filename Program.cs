@@ -1,6 +1,4 @@
 ﻿
-using HookLib;
-using HookLib.Windows;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -105,23 +103,6 @@ namespace GenshinbotCsharp
             Console.ReadLine();
         }
 
-        static void TestGenshin()
-        {
-            GenshinWindow g = new GenshinWindow();
-
-            Console.WriteLine("found window");
-
-            g.KeyDown += (s, e) =>
-            {
-                Console.WriteLine((VirtualKeyCode)e.VirtualKeyCode);
-            };
-
-            g.EnableRecording();
-
-            Console.ReadLine();
-
-            g.DisableRecording();
-        }
 
         static void Main(string[] args)
         {

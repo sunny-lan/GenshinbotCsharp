@@ -1,6 +1,4 @@
 ﻿
-using HookLib;
-using HookLib.Windows;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -24,7 +22,6 @@ namespace GenshinbotCsharp
         private volatile IntPtr hWnd;
         public InputSimulator Simulator;
         private IntPtr hdc;
-        private Hooker recorder;
 
         public GenshinWindow()
         {
@@ -37,7 +34,6 @@ namespace GenshinbotCsharp
             if (hdc == IntPtr.Zero)
                 throw new Exception("failed to get DC (to get pixel colors)");
 
-            recorder = new Hooker();
 
             //stupid hack
        
