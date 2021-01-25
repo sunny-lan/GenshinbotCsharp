@@ -1,38 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Interop;
+using Vanara.PInvoke;
 
 namespace GenshinbotCsharp
 {
 
     class BetterHooker : IDisposable //TODO
+, IHooker
     {
-        private int hookID;
+        private User32.SafeHHOOK hookID;
         private uint threadID;
-        private const uint CUST_MSG = 0x666;
-        private WinAPI.HookProc proc;
+        private const uint CUST_MSG = 0x666, TIMEOUT_MSG=0x667;
+        private User32.HookProc proc;
 
-        static IntPtr mar = WinAPI.LoadLibrary("user32.dll");
+        static Kernel32.SafeHINSTANCE mar = Kernel32.LoadLibrary("user32.dll");
 
         private const int WM_QUIT = 0x12;
 
         private Queue<Event> records;
+
+        //public event System.EventHandler<Event> OnEvent;
         public BetterHooker()
         {
             records = new Queue<Event>();
-            threadID = WinAPI.GetCurrentThreadId();
+            threadID = Kernel32.GetCurrentThreadId();
             proc = KeyboardHookProc;
-            hookID = WinAPI.SetWindowsHookEx(
-                    WinAPI.WH_KEYBOARD_LL,
+            hookID = User32.SetWindowsHookEx(
+                    User32.HookType.WH_KEYBOARD_LL,
                     proc,
                     mar,
                     0);
-            if (hookID == 0)
+            if (hookID.IsInvalid)
             {
                 //Returns the error code returned by the last unmanaged function called using platform invoke that has the DllImportAttribute.SetLastError flag set. 
                 var errorCode = Marshal.GetLastWin32Error();
@@ -42,20 +42,20 @@ namespace GenshinbotCsharp
             }
         }
 
-        private static KeyboardEvent KbdToEvent(int wParam, IntPtr lParam)
+        private static KeyboardEvent KbdToEvent(IntPtr wParam, IntPtr lParam)
         {
-            var keyStruct = (WinAPI.KeyboardHookStruct)Marshal.PtrToStructure(lParam, typeof(WinAPI.KeyboardHookStruct));
+            var keyStruct = (User32.KBDLLHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(User32.KBDLLHOOKSTRUCT));
             KeyboardEvent r = new KeyboardEvent();
-            r.KeyCode = (WindowsInput.Native.VirtualKeyCode)keyStruct.VirtualKeyCode;
-            if (wParam == WinAPI.WM_KEYUP) r.KbType = KeyboardEvent.KbEvtType.UP;
-            else if (wParam == WinAPI.WM_KEYDOWN) r.KbType = KeyboardEvent.KbEvtType.DOWN;
+            r.KeyCode = (WindowsInput.Native.VirtualKeyCode)keyStruct.vkCode;
+            if ((User32.WindowMessage)wParam == User32.WindowMessage.WM_KEYUP) r.KbType = KeyboardEvent.KbEvtType.UP;
+            else if ((User32.WindowMessage)wParam == User32.WindowMessage.WM_KEYDOWN) r.KbType = KeyboardEvent.KbEvtType.DOWN;
             else r = null;
             return r;
         }
 
-        private int KeyboardHookProc(int nCode, int wParam, IntPtr lParam)
+        private IntPtr KeyboardHookProc(int nCode, IntPtr wParam, IntPtr lParam)
         {
-            if (WinAPI.GetCurrentThreadId() != threadID)
+            if (Kernel32.GetCurrentThreadId() != threadID)
                 throw new Exception("Cross thread call");
 
 
@@ -66,7 +66,7 @@ namespace GenshinbotCsharp
                 if (r != null)
                 {
                     records.Enqueue(r);
-                    if (!WinAPI.PostThreadMessage(threadID, CUST_MSG, UIntPtr.Zero, IntPtr.Zero))
+                    if (!User32.PostThreadMessage(threadID, CUST_MSG, IntPtr.Zero, IntPtr.Zero))
                     {
                         throw new Exception("Failed to post message");
                     }
@@ -75,32 +75,33 @@ namespace GenshinbotCsharp
 
 
             //forward to other application
-            return WinAPI.CallNextHookEx(hookID, nCode, wParam, lParam);
+            return User32.CallNextHookEx(hookID, nCode, wParam, lParam);
         }
 
 
-
+        //TODO implement timeout
         public Event WaitEvent()
         {
-            if (WinAPI.GetCurrentThreadId() != threadID)
+            if (Kernel32.GetCurrentThreadId() != threadID)
                 throw new Exception("Cross thread call");
 
-            var msg = new MSG();
+          
 
             while (true)
             {
-                int ret = WinAPI.GetMessage(ref msg, 0, 0, 0);
-                if (ret == -1)
-                    throw new Win32Exception(Marshal.GetLastWin32Error());
-                if (ret == 0)
+                MSG msg;
+                if (!User32.GetMessage(out msg, HWND.NULL, 0, 0))
                     throw new Exception("hooker disposed");
 
                 if (msg.message == CUST_MSG)
                     return records.Dequeue();
 
+                else if (msg.message == TIMEOUT_MSG)
+                    return null;
 
-                WinAPI.TranslateMessage(ref msg);
-                WinAPI.DispatchMessage(ref msg);
+
+                User32.TranslateMessage(msg);
+                User32.DispatchMessage(msg);
 
             }
 
@@ -108,27 +109,22 @@ namespace GenshinbotCsharp
 
         private void Interrupt()
         {
-            WinAPI.PostThreadMessage(threadID, WM_QUIT, UIntPtr.Zero, IntPtr.Zero);
+            User32.PostThreadMessage(threadID, WM_QUIT, IntPtr.Zero, IntPtr.Zero);
         }
 
 
 
         public void Dispose()
         {
-            if (hookID != 0)
+
+
+            //if failed and exception must be thrown
+            if (!User32.UnhookWindowsHookEx(hookID))
             {
-                //uninstall hook
-                var result = WinAPI.UnhookWindowsHookEx(hookID);
-                //reset invalid handle
-                hookID = 0;
-                //if failed and exception must be thrown
-                if (result == 0)
-                {
-                    //Returns the error code returned by the last unmanaged function called using platform invoke that has the DllImportAttribute.SetLastError flag set. 
-                    var errorCode = Marshal.GetLastWin32Error();
-                    //Initializes and throws a new instance of the Win32Exception class with the specified error. 
-                    throw new Win32Exception(errorCode);
-                }
+                //Returns the error code returned by the last unmanaged function called using platform invoke that has the DllImportAttribute.SetLastError flag set. 
+                var errorCode = Marshal.GetLastWin32Error();
+                //Initializes and throws a new instance of the Win32Exception class with the specified error. 
+                throw new Win32Exception(errorCode);
             }
             //Interrupt();
         }

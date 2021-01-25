@@ -1,4 +1,5 @@
 ﻿
+using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Vanara.PInvoke;
 using WindowsInput.Native;
 
 namespace GenshinbotCsharp
@@ -75,7 +77,7 @@ namespace GenshinbotCsharp
 
             }
             Task.Delay(1000).Wait();
-            var iss= new WindowsInput.InputSimulator();
+            var iss = new WindowsInput.InputSimulator();
             using (var br = new BinaryReader(File.Open("recording.bin", FileMode.Open)))
             {
                 Recording s = Recording.From(br);
@@ -103,12 +105,32 @@ namespace GenshinbotCsharp
             Console.ReadLine();
         }
 
+        static void testscreenshot()
+        {
+            using var g = new WindowAutomator();
+            g.WaitForFocus().Wait();
+            while (true)
+            {
+                var d = g.GetRect();
+                Console.WriteLine(d.Size);
+                using var mt = Screenshot.GetBuffer(d.Width, d.Height);
+                while (g.GetRect().Size == d.Size)
+                {
+                    if (g.Focused)
+                    {
+                        g.TakeScreenshot(0, 0, mt);
+                        Cv2.BitwiseNot(mt.Mat, mt.Mat);
+                    }
+                    Cv2.ImShow("hi", mt.Mat);
+                    Cv2.WaitKey(1);
+                }
+            }
+        }
 
         static void Main(string[] args)
         {
-            TestRecord();
-             TestPlayback();
-            
+            tools.CoordChecker.run(args);
+
         }
 
     }
