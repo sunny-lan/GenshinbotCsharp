@@ -16,7 +16,7 @@ using System.ComponentModel;
 namespace GenshinbotCsharp
 {
 
-    class WindowAutomator : IDisposable, IHooker
+    class WindowAutomator :  IHooker
     {
 
 
@@ -25,7 +25,7 @@ namespace GenshinbotCsharp
         private HWND hWnd;
         public InputSimulator Simulator;
 
-        public WindowAutomator(string TITLE = "Genshin Impact", string CLASS = "UnityWndClass")
+        public WindowAutomator(string TITLE, string CLASS )
         {
 
             hWnd = User32.FindWindow(CLASS,TITLE);
@@ -187,11 +187,6 @@ namespace GenshinbotCsharp
             Simulator.Mouse.MoveMouseBy(dx, dy);
         }
 
-        public void Dispose()
-        {
-            
-            if (hooker != null) hooker.Dispose();
-        }
 
 
     }

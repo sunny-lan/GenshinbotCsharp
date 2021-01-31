@@ -17,21 +17,20 @@ namespace GenshinbotCsharp.tools
         {
 
 
-            using var g = new WindowAutomator();// ("*Untitled - Notepad", null);
+           var g = new GenshinWindow();// ("*Untitled - Notepad", null);
             g.InitHooking();
             Console.WriteLine("genshin window initted");
 
             Cv2.NamedWindow(winName);
             Cv2.SetMouseCallback(winName, onMouse);
             Console.WriteLine("press g to take screenshot");
-            g.WaitForFocus().Wait();
             while (true)
             {
                 var d = g.GetRect();
                 
                 Console.WriteLine("window size detected: " + d.Size);
 
-                using var mt = Screenshot.GetBuffer(d.Width, d.Height);
+                 var mt = Screenshot.GetBuffer(d.Width, d.Height);
                 tmp = new Mat(mt.Mat.Size(), mt.Mat.Type());
                 while (g.GetRect().Size == d.Size)
                 {

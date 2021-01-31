@@ -7,8 +7,7 @@ using Vanara.PInvoke;
 namespace GenshinbotCsharp
 {
 
-    class BetterHooker : IDisposable //TODO
-, IHooker
+    class BetterHooker : IHooker
     {
         private User32.SafeHHOOK hookID;
         private uint threadID;
@@ -114,7 +113,7 @@ namespace GenshinbotCsharp
 
 
 
-        public void Dispose()
+        ~BetterHooker()
         {
 
 

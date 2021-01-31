@@ -12,7 +12,7 @@ namespace GenshinbotCsharp
 {
     class Screenshot
     {
-        static Screenshot()
+        public static void Init()
         {
             var r = SHCore.SetProcessDpiAwareness(SHCore.PROCESS_DPI_AWARENESS.PROCESS_PER_MONITOR_DPI_AWARE);
             if (r != HRESULT.S_OK)
@@ -27,13 +27,13 @@ namespace GenshinbotCsharp
 
         private static Gdi32.SafeHDC hDesktopDC;
         private static Gdi32.SafeHDC hTmpDC;
-        public class Buffer : IDisposable
+        public class Buffer
         {
             public IntPtr Raw;
             public Gdi32.SafeHBITMAP HBitmap;
             public OpenCvSharp.Mat Mat;
 
-            public void Dispose() => HBitmap.Dispose();
+            ~Buffer() => HBitmap.Dispose();
         }
 
         /// <summary>

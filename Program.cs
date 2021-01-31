@@ -17,8 +17,8 @@ namespace GenshinbotCsharp
         static void TestRecord()
         {
             Recorder r = new Recorder();
-            using (var b = new BetterHooker())
-            {
+            var b = new BetterHooker();
+            
                 Console.WriteLine("press esc to start");
                 while (true)
                 {
@@ -54,7 +54,7 @@ namespace GenshinbotCsharp
                     }
                 }
 
-            }
+            
             Console.WriteLine("saving to recording.bin");
             using (BinaryWriter writer = new BinaryWriter(File.Open("recording.bin", FileMode.Create)))
             {
@@ -65,8 +65,7 @@ namespace GenshinbotCsharp
         static void TestPlayback()
         {
             Console.WriteLine("press esc to play");
-            using (var b = new BetterHooker())
-            {
+            var b = new BetterHooker();
                 while (true)
                 {
                     var x = b.WaitEvent();
@@ -75,7 +74,6 @@ namespace GenshinbotCsharp
                             if (e.KeyCode == VirtualKeyCode.ESCAPE) break;
                 }
 
-            }
             Task.Delay(1000).Wait();
             var iss = new WindowsInput.InputSimulator();
             using (var br = new BinaryReader(File.Open("recording.bin", FileMode.Open)))
@@ -107,13 +105,13 @@ namespace GenshinbotCsharp
 
         static void testscreenshot()
         {
-            using var g = new WindowAutomator();
+            var g = new GenshinWindow();
             g.WaitForFocus().Wait();
             while (true)
             {
                 var d = g.GetRect();
                 Console.WriteLine(d.Size);
-                using var mt = Screenshot.GetBuffer(d.Width, d.Height);
+                var mt = Screenshot.GetBuffer(d.Width, d.Height);
                 while (g.GetRect().Size == d.Size)
                 {
                     if (g.Focused)
@@ -127,10 +125,25 @@ namespace GenshinbotCsharp
             }
         }
 
+        static void TestMap()
+        {
+            var g = new GenshinWindow();
+            g.WaitForFocus().Wait();
+            
+            var map = new screens.MapScreen(g);
+            while (true)
+            {
+                g.WaitForFocus().Wait();
+                map.FindLocation();
+            }
+        }
+
         static void Main(string[] args)
         {
-            tools.CoordChecker.run(args);
-
+            
+            Screenshot.Init();
+            // tools.CoordChecker.run(args);
+            TestMap();
         }
 
     }
