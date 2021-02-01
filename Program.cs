@@ -127,23 +127,49 @@ namespace GenshinbotCsharp
 
         static void TestMap()
         {
+            var m = new algorithm.MapFeatureMatch();
+            var img = Data.Imread("test/jueyuan_default.PNG");
+            while (true)
+            {
+                m.FindLocation(img);
+                Cv2.WaitKey();
+            }
+        }
+
+        static void TestMap2()
+        {
             var g = new GenshinWindow();
-            g.WaitForFocus().Wait();
-            
-            var map = new screens.MapScreen(g);
+
+            var m = new algorithm.MapFeatureMatch();
+            var img = Data.Imread("test/jueyuan_default.PNG");
+
             while (true)
             {
                 g.WaitForFocus().Wait();
-                map.FindLocation();
+                var r = g.GetRect();
+                var b = Screenshot.GetBuffer(r.Width, r.Height);
+                while (g.GetRect() == r)
+                {
+                    g.WaitForFocus().Wait();
+                    g.TakeScreenshot(0, 0, b);
+                    foreach(var x in m.FindTeleporters(b.Mat))
+                    {
+
+                    }
+                    Cv2.WaitKey(1);
+                }
             }
+            
         }
 
         static void Main(string[] args)
         {
             
             Screenshot.Init();
+            TestMap2();
             // tools.CoordChecker.run(args);
-            TestMap();
+            // TestMap();
+            //tools.CoordRecorder.run(args);
         }
 
     }

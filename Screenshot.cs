@@ -12,8 +12,11 @@ namespace GenshinbotCsharp
 {
     class Screenshot
     {
+        static bool inited = false;
         public static void Init()
         {
+            if (inited) return;
+            inited = true;
             var r = SHCore.SetProcessDpiAwareness(SHCore.PROCESS_DPI_AWARENESS.PROCESS_PER_MONITOR_DPI_AWARE);
             if (r != HRESULT.S_OK)
                 throw r.GetException("failed to set dpi awareness to per monitor aware. this is required for multimonitor screenshots");
