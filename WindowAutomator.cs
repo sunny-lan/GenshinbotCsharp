@@ -27,7 +27,6 @@ namespace GenshinbotCsharp
 
         public WindowAutomator(string TITLE, string CLASS )
         {
-            Screenshot.Init();
             hWnd = User32.FindWindow(CLASS,TITLE);
               if (hWnd == IntPtr.Zero)
                   throw new Exception("failed to find window");

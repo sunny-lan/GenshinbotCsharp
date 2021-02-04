@@ -12,7 +12,7 @@ namespace GenshinbotCsharp
     {
         public enum EvtType : byte
         {
-            MOUSE = 6, KEYBOARD = 7,
+            MOUSE = 6, KEYBOARD = 7,WINDOW=8,
         }
 
 
@@ -66,6 +66,23 @@ namespace GenshinbotCsharp
             bw.Write((int)KeyCode);
             bw.Write((byte)KbType);
         }
+    }
+
+    class WindowEvent : Event
+    {
+        public override EvtType Type => EvtType.WINDOW;
+
+        public static WindowEvent From(BinaryReader br)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void SubTo(BinaryWriter bw)
+        {
+            throw new NotImplementedException();
+        }
+
+
     }
 
 

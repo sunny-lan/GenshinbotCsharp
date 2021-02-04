@@ -128,20 +128,19 @@ namespace GenshinbotCsharp
         static void TestMap()
         {
             var m = new algorithm.MapFeatureMatch();
-            var img = Data.Imread("test/jueyuan_default.PNG");
-            while (true)
+            var img = Data.Imread("test/mondstadt_default.PNG");
+            foreach(var x in m.FindTeleporters(img))
             {
-                m.FindLocation(img);
                 Cv2.WaitKey();
             }
+            Cv2.WaitKey();
         }
 
-        static void TestMap2()
+        static void TestMapLive()
         {
             var g = new GenshinWindow();
 
             var m = new algorithm.MapFeatureMatch();
-            var img = Data.Imread("test/jueyuan_default.PNG");
 
             while (true)
             {
@@ -152,10 +151,7 @@ namespace GenshinbotCsharp
                 {
                     g.WaitForFocus().Wait();
                     g.TakeScreenshot(0, 0, b);
-                    foreach(var x in m.FindTeleporters(b.Mat))
-                    {
-
-                    }
+                    foreach(var x in m.FindTeleporters(b.Mat));
                     Cv2.WaitKey(1);
                 }
             }
@@ -164,11 +160,11 @@ namespace GenshinbotCsharp
 
         static void Main(string[] args)
         {
-            
             Screenshot.Init();
-            TestMap2();
+            TestMapLive();
             // tools.CoordChecker.run(args);
-            // TestMap();
+            //TestMap();
+            Cv2.WaitKey();
             //tools.CoordRecorder.run(args);
         }
 

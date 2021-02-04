@@ -35,6 +35,9 @@ namespace GenshinbotCsharp.algorithm
                 public Point P1 => new Point(Left, Top);
                 public Point P2 => new Point(Right, Bottom);
 
+
+                public Size Size => new Size(Width, Height);
+
             }
 
             Mat labels = new Mat(),
@@ -46,7 +49,7 @@ namespace GenshinbotCsharp.algorithm
             {
 
                 Count = Cv2.ConnectedComponentsWithStats(img, labels, stats, centroids);
-                
+
             }
 
             public Stats this[int idx]
@@ -88,52 +91,80 @@ namespace GenshinbotCsharp.algorithm
 
         class Template
         {
+            public double SatMinThres;
+            //public double ValMinThres;
+
             public Mat Mask;
-            public Mat Match;//actual template used for match
-            Mat filter; //binary image used by findconnectedcomponents
-            ConnectedComponents components = new ConnectedComponents();
+            public Mat UnweightedMask;
+
+           // public Mat Value
+            public Mat Sat;
+            //public Mat Hue;
+
+            //public double ValueAvg;
+
+            public Mat Filter;
+
             public ConnectedComponents.Stats Stats;
+
+            ConnectedComponents components = new ConnectedComponents();
             public Template(string path, string pathAlpha)
             {
+                Filter = new Mat();
+                Mask = new Mat();
+
                 //1. calculate filter image and components
                 using var orig = Cv2.ImRead(path);
 
                 Cv2.CvtColor(orig, orig, ColorConversionCodes.BGR2HSV);
 
-                filter = orig.ExtractChannel(1);//s
-                Cv2.Threshold(filter, filter, 10, 255, ThresholdTypes.BinaryInv);
+                Sat = orig.ExtractChannel(1);//s
+                Cv2.Threshold(Sat, Filter, 15, 255, ThresholdTypes.BinaryInv);
 
-                components.CalculateFrom(filter);
+                components.CalculateFrom(Filter);
                 if (components.Count != 2)
                     throw new NotImplementedException("split component template not supported yet");
 
                 Stats = components[1];
 
-                //2. calculate image used for template matching (value channel)
-                Match = orig[Stats.Rect].ExtractChannel(2);
-
                 //3. calculate image used for masking (alpha channel)
                 using var origAlpha = Cv2.ImRead(pathAlpha, ImreadModes.Unchanged);
-                Mask = origAlpha[Stats.Rect].ExtractChannel(3);
-                Mask.ConvertTo(Mask, MatType.CV_32F);
+                using var UnweightedMask = origAlpha[Stats.Rect].ExtractChannel(3);
+                UnweightedMask.ConvertTo(Mask, MatType.CV_32F);
+
+                //2. calculate image used for template matching (value channel)
+                //var subImg = orig[Stats.Rect];
+                //Value = subImg.ExtractChannel(2);
+                //Hue = subImg.ExtractChannel(0);
+
+                Sat = Sat[Stats.Rect];
+                //Filter = Filter[Stats.Rect];
+                //ValueAvg = Value.Mean(Filter)[0];
+                //SatAvg = Sat.Mean(Filter)[0];
             }
 
             ~Template()
             {
                 Mask.Dispose();
-                Match.Dispose();
-                filter.Dispose();
+                UnweightedMask.Dispose();
+                Sat.Dispose();
+                Filter.Dispose();
             }
 
             public static Template Waypoint()
             {
-                return new Template(Data.Get("map/icons/waypoint.PNG"), Data.Get("map/icons/waypoint_alpha.PNG"));
+                return new Template(Data.Get("map/icons/waypoint_1680x1050.PNG"), Data.Get("map/icons/waypoint_1680x1050_alpha.PNG"))
+                {
+                    SatMinThres = 0.1,
+                   //ValMinThres = 0.1,
+                };
             }
         }
 
         private ConnectedComponents components = new ConnectedComponents();
         private Template waypoint;
         private Mat matchResult = new Mat();
+        private Mat matchResult2 = new Mat();
 
         public MapFeatureMatch()
         {
@@ -170,13 +201,13 @@ namespace GenshinbotCsharp.algorithm
             var t = Data.Map.Teleporters;
             for (int i = 0; i < t.Count; i++)
             {
-                
+
                 var a = t[i];
-               // if(a.Name.ToLower().Contains("aiozang") || a.Name== "Qingyun Peak Teleporter")
+                // if(a.Name.ToLower().Contains("aiozang") || a.Name== "Qingyun Peak Teleporter")
                 for (int j = i + 1; j < t.Count; j++)
                 {
                     var b = t[j];
-                   // if (b.Name.ToLower().Contains("aiozang") || b.Name == "Qingyun Peak Teleporter")
+                    // if (b.Name.ToLower().Contains("aiozang") || b.Name == "Qingyun Peak Teleporter")
                     {
                         var pair = new Pair(a, b);
                         if (pair.Angle < 0)
@@ -195,28 +226,39 @@ namespace GenshinbotCsharp.algorithm
         Mat debugImg = new Mat();
         Mat hsv = new Mat();
 
-        const double TEMPLATE_MATCH_TOLERANCE = 0.05;
+        //things which are definitely not matches
         const double ANGLE_MATCH_TOLERANCE = 0.2;
         const double DISTANCE_MATCH_TOLERANCE = 0.5;
+        private const double RATIO_TEST_TOLERANCE = 2;
 
         private double scoreFunc(double a, double b)
         {
             return 1.0 / (1 + Abs(a - b));
         }
 
+        //Mat t_sub_v = new Mat();
+        //Mat t_sub_h = new Mat();
+        Mat t_sub_mask = new Mat();
+        //Mat t_unweighted_mask = new Mat();
+        Mat filter = new Mat();
+        Mat t_sat = new Mat();
         public IEnumerable<Point2d> FindTeleporters(Mat buf)
         {
             buf.CopyTo(debugImg);
 
-            
+            Template template = waypoint;
+
+
             Cv2.CvtColor(buf, hsv, ColorConversionCodes.BGR2HSV);
 
-            using var filter = hsv.ExtractChannel(1);
+            using var sat = hsv.ExtractChannel(1);
+            Cv2.Threshold(sat, filter, 15, 255, ThresholdTypes.BinaryInv);
 
-            Cv2.Threshold(filter, filter, 10, 255, ThresholdTypes.BinaryInv);
             components.CalculateFrom(filter);
 
             int iw = hsv.Width, ih = hsv.Height;
+
+            var matches = new List<Tuple<double, Point2d>>();
 
             //sort candidate areas using heuristic
             //compares the size of the template image with the size of the  actual area of interest
@@ -226,68 +268,102 @@ namespace GenshinbotCsharp.algorithm
                 ConnectedComponents.Stats c = components[i];
 
                 //ignore subimages which are way too small
-                if (c.Area < waypoint.Stats.Area / 2
-                    || c.Width < waypoint.Stats.Width / 2
-                    || c.Height < waypoint.Stats.Height / 2
+                if (c.Area < template.Stats.Area / 6
+                    || c.Width < template.Stats.Width / 3
+                    || c.Height < template.Stats.Height / 3
                     ) continue;
                 //ignore subimages which are way too big
-                if (c.Area > waypoint.Stats.Area * 20
-                    || c.Width > waypoint.Stats.Width * 10
-                    || c.Height > waypoint.Stats.Height * 10
+                if (c.Area > template.Stats.Area * 20
+                    || c.Width > template.Stats.Width * 10
+                    || c.Height > template.Stats.Height * 10
                     ) continue;
 
-                double areaScale = Sqrt(waypoint.Stats.Area / (double)c.Area);
-                double sizeDiff = Sqrt(scoreFunc(areaScale * c.Width, waypoint.Stats.Width) *
-                                        scoreFunc(areaScale * c.Height, waypoint.Stats.Height));
-                double ratioDiff = scoreFunc(waypoint.Stats.Width / waypoint.Stats.Height,
+                double areaScale = Sqrt(template.Stats.Area / (double)c.Area);
+                double sizeDiff = Sqrt(scoreFunc(areaScale * c.Width, template.Stats.Width) *
+                                        scoreFunc(areaScale * c.Height, template.Stats.Height));
+                double ratioDiff = scoreFunc(template.Stats.Width / template.Stats.Height,
                     c.Width / c.Height);
-
-                candidates.Add(new Tuple<double, int>(sizeDiff * ratioDiff, i));
+                candidates.Add(new Tuple<double, int>(ratioDiff, i));
             }
             candidates.Sort();
+
 
             foreach (var state in candidates)
             {
                 var i = state.Item2;
                 ConnectedComponents.Stats c = components[i];
 
-                Mat t_sub = waypoint.Match;
-                int tw = t_sub.Width, th = t_sub.Height;
 
-                //calculate biggest possible rect template could be in
-                int l = c.Left, r = c.Right, t = c.Top, b = c.Bottom;
-                int left = Max(0, Min(r - tw, l));
-                int right = Min(iw, Max(l + tw, r));
-                int top = Max(0, Min(b - th, t));
-                int bottom = Min(ih, Max(t + th, b));
+                //resize the template to fit within given image
+                double maxFactor = Min(1.0, Min(c.Width /(double) template.Stats.Width, c.Height / (double)template.Stats.Height));
+                var t_size = new Size(maxFactor*template.Stats.Width, maxFactor*template.Stats.Height);
+                //Cv2.Resize(template.Value, t_sub_v, t_size);
+                // Cv2.Resize(waypoint.Hue, t_sub_h, size);
+                Cv2.Resize(template.Mask, t_sub_mask, t_size);
+                // Cv2.Resize(waypoint.UnweightedMask, t_unweighted_mask, size);
+                Cv2.Resize(template.Sat, t_sat, t_size);
 
-                Mat sub = hsv[top, bottom, left, right];
+                //select subimage
+                Mat sub = hsv[c.Rect];
 
                 //images could be too small after clipping off the side of the screenshot
-                if (sub.Width < t_sub.Width || sub.Height < t_sub.Height)
+                if (sub.Width < t_sub_mask.Width || sub.Height < t_sub_mask.Height)
                     continue;
 
-                //match the templates using the value channel
-                using Mat subCh = sub.ExtractChannel(2);//value
-                Cv2.MatchTemplate(subCh, waypoint.Match, matchResult, TemplateMatchModes.SqDiffNormed, waypoint.Mask);
+                //match the templates using the hue and value channel
+               // using Mat value = sub.ExtractChannel(2);//value
+
+                //adjust brightness
+                //Mat sub_filter = filter[c.Rect];
+                //double brightnessAdjust = waypoint.ValueAvg - value.Mean(sub_filter)[0];
+               // Cv2.Add(value, brightnessAdjust, value);
+
+                //Cv2.PutText(debugImg, "v:" + brightnessAdjust, new Point(c.Right, c.Bottom), HersheyFonts.HersheyPlain, 1, Scalar.Pink, thickness: 2);
+
+               // Cv2.MatchTemplate(value, t_sub_v, matchResult2, TemplateMatchModes.SqDiffNormed, t_sub_mask);
+
+
+                //using Mat hue = sub.ExtractChannel(0);//hue
+                //Cv2.MatchTemplate(hue, t_sub_h, matchResult, TemplateMatchModes.SqDiffNormed, t_sub_mask);
+                //matchResult.MinMaxLoc(out var hueScore, out var _, out Point hueLoc, out Point _);
+
+                Mat sub_sat = sat[c.Rect];
+                Cv2.MatchTemplate(sub_sat, t_sat, matchResult, TemplateMatchModes.SqDiffNormed, t_sub_mask);
+                //Cv2.Add(matchResult2, 1.0, matchResult2);
+                //Cv2.Add(matchResult, 1.0, matchResult);
+                //Cv2.Multiply(matchResult, matchResult2, matchResult);
 
                 matchResult.MinMaxLoc(out var score, out var _, out Point loc, out Point _);
 
-                Cv2.Rectangle(debugImg, c.Rect, Scalar.Red, thickness: 2);
-                if (score < TEMPLATE_MATCH_TOLERANCE)
+
+                Point2d bestPoint = loc;
+                Rect area = new Rect(
+                    new Point(c.Left + bestPoint.X, c.Top + bestPoint.Y),
+                    t_size
+                );
+
+                double deviation =  matchResult.Mean()[0]-score;
+
+
+                if (score < 0.1)
                 {
-                    Rect area = new Rect(new Point(left, top) + loc, waypoint.Stats.Rect.Size);
+                    debugImg.PutText("s:" + Round(score, 3)
+                            + "d:" + Round(deviation, 3),
+                        area.TopLeft, HersheyFonts.HersheyPlain, fontScale: 1, color: Scalar.Red, thickness: 2);
+
                     Cv2.Rectangle(img: debugImg, area, color: Scalar.Blue, thickness: 2);
+
+
                     var mapPoint = new Point((area.Left + area.Right) / 2.0, area.Bottom);
                     Cv2.Circle(img: debugImg, center: mapPoint, radius: 2, color: Scalar.Green, thickness: 2);
+
+
                     yield return mapPoint;
-
                 }
-
             }
 
-            Cv2.ImShow("result", debugImg);
-            Cv2.WaitKey(1);
+            Cv2.ImShow("de",debugImg);
+
         }
         double anglediff(double a, double b)
         {
@@ -305,7 +381,7 @@ namespace GenshinbotCsharp.algorithm
 
             var list = FindTeleporters(buf).GetEnumerator();
 
-           
+
 
             //get the first two teleporters
             bool flag = false;
@@ -339,7 +415,7 @@ namespace GenshinbotCsharp.algorithm
                 foreach (var x in allPairs)
                 {
 
-                   // if (anglediff(x.Angle, angle) < ANGLE_MATCH_TOLERANCE)
+                    // if (anglediff(x.Angle, angle) < ANGLE_MATCH_TOLERANCE)
                     {
                         candidates.Add(x);
                     }

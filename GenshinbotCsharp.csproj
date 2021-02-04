@@ -117,7 +117,11 @@
     <Compile Include="BetterHooker.cs" />
     <Compile Include="ConfgurationManager.cs" />
     <Compile Include="Data.cs" />
+    <Compile Include="GenshinBot.cs" />
     <Compile Include="GenshinWindow.cs" />
+    <Compile Include="hooks\KbdHooker.cs" />
+    <Compile Include="hooks\WindowEvtHook.cs" />
+    <Compile Include="hooks\WindowHook.cs" />
     <Compile Include="json\Map.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="ScreenMap.cs" />
@@ -127,6 +131,7 @@
     <Compile Include="screens\PlayingScreen.cs" />
     <Compile Include="screens\Screen.cs" />
     <Compile Include="tools\CoordRecorder.cs" />
+    <Compile Include="Util.cs" />
     <Compile Include="WindowAutomator.cs" />
     <Compile Include="IHooker.cs" />
     <Compile Include="KeyboardStateTracker.cs" />
@@ -142,30 +147,10 @@
     <Compile Include="RecorderProgram.cs" />
     <Compile Include="Recording.cs" />
     <Compile Include="tools\CoordChecker.cs" />
+    <Compile Include="hooks\Hooker.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="data\test\jueyuan_default.PNG">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="data\test\liyue_default.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="data\test\mondstadt_default.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="data\test\mondstadt_max.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="data\test\mondstadt_min.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="data\test\stormterror.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="data\test\stormterror_default.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="data\test\stormterror_max.png">
+    <Content Include="data\map\icons\waypoint2.PNG">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="App.config" />
@@ -359,14 +344,16 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="data\map\icons\waypoint.PNG">
+    <Content Include="data\map\icons\waypoint_1680x1050.PNG">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="data\map\icons\waypoint_alpha.png">
+    <Content Include="data\map\icons\waypoint_1680x1050_alpha.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="data\test\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
