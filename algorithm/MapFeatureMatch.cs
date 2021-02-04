@@ -295,19 +295,22 @@ namespace GenshinbotCsharp.algorithm
 
 
                 //resize the template to fit within given image
-                double maxFactor = Min(1.0, Min(c.Width /(double) template.Stats.Width, c.Height / (double)template.Stats.Height));
-                var t_size = new Size(maxFactor*template.Stats.Width, maxFactor*template.Stats.Height);
+                //double maxFactor = Min(1.0, Min(c.Width /(double) template.Stats.Width, c.Height / (double)template.Stats.Height));
+                //var t_size = new Size(maxFactor*template.Stats.Width, maxFactor*template.Stats.Height);
                 //Cv2.Resize(template.Value, t_sub_v, t_size);
                 // Cv2.Resize(waypoint.Hue, t_sub_h, size);
-                Cv2.Resize(template.Mask, t_sub_mask, t_size);
+                //Cv2.Resize(template.Mask, t_sub_mask, t_size);
+                t_sub_mask = template.Mask;
+                t_sat = template.Sat;
                 // Cv2.Resize(waypoint.UnweightedMask, t_unweighted_mask, size);
-                Cv2.Resize(template.Sat, t_sat, t_size);
+                //Cv2.Resize(template.Sat, t_sat, t_size);
+                var t_size = template.Stats.Size;
 
                 //select subimage
-                Mat sub = hsv[c.Rect];
+                //Mat sub = hsv[c.Rect];
 
                 //images could be too small after clipping off the side of the screenshot
-                if (sub.Width < t_sub_mask.Width || sub.Height < t_sub_mask.Height)
+                if (c.Width < t_sub_mask.Width || c.Height < t_sub_mask.Height)
                     continue;
 
                 //match the templates using the hue and value channel
