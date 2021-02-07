@@ -112,11 +112,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="algorithm\MapFeatureMatch.cs" />
+    <Compile Include="algorithm\ConnectedComponents.cs" />
+    <Compile Include="algorithm\MapTemplateMatch.cs" />
+    <Compile Include="algorithm\MapLocationMatch.cs" />
     <Compile Include="algorithm\PointSetMatch.cs" />
     <Compile Include="BetterHooker.cs" />
     <Compile Include="ConfgurationManager.cs" />
     <Compile Include="Data.cs" />
+    <Compile Include="database\Point.cs" />
+    <Compile Include="database\Database.cs" />
+    <Compile Include="database\map\Feature.cs" />
+    <Compile Include="database\map\MapDb.cs" />
+    <Compile Include="Debug.cs" />
     <Compile Include="GenshinBot.cs" />
     <Compile Include="GenshinWindow.cs" />
     <Compile Include="hooks\KbdHooker.cs" />
@@ -151,6 +158,18 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="data\map\icons\waypoint2.PNG">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\map_a.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\map_b.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\map_c.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\map_D.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="App.config" />
@@ -351,9 +370,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="data\test\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

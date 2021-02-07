@@ -18,43 +18,43 @@ namespace GenshinbotCsharp
         {
             Recorder r = new Recorder();
             var b = new BetterHooker();
-            
-                Console.WriteLine("press esc to start");
-                while (true)
-                {
-                    var x = b.WaitEvent();
-                    if (x is KeyboardEvent e)
-                    {
 
-                        if (e.KeyCode == VirtualKeyCode.ESCAPE)
+            Console.WriteLine("press esc to start");
+            while (true)
+            {
+                var x = b.WaitEvent();
+                if (x is KeyboardEvent e)
+                {
+
+                    if (e.KeyCode == VirtualKeyCode.ESCAPE)
+                    {
+                        if (e.KbType == KeyboardEvent.KbEvtType.DOWN)
                         {
-                            if (e.KbType == KeyboardEvent.KbEvtType.DOWN)
+                            if (r.Recording)
                             {
-                                if (r.Recording)
-                                {
-                                    r.Stop();
-                                    Console.WriteLine("paused");
-                                }
-                                else
-                                {
-                                    r.Start();
-                                    Console.WriteLine("recording...");
-                                }
+                                r.Stop();
+                                Console.WriteLine("paused");
+                            }
+                            else
+                            {
+                                r.Start();
+                                Console.WriteLine("recording...");
                             }
                         }
-                        else if (e.KeyCode == VirtualKeyCode.END)
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            r.OnEvent(x);
-                        }
-
                     }
-                }
+                    else if (e.KeyCode == VirtualKeyCode.END)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        r.OnEvent(x);
+                    }
 
-            
+                }
+            }
+
+
             Console.WriteLine("saving to recording.bin");
             using (BinaryWriter writer = new BinaryWriter(File.Open("recording.bin", FileMode.Create)))
             {
@@ -66,13 +66,13 @@ namespace GenshinbotCsharp
         {
             Console.WriteLine("press esc to play");
             var b = new BetterHooker();
-                while (true)
-                {
-                    var x = b.WaitEvent();
-                    if (x is KeyboardEvent e)
-                        if (e.KbType == KeyboardEvent.KbEvtType.DOWN)
-                            if (e.KeyCode == VirtualKeyCode.ESCAPE) break;
-                }
+            while (true)
+            {
+                var x = b.WaitEvent();
+                if (x is KeyboardEvent e)
+                    if (e.KbType == KeyboardEvent.KbEvtType.DOWN)
+                        if (e.KeyCode == VirtualKeyCode.ESCAPE) break;
+            }
 
             Task.Delay(1000).Wait();
             var iss = new WindowsInput.InputSimulator();
@@ -127,9 +127,9 @@ namespace GenshinbotCsharp
 
         static void TestMap()
         {
-            var m = new algorithm.MapFeatureMatch();
+            var m = new algorithm.MapTemplateMatch();
             var img = Data.Imread("test/mondstadt_default.PNG");
-            foreach(var x in m.FindTeleporters(img))
+            foreach (var x in m.FindTeleporters(img))
             {
                 Cv2.WaitKey();
             }
@@ -140,7 +140,7 @@ namespace GenshinbotCsharp
         {
             var g = new GenshinWindow();
 
-            var m = new algorithm.MapFeatureMatch();
+            var m = new algorithm.MapTemplateMatch();
 
             while (true)
             {
@@ -151,21 +151,72 @@ namespace GenshinbotCsharp
                 {
                     g.WaitForFocus().Wait();
                     g.TakeScreenshot(0, 0, b);
-                    foreach(var x in m.FindTeleporters(b.Mat));
+                    foreach (var x in m.FindTeleporters(b.Mat)) ;
                     Cv2.WaitKey(1);
                 }
             }
-            
+
+        }
+
+        static void TestLocationDetect()
+        {
+
+            var m = new algorithm.MapTemplateMatch();
+
+            var a = Data.Imread("test/map_c.png");
+            var b = Data.Imread("test/map_D.png");
+
+            var features = m.FindTeleporters(a).Select(x => new Feature
+            {
+                Coordinates = x.Point,
+            }).ToList();
+            //features.Sort((x, y) => x.Coordinates.X.CompareTo( y.Coordinates.X));
+            var lm = new algorithm.MapLocationMatch();
+            foreach (var f in features)
+                lm.AddFeature(f);
+
+            Debug.show();
+
+
+            Console.WriteLine("find teleporter");
+            var tr = m.FindTeleporters(b).ToList();
+           // tr.Sort((x, y) => x.Point.X.CompareTo(y.Point.X));
+            Debug.show();
+            Console.WriteLine("find loc");
+            var lr = lm.FindLocation2(tr, b.Size());
+            if (lr.Score != 0)
+            {
+                Console.WriteLine("detect pos: " + lr.ToCoord(new Point2d(0, 0)));
+                for (int i = 0; i < features.Count; i++)
+                {
+                    var f = features[i];
+                    Debug.img.PutText("f:" + i, lr.ToPoint(f.Coordinates).ToPoint(),
+                        HersheyFonts.HersheyPlain, fontScale: 1, color: Scalar.Red, thickness: 2);
+                }
+                foreach(var match in lr.Matches)
+                {
+                    if (match.B != null)
+                    {
+                        int idx = features.IndexOf(match.B);
+                        Debug.img.PutText("m:" + idx, match.A.BoundingBox.TopLeft, HersheyFonts.HersheyPlain,
+                            fontScale: 1, color: Scalar.Cyan, thickness: 2);
+                    }
+                }
+            }
+            Debug.show();
+            Debug.WaitKey();
+
         }
 
         static void Main(string[] args)
         {
             Screenshot.Init();
-            TestMapLive();
+            //TestMapLive();
             // tools.CoordChecker.run(args);
             //TestMap();
-            Cv2.WaitKey();
-            //tools.CoordRecorder.run(args);
+            // Cv2.WaitKey();
+            tools.CoordRecorder.run(args);
+           // TestLocationDetect();
         }
 
     }

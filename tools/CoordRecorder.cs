@@ -37,18 +37,20 @@ namespace GenshinbotCsharp.tools
         }
         public static void run(string[] args)
         {
-            Console.WriteLine("clear old (y/n)?");
+           /* Console.WriteLine("clear old (y/n)?");
             var c = Console.ReadKey();
 
             var points = new List<Point2d>();
             if (c.Key != ConsoleKey.Y)
             {
                 points = read();
-            }
+            }*/
 
             var g = new GenshinWindow();// ("*Untitled - Notepad", null);
             Console.WriteLine("genshin window initted");
-            var m = new algorithm.MapFeatureMatch();
+            g.InitHooking();
+            var m = new algorithm.MapTemplateMatch();
+            var lm = new algorithm.MapLocationMatch();
 
             Console.WriteLine("Open map in genshin and focus onto it");
             g.WaitForFocus().Wait();
@@ -57,72 +59,65 @@ namespace GenshinbotCsharp.tools
             Console.WriteLine("move slowly");
 
             //position of current frame 
-            Point2d coordinate = new Point2d(0, 0);
-            double THRES = 100; //expect not to move more than 100 pixels per frame
+            var features = new List<Feature>();
             while (true)
             {
                 g.WaitForFocus().Wait();
+                if (!g.Focused) break;
                 g.TakeScreenshot(0, 0, buf);
 
-                //find all teleporters
-                //match each teleporter to the closest one in the last frame
-                //calculate the average offset of all teleporters
-                var newPoints = new List<Point2d>();
-                Point2d totalOffset = new Point2d(0, 0);
-                int count = 0;
-                foreach(var tel in m.FindTeleporters(buf.Mat))
+
+                var tr = m.FindTeleporters(buf.Mat).ToList();
+                try
                 {
-                    Point2d closest=default;
-                    double min = double.PositiveInfinity;
-                    foreach(var p in points)
+                    var lr = lm.FindLocation2(tr, r.ToOpenCVRect().Size);
+                    if (lr.Score != 0)
                     {
-                        var lastPos = p - coordinate;
-                        double d = lastPos.DistanceTo(tel);
-                        if (d < min)
+                        Console.WriteLine("detect pos: " + lr.ToCoord(new Point2d(0, 0)) + " score=" + lr.Score);
+                        for (int i = 0; i < features.Count; i++)
                         {
-                            min = d;
-                            closest = p;
+                            var f = features[i];
+                            Debug.img.PutText("f:" + i, lr.ToPoint(f.Coordinates).ToPoint(),
+                                HersheyFonts.HersheyPlain, fontScale: 1, color: Scalar.Red, thickness: 2);
+                        }
+                        foreach (var match in lr.Matches)
+                        {
+                            if (match.B == null)
+                            {
+
+                            }
+                            else
+                            {
+                                int idx = features.IndexOf(match.B);
+                                Debug.img.PutText("m:" + idx, match.A.BoundingBox.TopLeft, HersheyFonts.HersheyPlain,
+                                    fontScale: 1, color: Scalar.Cyan, thickness: 2);
+                            }
                         }
                     }
-
-                    if (min > THRES) //new point
+                    foreach (var newPt in lr.Unknown)
                     {
-                        newPoints.Add(tel);
+                        var f = new Feature
+                        {
+                            Coordinates = lr.ToCoord(newPt.Point),
+                        };
+                        features.Add(f);
+                        lm.AddFeature(f);
+                        Console.WriteLine("new feature: " + f.Coordinates);
                     }
-                    else
-                    {
-                        totalOffset += tel - closest;
-                        count++;
-                    }
+                }catch(Exception e) {
+                    Console.WriteLine("failed to find location");
                 }
-
-                if (count > 0) {
-                    Point2d avgOffset = totalOffset * (1.0 / count);
-                    coordinate += avgOffset;
-                }
-                else
-                {
-                    if (points.Count > 0)
-                        throw new Exception("unable to track position");
-                }
-                Console.WriteLine("Coordinates: " + coordinate);
-
-                //coordinate now holds the global position of the current frame
-                //use this to add in all the new points
-                foreach (var p in newPoints)
-                {
-                    points.Add(p+coordinate);
-                    Console.WriteLine("New point: " + (p+coordinate));
-                }
+                Debug.show();
+                
             }
-            Console.WriteLine("points dump:");
+          /*  Console.WriteLine("points dump:");
 
             Console.WriteLine(points.Count);
             foreach(var p in points)
             {
                 Console.WriteLine(p.X+ " " +p.Y);
             }
-            write(points);
+            write(points);*/
             Console.ReadLine();
         }
     }
