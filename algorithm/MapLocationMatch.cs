@@ -93,13 +93,16 @@ namespace GenshinbotCsharp.algorithm
         const double MIN_ACCEPTABLE_SCORE = 0.9;
         public const int MAX_EXPECTED_FALSE_POSITIVES = 2;
         public const double MAX_EXPECTED_FALSE_NEGATIVE_RATE =0.7;
+        //required difference between score of best solution and second best
+        const double REQUIRED_SOLUTION_UNIQUENESS=0.05;
         public MapLocationMatch() { }
         public MapLocationMatch(List<Feature> features) {
             foreach (var f in features)
                 AddFeature(f);
         }
 
-        void TestTransform(Point2d translation, double scale, List<MapTemplateMatch.Result> list,bool expectUnknown,ref Result result,Size bound )
+        void TestTransform(Point2d translation, double scale, List<MapTemplateMatch.Result> list,bool expectUnknown,
+            ref Result result,Size bound,ref double lastBest )
         {
 
             var l2 = list.Select(x => new Result.Match
@@ -113,8 +116,9 @@ namespace GenshinbotCsharp.algorithm
             foreach (var t in allFeatures) //200
             {
                 Point2d screen = (t.Coordinates - translation) * (1 / scale);
-                if (screen.X < 0 || screen.Y < 0 || screen.X > bound.Width || screen.Y > bound.Height) { }else
+                if (screen.X < 0 || screen.Y < 0 || screen.X > bound.Width || screen.Y > bound.Height) continue;
                 inRect++;
+                //TODO support multiple types of features
                 foreach(var m in l2)
                 {
                     double d = screen.DistanceTo(m.A.Point);
@@ -163,6 +167,7 @@ namespace GenshinbotCsharp.algorithm
             curScor = Pow(curScor, 1.0 / count);
             if (curScor > MIN_ACCEPTABLE_SCORE && curScor > result.Score)
             {
+                lastBest = result.Score;
                 result.Score = curScor;
                 result.Translation = translation;
                 result.Scale = scale;
@@ -207,11 +212,18 @@ namespace GenshinbotCsharp.algorithm
                     Scale = double.NaN,
                     Translation = new Point2d(double.NaN, double.NaN),
                 };
+                double lastBest = 0;
 
                 //check every pair of teleporters
-                //TODO implement binary search
-                foreach (var candidate in allPairs) //200^2
+                double st = angle - ANGLE_TOLERANCE;
+                double ed = angle + ANGLE_TOLERANCE;
+                int sidx = allPairs.LowerBound(x => x.Angle >= st);
+                int eidx = allPairs.LowerBound(x => x.Angle > ed);
+
+
+                for (int k= sidx;k < eidx;k++) //200^2
                 {
+                    var candidate = allPairs[k];
                     if (anglediff(angle, candidate.Angle) > ANGLE_TOLERANCE) continue;
 
                     //calculate the transformation of this candidate
@@ -219,14 +231,18 @@ namespace GenshinbotCsharp.algorithm
                     double scale = candidate.Distance / a.DistanceTo(b);
                     Point2d translation = candidate.A.Coordinates - a * scale;
 
-                    TestTransform(translation, scale, list, expectUnknown, ref result,bounds);
+                    TestTransform(translation, scale, list, expectUnknown, ref result,bounds,ref lastBest);
                 }
-                if (result.Score > MIN_ACCEPTABLE_SCORE)
+                if (result.Score > MIN_ACCEPTABLE_SCORE && result.Score - lastBest>REQUIRED_SOLUTION_UNIQUENESS)
                 {
                     return result;
                 }
             }
-            throw new Exception("unable to find location");
+            throw new NoSolutionException("unable to find location");
+        }
+
+        public class NoSolutionException : Exception {
+            public NoSolutionException(string s) : base(s) { }
         }
 
         public Result FindLocationOld(IEnumerator<MapTemplateMatch.Result> list, bool shortCircuit = true)

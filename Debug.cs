@@ -45,5 +45,9 @@ namespace GenshinbotCsharp
             }
         }
 
+        public static void Assert(bool b, string s="assert failed")
+        {
+            if (!b) throw new Exception(s);
+        }
     }
 }
