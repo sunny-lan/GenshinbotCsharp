@@ -10,50 +10,19 @@ using System.Threading.Tasks;
 
 namespace GenshinbotCsharp
 {
-    class Feature
-    {
-        public Point2d Coordinates;
+  
 
-    }
-
-    class Teleporter : Feature
-    {
-        public string Name;
-    }
-
-    class MapData
-    {
-        public List<Teleporter> Teleporters=new List<Teleporter>();
-    }
 
     static class Data
     {
-       static List<Teleporter> ReadTeleporters(string region)
+
+        private static JsonSerializerOptions options = new JsonSerializerOptions()
         {
-            var result = new List<Teleporter>();
-            var json = Json<data.json.MapData>(Path.Combine("map/json/features",region,"special/teleporter.json"));
-            foreach(var teleporter in json.data)
+            Converters =
             {
-                
-                result.Add(new Teleporter
-                {
-                    Coordinates=new Point2d(teleporter.geometry.coordinates[1],-teleporter.geometry.coordinates[0]),
-                    Name=teleporter.properties.popupTitle.en,
-                    
-                });
+                new database.jsonconverters.Point2dConverter()
             }
-            return result;
-        }
-
-        public static MapData Map { get; private set; }
-        static Data()
-        {
-            Map = new MapData();
-           // Map.Teleporters.AddRange(ReadTeleporters("mondstadt"));
-            Map.Teleporters.AddRange(ReadTeleporters("liyue"));
-            //Map.Teleporters.AddRange(ReadTeleporters("dragonspine"));
-        }
-
+        };
         public static string Get(string name)
         {
             return Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),"data",name);
@@ -64,9 +33,18 @@ namespace GenshinbotCsharp
             return File.ReadAllText(Get(name));
         }
 
-        public static T Json<T>(string name)
+        public static void Write(string name, string value)
         {
-            return JsonSerializer.Deserialize<T>(Read(name));
+            File.WriteAllText(Get(name), value);
+        }
+
+        public static T ReadJson<T>(string name)
+        {
+            return JsonSerializer.Deserialize<T>(Read(name), options);
+        }
+        public static void WriteJson<T>(string name, T data)
+        {
+            Write(name, JsonSerializer.Serialize<T>(data, options));
         }
 
         public static Mat Imread(string name, ImreadModes mode=ImreadModes.Color)

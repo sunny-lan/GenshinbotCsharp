@@ -1,4 +1,5 @@
-﻿using OpenCvSharp;
+﻿using GenshinbotCsharp.database.map;
+using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,7 @@ namespace GenshinbotCsharp.algorithm
 
         public class Template
         {
+            public FeatureType FeatureType;
             public double SatMinThres;
             //public double ValMinThres;
 
@@ -80,6 +82,7 @@ namespace GenshinbotCsharp.algorithm
                 {
                     SatMinThres = 0.1,
                    //ValMinThres = 0.1,
+                   FeatureType=FeatureType.Teleporter,
                 };
             }
         }

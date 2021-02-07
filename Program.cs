@@ -1,4 +1,5 @@
 ﻿
+using GenshinbotCsharp.database.map;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;

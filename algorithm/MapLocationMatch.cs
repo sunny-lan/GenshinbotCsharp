@@ -1,4 +1,5 @@
-﻿using OpenCvSharp;
+﻿using GenshinbotCsharp.database.map;
+using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -73,7 +74,6 @@ namespace GenshinbotCsharp.algorithm
             }
             public Point2d Translation;
             public double Scale;
-            public List<MapTemplateMatch.Result> Unknown;
             public List<Match> Matches;
             public double Score;
 
@@ -88,22 +88,19 @@ namespace GenshinbotCsharp.algorithm
             }
         }
 
-        const double ANGLE_TOLERANCE = PI / 18;
+        const double ANGLE_TOLERANCE = PI / 36; //5 degrees
         const double COORD_DIST_TOLERANCE =100;
         const double MIN_ACCEPTABLE_SCORE = 0.9;
-        const int MAX_RETRIES = 4;
         public const int MAX_EXPECTED_FALSE_POSITIVES = 2;
-        public const double MAX_EXPECTED_FALSE_NEGATIVE_RATE =0;
-        Size pb;
+        public const double MAX_EXPECTED_FALSE_NEGATIVE_RATE =0.7;
+        public MapLocationMatch() { }
+        public MapLocationMatch(List<Feature> features) {
+            foreach (var f in features)
+                AddFeature(f);
+        }
 
         void TestTransform(Point2d translation, double scale, List<MapTemplateMatch.Result> list,bool expectUnknown,ref Result result,Size bound )
         {
-            if (pb.Width != 0)
-            {
-                if (pb != bound) throw new Exception();
-            }
-            pb = bound;
-            var unknown = new List<MapTemplateMatch.Result>();
 
             var l2 = list.Select(x => new Result.Match
             {
@@ -141,6 +138,11 @@ namespace GenshinbotCsharp.algorithm
             {
                 return;
             }
+            if(!expectUnknown && l2.Count-matched > MAX_EXPECTED_FALSE_POSITIVES)
+            {
+                return;
+            }
+                
             double curScor = 1;
             int count = 0;
             foreach (var m in l2)
@@ -148,11 +150,6 @@ namespace GenshinbotCsharp.algorithm
                 if (m.B==null)
                 {
 
-                    //unable to match
-                    unknown.Add(m.A);
-                    if (expectUnknown == false
-                        && unknown.Count > MAX_EXPECTED_FALSE_POSITIVES)
-                        return;
                 }
                 else
                 {
@@ -170,19 +167,24 @@ namespace GenshinbotCsharp.algorithm
                 result.Translation = translation;
                 result.Scale = scale;
                 result.Matches = l2;
-                result.Unknown = unknown;
             }
         }
         public Result FindLocation2(List<MapTemplateMatch.Result> list21,Size bounds, bool expectUnknown = true)
         {
             if (allPairs.Count == 0)
             {
+                //special case: when there are no data, we just return the whole input list as unknown 
                 return new Result
                 {
                     Score = 0,
-                    Unknown = list21,
                     Scale = 1,
                     Translation = new Point2d(0, 0),
+                    Matches = list21.Select(x => new Result.Match
+                    {
+                        A = x,
+                        B = null,
+                        Distance = double.PositiveInfinity,
+                    }).ToList(),
                 };
             }
 
@@ -199,12 +201,9 @@ namespace GenshinbotCsharp.algorithm
                     Swap(ref a, ref b);
                     angle = a.AngleTo(b);
                 }
-                //special case: when there are not data, we just return the whole input list
-                //as unknown 
                 var result = new Result
                 {
                     Score = 0,
-                    Unknown = null,
                     Scale = double.NaN,
                     Translation = new Point2d(double.NaN, double.NaN),
                 };
@@ -230,7 +229,7 @@ namespace GenshinbotCsharp.algorithm
             throw new Exception("unable to find location");
         }
 
-        public Result FindLocation(IEnumerator<MapTemplateMatch.Result> list, bool shortCircuit = true)
+        public Result FindLocationOld(IEnumerator<MapTemplateMatch.Result> list, bool shortCircuit = true)
         {
             //get the first two teleporters
             bool flag = false;
@@ -310,11 +309,7 @@ namespace GenshinbotCsharp.algorithm
                 double scaleFinal = candidates[1].Distance / a.DistanceTo(b);
                 Point2d translationFinal = candidates[1].A.Coordinates - a * scaleFinal;
 
-                foreach (var teleporterM in Data.Map.Teleporters)
-                {
-                    Point2d screenCoords = (teleporterM.Coordinates - translationFinal) * (1 / scaleFinal);
-
-                }
+                throw new NotImplementedException("this algorithm doesn't work"); 
 
             }
 

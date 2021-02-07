@@ -1,4 +1,5 @@
-﻿using OpenCvSharp;
+﻿using GenshinbotCsharp.database.map;
+using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,56 +11,37 @@ namespace GenshinbotCsharp.tools
 {
     class CoordRecorder
     {
-        static string path = Data.Get("map/points.txt");
-        static List<Point2d> read()
-        {
-            if (!File.Exists(path))
-                return new List<Point2d>();
-            string[] lines = File.ReadAllLines(path);
-            var r = new List<Point2d>(lines.Length);
-            foreach(var line in lines)
-            {
-                var tmp = line.Split(' ');
-                r.Add(new Point2d(
-                    double.Parse(tmp[0]),
-                    double.Parse(tmp[1])
-                ));
-            }
-            return r;
-        }
-
-        static void write(List<Point2d> points)
-        {
-            string[] lines = points.Select(
-                p => p.X + " " + p.Y
-            ).ToArray();
-            File.WriteAllLines(path, lines);
-        }
+        const string path = "map/db.json";
         public static void run(string[] args)
         {
-           /* Console.WriteLine("clear old (y/n)?");
+            Console.WriteLine("clear old (y/n)?");
             var c = Console.ReadKey();
 
-            var points = new List<Point2d>();
+            MapDb db;
             if (c.Key != ConsoleKey.Y)
             {
-                points = read();
-            }*/
+                db = Data.ReadJson<MapDb>(path); 
+               
+            }
+            else
+            {
+                db = MapDb.Default();
+            }
 
             var g = new GenshinWindow();// ("*Untitled - Notepad", null);
             Console.WriteLine("genshin window initted");
             g.InitHooking();
+            var features = db.Features;
             var m = new algorithm.MapTemplateMatch();
-            var lm = new algorithm.MapLocationMatch();
+            var lm = new algorithm.MapLocationMatch(features);
 
             Console.WriteLine("Open map in genshin and focus onto it");
             g.WaitForFocus().Wait();
             var r = g.GetRect();
             var buf = Screenshot.GetBuffer(r.Width, r.Height);
-            Console.WriteLine("move slowly");
+            Console.WriteLine("data will be written automatically");
 
-            //position of current frame 
-            var features = new List<Feature>();
+           
             while (true)
             {
                 g.WaitForFocus().Wait();
@@ -77,47 +59,53 @@ namespace GenshinbotCsharp.tools
                         for (int i = 0; i < features.Count; i++)
                         {
                             var f = features[i];
-                            Debug.img.PutText("f:" + i, lr.ToPoint(f.Coordinates).ToPoint(),
-                                HersheyFonts.HersheyPlain, fontScale: 1, color: Scalar.Red, thickness: 2);
-                        }
-                        foreach (var match in lr.Matches)
-                        {
-                            if (match.B == null)
+                            var p = lr.ToPoint(f.Coordinates).ToPoint();
+                            if (p.X > 0 && p.Y > 0 && p.X < r.Width && p.Y < r.Height)
                             {
-
-                            }
-                            else
-                            {
-                                int idx = features.IndexOf(match.B);
-                                Debug.img.PutText("m:" + idx, match.A.BoundingBox.TopLeft, HersheyFonts.HersheyPlain,
-                                    fontScale: 1, color: Scalar.Cyan, thickness: 2);
+                                Debug.img.PutText("f:" + i, p,
+                                    HersheyFonts.HersheyPlain, fontScale: 1, color: Scalar.Red, thickness: 2);
                             }
                         }
                     }
-                    foreach (var newPt in lr.Unknown)
+                    bool added = false;
+                    foreach (var match in lr.Matches)
                     {
-                        var f = new Feature
+                        if (match.B == null)
                         {
-                            Coordinates = lr.ToCoord(newPt.Point),
-                        };
-                        features.Add(f);
-                        lm.AddFeature(f);
-                        Console.WriteLine("new feature: " + f.Coordinates);
+                            var f = new Feature
+                            {
+                                Coordinates = lr.ToCoord(match.A.Point),
+                            };
+                            features.Add(f);
+                            lm.AddFeature(f);
+                            Console.WriteLine("new feature: " + f.Coordinates);
+                            added = true;
+                        }
+                        else
+                        {
+                            int idx = features.IndexOf(match.B);
+                            Debug.img.PutText("m:" + idx, match.A.BoundingBox.TopLeft, HersheyFonts.HersheyPlain,
+                                fontScale: 1, color: Scalar.Cyan, thickness: 2);
+                        }
                     }
-                }catch(Exception e) {
+                    Debug.show();
+                    if (added)
+                        Data.WriteJson(path, db);
+                }
+                catch (Exception _)
+                {
                     Console.WriteLine("failed to find location");
                 }
-                Debug.show();
-                
-            }
-          /*  Console.WriteLine("points dump:");
 
-            Console.WriteLine(points.Count);
-            foreach(var p in points)
-            {
-                Console.WriteLine(p.X+ " " +p.Y);
             }
-            write(points);*/
+            Console.WriteLine("points dump:");
+
+            Console.WriteLine(features.Count);
+            foreach (var p in features)
+            {
+                Console.WriteLine(p.Coordinates.X + " " + p.Coordinates.Y);
+            }
+
             Console.ReadLine();
         }
     }

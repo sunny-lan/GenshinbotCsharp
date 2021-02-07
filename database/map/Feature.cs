@@ -1,4 +1,6 @@
-﻿using System;
+﻿
+using OpenCvSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +15,6 @@ namespace GenshinbotCsharp.database.map
     class Feature
     {
         public FeatureType Type { get; set; }
-        public Point Coordinate { get; set; }
+        public Point2d Coordinates { get; set; }
     }
 }
