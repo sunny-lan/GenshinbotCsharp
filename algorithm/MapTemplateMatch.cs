@@ -12,7 +12,7 @@ namespace GenshinbotCsharp.algorithm
      class MapTemplateMatch
     {
 
-
+        //TODO use templates from the assets
         public class Template
         {
             public FeatureType FeatureType;

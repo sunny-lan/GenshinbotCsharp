@@ -68,5 +68,33 @@ namespace GenshinbotCsharp
         {
             return new Rect(r.X, r.Y, r.Width, r.Height);
         }
+
+        public static Point2d ToPointd(this Mat mat)
+        {
+            return new Point2d((float)mat.Get<double>(0, 0), (float)mat.Get<double>(1   , 0));
+        }
+        public static Mat ToMat(this Point2d point)
+        {
+            return new Mat(3, 1, MatType.CV_64FC1, new double[] { point.X, point.Y, 1 });
+        }
+
+        public static Point2f ToPointf(this Point2d p)
+        {
+            return new Point2f((float)p.X, (float)p.Y);
+        }
+
+        public static Point2d Center(this Mat img)
+        {
+            return new Point2d(img.Width / 2.0, img.Height / 2.0);
+        }
+        public static Point2d Center(this Size img)
+        {
+            return new Point2d(img.Width / 2.0, img.Height / 2.0);
+        }
+
+        public static Size Scale(this Size size, double s)
+        {
+            return new Size(size.Width * s, size.Height * s);
+        }
     }
 }

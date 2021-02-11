@@ -1,4 +1,5 @@
 ﻿
+using GenshinbotCsharp.algorithm.experiments;
 using GenshinbotCsharp.database.map;
 using OpenCvSharp;
 using System;
@@ -209,6 +210,8 @@ namespace GenshinbotCsharp
 
         }
 
+        
+
         static void Main(string[] args)
         {
             Screenshot.Init();
@@ -216,8 +219,9 @@ namespace GenshinbotCsharp
             // tools.CoordChecker.run(args);
             //TestMap();
             // Cv2.WaitKey();
-            tools.CoordRecorder.run(args);
-           // TestLocationDetect();
+            //tools.CoordRecorder.run(args);
+            // TestLocationDetect();
+            MinimapMatcher.Test();
         }
 
     }

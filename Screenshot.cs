@@ -47,6 +47,7 @@ namespace GenshinbotCsharp
         /// <returns></returns>
         public static Buffer GetBuffer(int width, int height)
         {
+
             Gdi32.BITMAPINFO bi = new Gdi32.BITMAPINFO();
             bi.bmiHeader = new Gdi32.BITMAPINFOHEADER
             {
