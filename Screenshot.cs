@@ -36,7 +36,11 @@ namespace GenshinbotCsharp
             public Gdi32.SafeHBITMAP HBitmap;
             public OpenCvSharp.Mat Mat;
 
-            ~Buffer() => HBitmap.Dispose();
+            ~Buffer()
+            {
+                HBitmap.Dispose();
+                Mat.Dispose();
+            }
         }
 
         /// <summary>

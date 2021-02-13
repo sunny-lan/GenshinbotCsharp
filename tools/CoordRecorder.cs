@@ -28,15 +28,14 @@ namespace GenshinbotCsharp.tools
                 db = MapDb.Default();
             }
 
-            var g = new GenshinWindow();// ("*Untitled - Notepad", null);
+            var g = GenshinWindow.FindExisting();// ("*Untitled - Notepad", null);
             Console.WriteLine("genshin window initted");
-            g.InitHooking();
             var features = db.Features;
             var m = new algorithm.MapTemplateMatch();
             var lm = new algorithm.MapLocationMatch(features);
 
             Console.WriteLine("Open map in genshin and focus onto it");
-            g.WaitForFocus().Wait();
+            g.WaitForFocus();
             var r = g.GetRect();
             var buf = Screenshot.GetBuffer(r.Width, r.Height);
             Console.WriteLine("data will be written automatically");
@@ -44,7 +43,7 @@ namespace GenshinbotCsharp.tools
 
             while (true)
             {
-                g.WaitForFocus().Wait();
+                g.WaitForFocus();
                 if (!g.Focused) break;
                 g.TakeScreenshot(0, 0, buf);
 

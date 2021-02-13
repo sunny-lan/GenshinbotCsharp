@@ -8,7 +8,7 @@ using Vanara.PInvoke;
 
 namespace GenshinbotCsharp.hooks
 {
-    class KbdHooker : BasicHooker<User32.KBDLLHOOKSTRUCT>
+    class KbdHooker : BasicWindowsHookEx<User32.KBDLLHOOKSTRUCT>
     {
         public KbdHooker() : base(User32.HookType.WH_KEYBOARD_LL) { }
 

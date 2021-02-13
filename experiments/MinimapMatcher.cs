@@ -175,12 +175,12 @@ namespace GenshinbotCsharp.algorithm.experiments
             var minimap1 = new Rect(53, 15, 189, 189);
 
 
-            GenshinWindow g = new GenshinWindow();
+            GenshinWindow g = GenshinWindow.FindExisting();
             var r = g.GetRect();
             var buf = Screenshot.GetBuffer(r.Width, r.Height);
             while (true)
             {
-                g.WaitForFocus().Wait();
+                g.WaitForFocus();
                 g.TakeScreenshot(0, 0, buf);
                 var sub1 = buf.Mat;
                 sub1 = sub1[minimap1].Resize(default, fx: 1.6, fy: 1.6, InterpolationFlags.Lanczos4);

@@ -1,6 +1,7 @@
 ﻿
 using GenshinbotCsharp.algorithm.experiments;
 using GenshinbotCsharp.database.map;
+using GenshinbotCsharp.hooks;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -107,8 +108,8 @@ namespace GenshinbotCsharp
 
         static void testscreenshot()
         {
-            var g = new GenshinWindow();
-            g.WaitForFocus().Wait();
+            var g = GenshinWindow.FindExisting();
+            g.WaitForFocus();
             while (true)
             {
                 var d = g.GetRect();
@@ -140,18 +141,18 @@ namespace GenshinbotCsharp
 
         static void TestMapLive()
         {
-            var g = new GenshinWindow();
+            var g = GenshinWindow.FindExisting();
 
             var m = new algorithm.MapTemplateMatch();
 
             while (true)
             {
-                g.WaitForFocus().Wait();
+                g.WaitForFocus();
                 var r = g.GetRect();
                 var b = Screenshot.GetBuffer(r.Width, r.Height);
                 while (g.GetRect() == r)
                 {
-                    g.WaitForFocus().Wait();
+                    g.WaitForFocus();
                     g.TakeScreenshot(0, 0, b);
                     foreach (var x in m.FindTeleporters(b.Mat)) ;
                     Cv2.WaitKey(1);
@@ -221,7 +222,9 @@ namespace GenshinbotCsharp
             // Cv2.WaitKey();
             //tools.CoordRecorder.run(args);
             // TestLocationDetect();
-            MinimapMatcher.Test();
+            //MinimapMatcher.Test();
+            //WinEventHook.Test();
+            WindowAutomator.Test();
         }
 
     }

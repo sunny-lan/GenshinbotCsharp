@@ -117,7 +117,8 @@
     <Compile Include="algorithm\MapLocationMatch.cs" />
     <Compile Include="experiments\MinimapMatcher.cs" />
     <Compile Include="algorithm\PointSetMatch.cs" />
-    <Compile Include="BetterHooker.cs" />
+    <Compile Include="hooks\EventWaiter.cs" />
+    <Compile Include="oldhooking\BetterHooker.cs" />
     <Compile Include="ConfgurationManager.cs" />
     <Compile Include="Data.cs" />
     <Compile Include="database\Database.cs" />
@@ -128,11 +129,9 @@
     <Compile Include="GenshinBot.cs" />
     <Compile Include="GenshinWindow.cs" />
     <Compile Include="hooks\KbdHooker.cs" />
-    <Compile Include="hooks\WindowEvtHook.cs" />
+    <Compile Include="hooks\WinEventHook.cs" />
     <Compile Include="hooks\WindowHook.cs" />
     <Compile Include="database\map\GenshinIOMapData.cs" />
-    <Compile Include="Map.cs" />
-    <Compile Include="ScreenMap.cs" />
     <Compile Include="Screenshot.cs" />
     <Compile Include="screens\Loading.cs" />
     <Compile Include="screens\MapScreen.cs" />
@@ -141,8 +140,8 @@
     <Compile Include="tools\CoordRecorder.cs" />
     <Compile Include="Util.cs" />
     <Compile Include="WindowAutomator.cs" />
-    <Compile Include="IHooker.cs" />
-    <Compile Include="KeyboardStateTracker.cs" />
+    <Compile Include="oldhooking\IHooker.cs" />
+    <Compile Include="oldhooking\KeyboardStateTracker.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -151,11 +150,11 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Recorder.cs" />
-    <Compile Include="RecorderProgram.cs" />
-    <Compile Include="Recording.cs" />
+    <Compile Include="oldhooking\Recorder.cs" />
+    <Compile Include="oldhooking\RecorderProgram.cs" />
+    <Compile Include="oldhooking\Recording.cs" />
     <Compile Include="tools\CoordChecker.cs" />
-    <Compile Include="hooks\Hooker.cs" />
+    <Compile Include="hooks\HookBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="data\map\genshiniodata\assets\Andrius.dds" />

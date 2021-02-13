@@ -17,7 +17,7 @@ namespace GenshinbotCsharp.tools
         {
 
 
-           var g = new GenshinWindow();// ("*Untitled - Notepad", null);
+          /* var g = GenshinWindow.FindExisting();// ("*Untitled - Notepad", null);
             g.InitHooking();
             Console.WriteLine("genshin window initted");
 
@@ -26,13 +26,13 @@ namespace GenshinbotCsharp.tools
             Console.WriteLine("press g to take screenshot");
             while (true)
             {
-                var d = g.GetRect();
+                var d = g.GetRectDirect();
                 
                 Console.WriteLine("window size detected: " + d.Size);
 
                  var mt = Screenshot.GetBuffer(d.Width, d.Height);
                 tmp = new Mat(mt.Mat.Size(), mt.Mat.Type());
-                while (g.GetRect().Size == d.Size)
+                while (g.GetRectDirect().Size == d.Size)
                 {
                     var e = g.WaitKeyboardEvent();
                     if (e.KeyCode == VirtualKeyCode.VK_G && e.KbType == KeyboardEvent.KbEvtType.DOWN)
@@ -44,7 +44,7 @@ namespace GenshinbotCsharp.tools
                     }
 
                 }
-            }
+            }*/
         }
 
         private static int x, y;
