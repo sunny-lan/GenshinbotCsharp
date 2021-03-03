@@ -19,32 +19,16 @@ namespace GenshinbotCsharp.screens
         public MapScreen(GenshinBot b)
         {
             this.b = b;
-            var r = b.W.GetRect();
-            buf = Screenshot.GetBuffer(r.Width, r.Height);
 
             initLocator();
 
-            b.W.OnClientAreaChanged += W_OnClientAreaChanged;
-
         }
 
-        public PlayingScreen Close()
+        public void Close()
         {
             b.W.K.KeyPress(input.GenshinKeys.Map);
             Thread.Sleep(2000);//TODO
-            return b.S(b.PlayingScreen);
-        }
-
-
-
-        private void W_OnClientAreaChanged(object sender, Vanara.PInvoke.RECT e)
-        {
-            var r = b.W.GetRect();
-            if (r.Size != buf.Size)
-            {
-                lock (buf)
-                    buf = Screenshot.GetBuffer(r.Width, r.Height);
-            }
+            b.S(b.PlayingScreen);
         }
 
         public bool CheckActive()
@@ -73,8 +57,13 @@ namespace GenshinbotCsharp.screens
 
         public void UpdateScreenshot()
         {
-            lock (buf)
-               b.W.TakeScreenshot(0, 0, buf);
+            var r = b.W.GetRect();
+            if (buf==null  || r.Size != buf.Size)
+            {
+                buf = Screenshot.GetBuffer(r.Width, r.Height);
+            }
+
+            b.W.TakeScreenshot(0, 0, buf);
 
             features = null;
             location = null;

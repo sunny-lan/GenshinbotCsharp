@@ -9,7 +9,14 @@ namespace GenshinbotCsharp
 {
     static class Util
     {
-
+        public static Point ReadPoint()
+        {
+            Console.Write("x:");
+            int x = int.Parse(Console.ReadLine());
+            Console.Write("y:");
+            int y = int.Parse(Console.ReadLine());
+            return new Point(x, y);
+        }
         public static Rect ImgRect(this Mat m)
         {
             return new Rect(Origin, m.Size());

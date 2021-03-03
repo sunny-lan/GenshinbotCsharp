@@ -65,6 +65,7 @@ namespace GenshinbotCsharp.algorithm.MinimapMatch
             subRect = subRect.Intersect(bounds);
             if ( lastRect != subRect)
             {
+                Console.WriteLine("big rect change");
                 var subImg = db.BigMap[subRect];
                 lastRect = subRect;
                 bigF.Filter(subImg);
@@ -135,6 +136,7 @@ namespace GenshinbotCsharp.algorithm.MinimapMatch
                 pos.DistanceTo(m.SubImageCenterPos) > db.MaxDistanceBeforeTrackerMoves)
             {
                 m.UseSubImg(pos);
+                Console.WriteLine("Tracker update");
             }
 
             lastKnownPos = pos;

@@ -78,7 +78,11 @@ namespace GenshinbotCsharp.algorithm
 
             public static TemplateSat Waypoint()
             {
-                return new TemplateSat(Data.Get("map/icons/waypoint_1680x1050.PNG"), Data.Get("map/icons/waypoint_1680x1050_alpha.PNG"))
+                //TODO
+                return new TemplateSat(
+                    Data.Get("map/icons/waypoint_1440x900.PNG"), 
+                    Data.Get("map/icons/waypoint_1440x900_alpha.PNG")
+                    )
                 {
                     SatMinThres = 0.1,
                    //ValMinThres = 0.1,

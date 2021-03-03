@@ -30,7 +30,7 @@ namespace GenshinbotCsharp
         {
             Task.Run(() =>
             {
-                Cv2.NamedWindow("debug", WindowMode.KeepRatio);
+               // Cv2.NamedWindow("debug", WindowMode.KeepRatio);
                 lock (waitInit)
                 {
                     inited = true;
@@ -72,6 +72,7 @@ namespace GenshinbotCsharp
             }
         }
 
+        [System.Diagnostics.DebuggerHidden]
         public static void Assert(bool b, string s = "assert failed")
         {
             if (!b) throw new Exception(s);

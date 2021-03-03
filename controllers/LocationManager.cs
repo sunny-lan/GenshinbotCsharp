@@ -22,14 +22,60 @@ namespace GenshinbotCsharp.controllers
             {
                 BigMap = b.Db.MapDb.BigMap.Load(),
             });
+
+            //if we don't know transformation, we can get it using knownpoints
+            if (db.Coord2Minimap == null)
+                CalculateCoord2Minimap();
         }
 
         Point2d? approxPos;
         algorithm.MinimapMatch.ScaleMatcher m;
         algorithm.MinimapMatch.PositionTracker pt;
 
-        public Point2d DeduceLocation(screens.PlayingScreen p)
+        public Point2d GetLocationFromMap()
         {
+            var prevScreen = b.ActiveScreen;
+
+            if (b.ActiveScreen is screens.PlayingScreen p)
+                p.OpenMap();
+
+            var m = b.S<screens.MapScreen>();
+
+            m.UpdateScreenshot();
+            var screenCenter = b.W.GetBounds().Cv().Center();
+            var approxPos = m.GetLocation().ToCoord(screenCenter);
+
+            if (prevScreen is screens.PlayingScreen)
+                m.Close();
+
+            return approxPos;
+        }
+
+        public void CalculateCoord2Minimap()
+        {
+            Debug.Assert(db.KnownMinimapCoords.Count >= 2, "At least 2 points required for ");
+            var a = db.KnownMinimapCoords[0];
+            var b = db.KnownMinimapCoords[1];
+            var deltaCoord = a.Coord - b.Coord;
+            var deltaMini = a.Minimap - b.Minimap;
+            double scaleX = deltaMini.X / deltaCoord.X;
+            double scaleY = deltaMini.Y / deltaCoord.Y;
+            Debug.Assert(Math.Abs(scaleY - scaleX) < db.MaxMinimapScaleDistortion, "Calculated scaling is non uniform");
+            double scale = (scaleX + scaleY) / 2.0;
+            db.Coord2Minimap = new database.Transformation
+            {
+                Scale = scale,
+                Translation = a.Minimap-a.Coord*scale
+            };
+        }
+
+        public Point2d DeduceLocation()
+        {
+            if (db.Coord2Minimap == null)
+                throw new Exception("Missing setting");
+
+            var p = b.S<screens.PlayingScreen>();
+
             Mat minimap = p.SnapMinimap();
             bool approxLocCalculated = false;
 
@@ -39,13 +85,7 @@ namespace GenshinbotCsharp.controllers
             //check map to find initial location
             if (this.approxPos == null)
             {
-                var m = p.OpenMap();
-
-                m.UpdateScreenshot();
-                var screenCenter = b.W.GetBounds().Cv().Center();
-                this.approxPos = m.GetLocation().ToCoord(screenCenter);
-
-                m.Close();
+                approxPos = GetLocationFromMap();
 
                 approxLocCalculated = true;
             }
@@ -55,8 +95,7 @@ namespace GenshinbotCsharp.controllers
             Point2d miniPos1;
             if (pt == null) //if the scale hasn't been calculated yet
             {
-                if (db.Coord2Minimap == null)
-                    throw new Exception("Missing setting");
+                Console.WriteLine("Recalculating scale");
                 //convert map coord to minimap pos so we can use minimap matcher
                 var bigApproxPos = db.Coord2Minimap.Transform(this.approxPos.Expect());
                 var miniPos = m.FindScale(bigApproxPos, minimap, out var pt1);
@@ -80,6 +119,7 @@ namespace GenshinbotCsharp.controllers
 
                 //we successfully found the coordinate
                 miniPos1 = miniPos.Expect();
+                pt = new algorithm.MinimapMatch.PositionTracker(pt1);
             }
             else
             {
@@ -106,15 +146,68 @@ namespace GenshinbotCsharp.controllers
             return coord;
         }
 
+
+
         public static void Test()
         {
             GenshinBot b = new GenshinBot();
-            var playingScreen = b.S(b.PlayingScreen);
+
+          // b.LocationManager.Coord2MinimapTool();
+
+            b.S(b.PlayingScreen);
 
             while (true)
             {
-                var pos = b.LocationManager.DeduceLocation(playingScreen);
+                var pos = b.LocationManager.DeduceLocation();
                 Console.WriteLine(pos);
+            }
+        }
+
+
+
+        public void Coord2MinimapTool()
+        {
+            var data = new List<Tuple<Point2d, Point2d>>();
+            while (true)
+            {
+                Console.WriteLine("Please enter approx pos");
+                var approxPos = Util.ReadPoint();
+
+                Console.WriteLine("Please go into map screen");
+                Console.ReadLine();
+
+                //bot control begins
+
+                var m = b.S(b.MapScreen);
+                var coord1 = GetLocationFromMap();
+                m.Close();
+
+                var p = b.S<screens.PlayingScreen>();
+                var mini = p.SnapMinimap();
+
+                var miniP1 = this.m.FindScale(approxPos, mini, out var _);
+                if(miniP1 == null)
+                {
+                    Console.WriteLine("Minimap loc failed");
+                    continue;
+                }
+
+                //bot control ends
+
+                Console.WriteLine("Data point #" + data.Count);
+                Console.WriteLine("  Map coordinate " + coord1);
+                Console.WriteLine("  Minimap pos " + miniP1);
+
+                data.Add(new Tuple<Point2d, Point2d>(coord1, miniP1.Expect()));
+
+                if (data.Count >= 2)
+                {
+
+                }
+
+                Console.WriteLine("Please move to a different point and open map");
+                Console.ReadKey();
+
             }
         }
     }

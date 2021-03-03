@@ -9,7 +9,14 @@ namespace GenshinbotCsharp.database
 {
     class Transformation
     {
+        /// <summary>
+        /// Applied before translation
+        /// </summary>
         public double Scale { get; set; }
+
+        /// <summary>
+        /// Applied after scale
+        /// </summary>
         public Point2d Translation { get; set; }
 
         public Point2d Transform(Point2d p)

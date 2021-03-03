@@ -16,6 +16,10 @@ namespace GenshinbotCsharp
         public screens.PlayingScreen PlayingScreen;
         public screens.MapScreen MapScreen;
 
+        public bool SIs<T>() where T : Screen
+        {
+            return ActiveScreen is T;
+        }
         public T S<T>() where T:Screen
         {
             if (ActiveScreen is T t)
@@ -39,19 +43,30 @@ namespace GenshinbotCsharp
 
         public GenshinBot()
         {
+            Console.WriteLine("Bot load begin");
+
+            //TODO implement parallel loading
             Db = new database.Database
             {
                 MapDb = Data.ReadJson("map/db.json", database.map.MapDb.Default()),
                 LocationManagerDb = Data.ReadJson("controllers/LocationManager.json", database.controllers.LocationManagerDb.Default())
             };
 
+            Console.WriteLine("Database load finish");
+
             W = GenshinWindow.FindExisting();
+
+            Console.WriteLine("Genshin window initialized");
 
             PlayingScreen = new screens.PlayingScreen(this);
             MapScreen = new screens.MapScreen(this);
 
-            LocationManager = new controllers.LocationManager(this);
-        }
+            Console.WriteLine("Screens initialized");
 
+            LocationManager = new controllers.LocationManager(this);
+
+            Console.WriteLine("Controllers initialized");
+            Console.WriteLine("Bot initialized");
+        }
     }
 }

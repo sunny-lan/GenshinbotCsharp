@@ -22,22 +22,23 @@ namespace GenshinbotCsharp.screens
             throw new NotImplementedException();
         }
 
-        public MapScreen OpenMap()
+        public void OpenMap()
         {
             b.W.K.KeyPress(input.GenshinKeys.Map);
             Thread.Sleep(2000);//TODO
-            return b.S(b.MapScreen);
+            b.S(b.MapScreen);
         }
         private Rect thing = new Rect(53, 15, 189, 189);//TODO
+        private Rect thing_1440x900 = new Rect(46,13,161,161);//TODO
 
         private Screenshot.Buffer buf;
         public Mat SnapMinimap()
         {
             if(buf==null)
             {
-                buf = Screenshot.GetBuffer(thing.Width, thing.Height);
+                buf = Screenshot.GetBuffer(thing_1440x900.Width, thing_1440x900.Height);
             }
-            b.W.TakeScreenshot(0, 0, buf);
+            b.W.TakeScreenshot(thing_1440x900.X, thing_1440x900.Y, buf);
             return buf.Mat;
         }
     }

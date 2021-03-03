@@ -64,7 +64,6 @@ namespace GenshinbotCsharp.hooks
         //once signaled, the event object instance shall not be accessed again by the hooker
         protected void signal(T evt)
         {
-            //TODO
             if (Kernel32.GetCurrentThreadId() != ThreadID)
                 throw new Exception("Cross thread call to signal");
 
