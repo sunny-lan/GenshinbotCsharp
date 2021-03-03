@@ -1,7 +1,7 @@
-﻿namespace GenshinbotCsharp.data
+﻿namespace GenshinbotCsharp.data.genshinio
 {
 
-    public class GenshinIOMapData
+    public class MapData
     {
         public Name name { get; set; }
         public bool cluster { get; set; }

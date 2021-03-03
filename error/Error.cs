@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 
 namespace GenshinbotCsharp
 {
-    interface Screen
+    class Error
     {
-
-        public bool CheckActive();
+        public static void Throw<T>(T e) where T:Exception
+        {
+            throw e;
+        }
     }
 }

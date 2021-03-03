@@ -1,4 +1,4 @@
-﻿using GenshinbotCsharp.database.map;
+﻿using GenshinbotCsharp.database;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +9,7 @@ namespace GenshinbotCsharp.database
 {
     class Database
     {
-        public MapDb MapDb;
+        public map.MapDb MapDb;
+        public controllers.LocationManagerDb LocationManagerDb;
     }
 }

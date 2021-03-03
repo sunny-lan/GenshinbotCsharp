@@ -21,7 +21,7 @@ namespace GenshinbotCsharp.hooks
 
         private const int WM_QUIT = 0x12;
 
-        private Thread loopThread;
+        private Task loopThread;
 
         /// <summary>
         /// Note: this event will be raised on the message loop thread
@@ -34,8 +34,7 @@ namespace GenshinbotCsharp.hooks
         {
             if (Running) throw new Exception("already running");
             Running = true;
-            loopThread = new Thread(loop);
-            loopThread.Start();
+            loopThread = Task.Run(loop);
         }
 
         private object _ptr;//prevent garbage collection of delegate
@@ -79,7 +78,7 @@ namespace GenshinbotCsharp.hooks
             if (!Running) throw new Exception("already stopped");
             Running = false;
             User32.PostThreadMessage(ThreadID, WM_QUIT, IntPtr.Zero, IntPtr.Zero);
-            loopThread.Join();
+            loopThread.Wait();
         }
 
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenCvSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,8 @@ namespace GenshinbotCsharp.database.map
     class MapDb
     {
         public List<Feature> Features { get; set; }
+
+
         public static MapDb Default() {
             return new MapDb
             {
@@ -16,5 +19,6 @@ namespace GenshinbotCsharp.database.map
             };
         }
 
+        
     }
 }

@@ -10,8 +10,10 @@ namespace GenshinbotCsharp
 {
     class GenshinWindow : WindowAutomator
     {
+        public input.GenshinKeymap K;
         private GenshinWindow(string TITLE, string CLASS) : base(TITLE, CLASS)
         {
+            K = new input.GenshinKeymap(I);
         }
 
         public static GenshinWindow FindExisting()

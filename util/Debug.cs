@@ -28,7 +28,7 @@ namespace GenshinbotCsharp
         private static bool inited = false;
         static Debug()
         {
-            new Thread(() =>
+            Task.Run(() =>
             {
                 Cv2.NamedWindow("debug", WindowMode.KeepRatio);
                 lock (waitInit)
@@ -45,7 +45,7 @@ namespace GenshinbotCsharp
                         key = -1;
                     }
                 }
-            }).Start();
+            });
         }
 
         public static void show()

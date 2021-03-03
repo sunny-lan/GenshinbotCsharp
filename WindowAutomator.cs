@@ -8,40 +8,58 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using WindowsInput;
 using WindowsInput.Native;
 using Vanara.PInvoke;
 using System.ComponentModel;
 using GenshinbotCsharp.hooks;
+using GenshinbotCsharp.util;
 
 namespace GenshinbotCsharp
 {
 
     class WindowAutomator
     {
+        public input.IInputSimulator I;
 
-
-
+        
 
         private HWND hWnd;
         private uint pid, thread;
-        public InputSimulator Simulator;
 
+        public WindowAutomator(HWND hwnd)
+        {
+            constructor(hwnd);
+        }
 
+        private void constructor(HWND hwnd)
+        {
+            if (hwnd.IsNull) throw new Exception("invalid hwnd");
+            this.hWnd = hwnd;
+            thread = User32.GetWindowThreadProcessId(hWnd, out pid);
+
+            initInput();
+            initFocus();
+            initRect();
+
+        }
         public WindowAutomator(string TITLE, string CLASS)
         {
             hWnd = User32.FindWindow(CLASS, TITLE);
             if (hWnd == IntPtr.Zero)
                 throw new Exception("failed to find window");
-
-            thread = User32.GetWindowThreadProcessId(hWnd, out pid);
-
-            initFocus();
-            initRect();
-
-            Simulator = new InputSimulator();
-
+            constructor(hWnd);
+            
         }
+
+        #region Input
+
+
+        private void initInput()
+        {
+            //TODO
+        }
+
+        #endregion
 
         #region Screenshot 
 
@@ -175,6 +193,14 @@ namespace GenshinbotCsharp
             //as it will always fetch the rect as soon as the window recieves focus
             WaitForFocus();
             return rect;
+        }
+
+        public RECT GetBounds()
+        {
+            var r = GetRect();
+            r.X = 0;
+            r.Y = 0;
+            return r;
         }
 
         private void initRect()

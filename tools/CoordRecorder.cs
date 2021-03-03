@@ -52,7 +52,7 @@ namespace GenshinbotCsharp.tools
                 algorithm.MapLocationMatch.Result lr;
                 try
                 {
-                    lr = lm.FindLocation2(tr, r.ToOpenCVRect().Size);
+                    lr = lm.FindLocation2(tr, r.Cv().Size);
                 }
                 catch (algorithm.MapLocationMatch.NoSolutionException _)
                 {

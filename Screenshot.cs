@@ -1,17 +1,17 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using Vanara.PInvoke;
 
 namespace GenshinbotCsharp
 {
+    using Vanara.PInvoke;
+    using System.Runtime.InteropServices;
+    using System.Drawing;
+    using System.ComponentModel;
+
     class Screenshot
     {
+
         static bool inited = false;
         public static void Init()
         {
@@ -35,6 +35,7 @@ namespace GenshinbotCsharp
             public IntPtr Raw;
             public Gdi32.SafeHBITMAP HBitmap;
             public OpenCvSharp.Mat Mat;
+            public Size Size;
 
             ~Buffer()
             {
@@ -73,6 +74,7 @@ namespace GenshinbotCsharp
                 HBitmap = sec,
                 Raw = raw,
                 Mat = new OpenCvSharp.Mat(height, width, OpenCvSharp.MatType.CV_8UC4, raw),
+                Size=new Size(width,height)
             };
         }
 

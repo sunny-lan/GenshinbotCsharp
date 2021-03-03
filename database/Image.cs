@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GenshinbotCsharp
+namespace GenshinbotCsharp.database
 {
-    interface Screen
+    class Image
     {
-
-        public bool CheckActive();
+        public string Path { get; set; }
     }
 }

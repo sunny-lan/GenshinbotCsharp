@@ -12,8 +12,8 @@ namespace GenshinbotCsharp.algorithm
      class MapTemplateMatch
     {
 
-        //TODO use templates from the assets
-        public class Template
+        public interface Template { }
+        public class TemplateSat:Template
         {
             public FeatureType FeatureType;
             public double SatMinThres;
@@ -33,7 +33,7 @@ namespace GenshinbotCsharp.algorithm
             public ConnectedComponents.Stats Stats;
 
             ConnectedComponents components = new ConnectedComponents();
-            public Template(string path, string pathAlpha)
+            public TemplateSat(string path, string pathAlpha)
             {
                 Filter = new Mat();
                 Mask = new Mat();
@@ -68,7 +68,7 @@ namespace GenshinbotCsharp.algorithm
                 //SatAvg = Sat.Mean(Filter)[0];
             }
 
-            ~Template()
+            ~TemplateSat()
             {
                 Mask.Dispose();
                 UnweightedMask.Dispose();
@@ -76,9 +76,9 @@ namespace GenshinbotCsharp.algorithm
                 Filter.Dispose();
             }
 
-            public static Template Waypoint()
+            public static TemplateSat Waypoint()
             {
-                return new Template(Data.Get("map/icons/waypoint_1680x1050.PNG"), Data.Get("map/icons/waypoint_1680x1050_alpha.PNG"))
+                return new TemplateSat(Data.Get("map/icons/waypoint_1680x1050.PNG"), Data.Get("map/icons/waypoint_1680x1050_alpha.PNG"))
                 {
                     SatMinThres = 0.1,
                    //ValMinThres = 0.1,
@@ -90,13 +90,13 @@ namespace GenshinbotCsharp.algorithm
 
         public MapTemplateMatch()
         {
-            waypoint = Template.Waypoint();
+            waypoint = TemplateSat.Waypoint();
         }
 
 
 
         private ConnectedComponents components = new ConnectedComponents();
-        private Template waypoint;
+        private TemplateSat waypoint;
         private Mat matchResult = new Mat();
         //private Mat matchResult2 = new Mat();
         Mat hsv = new Mat();
@@ -110,7 +110,7 @@ namespace GenshinbotCsharp.algorithm
         public class Result
         {
             public Point2d Point;
-            public Template Match;
+            public TemplateSat Match;
             public Rect BoundingBox;
             public double Score;
         }
@@ -119,7 +119,7 @@ namespace GenshinbotCsharp.algorithm
         {
             buf.CopyTo(Debug.img);
 
-            Template template = waypoint;
+            TemplateSat template = waypoint;
 
 
             Cv2.CvtColor(buf, hsv, ColorConversionCodes.BGR2HSV);

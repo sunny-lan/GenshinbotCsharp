@@ -1,23 +1,44 @@
-﻿using System;
+﻿using OpenCvSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace GenshinbotCsharp.screens
 {
-    class PlayingScreen
+    class PlayingScreen:Screen
     {
-        GenshinWindow g;
-        public void Expect(GenshinWindow g)
+        private GenshinBot b;
+
+        public PlayingScreen(GenshinBot b)
         {
-            //TODO actually check
-            this.g = g;
+            this.b = b;
         }
 
-        public void Minimap(Screenshot.Buffer buf)
+        public bool CheckActive()
         {
+            throw new NotImplementedException();
+        }
 
+        public MapScreen OpenMap()
+        {
+            b.W.K.KeyPress(input.Keys.Map);
+            Thread.Sleep(1000);//TODO
+            return b.S(b.MapScreen);
+        }
+        private Rect thing = new Rect(53, 15, 189, 189);//TODO
+
+        private Screenshot.Buffer buf;
+        public Mat SnapMinimap()
+        {
+            if(buf==null)
+            {
+                buf = Screenshot.GetBuffer(thing.Width, thing.Height);
+            }
+            b.W.TakeScreenshot(0, 0, buf);
+            return buf.Mat;
         }
     }
 }

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace GenshinbotCsharp.database.jsonconverters
 {
+    //TODO make internal classes vector2d and such
     class Point2dConverter : JsonConverter<Point2d>
     {
         struct Point
