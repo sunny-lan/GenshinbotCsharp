@@ -27,7 +27,7 @@ namespace GenshinbotCsharp.algorithm.MinimapMatch
     class PositionMatcher
     {
 
-        private Settings db;
+        internal Settings db;
 
         FilterStage bigF, miniF;
         StandardPhaseCorr phaseCorr = new StandardPhaseCorr();
@@ -96,9 +96,9 @@ namespace GenshinbotCsharp.algorithm.MinimapMatch
 
         Point2d? lastKnownPos;
 
-        public PositionTracker(Settings db, PositionMatcher m)
+        public PositionTracker( PositionMatcher m)
         {
-            this.db = db;
+            this.db = m.db;
             this.m = m;
             lastKnownPos = m.SubImageCenterPos;
         }
@@ -116,7 +116,7 @@ namespace GenshinbotCsharp.algorithm.MinimapMatch
         /// <param name="minimap"></param>
         /// <param name="response"></param>
         /// <returns></returns>
-        public Point2d? Match(Mat minimap)
+        public Point2d? Track(Mat minimap)
         {
             lastKnownPos.Expect("Tried to call Match on a PositionTracker which has lost tracking");
 
@@ -343,6 +343,6 @@ namespace GenshinbotCsharp.algorithm.MinimapMatch
 
     class ScaleInvTracker
     {
-
+        
     }
 }
