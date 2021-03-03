@@ -17,9 +17,10 @@ namespace GenshinbotCsharp.controllers
         {
             this.b = b;
             this.db = b.Db.LocationManagerDb;
+
             this.m = new algorithm.MinimapMatch.ScaleMatcher(new algorithm.MinimapMatch.Settings
             {
-                BigMap = Data.Imread("map/genshiniodata/assets/MapExtracted_12.png"),
+                BigMap = b.Db.MapDb.BigMap.Load(),
             });
         }
 
@@ -54,6 +55,8 @@ namespace GenshinbotCsharp.controllers
             Point2d miniPos1;
             if (pt == null) //if the scale hasn't been calculated yet
             {
+                if (db.Coord2Minimap == null)
+                    throw new Exception("Missing setting");
                 //convert map coord to minimap pos so we can use minimap matcher
                 var bigApproxPos = db.Coord2Minimap.Transform(this.approxPos.Expect());
                 var miniPos = m.FindScale(bigApproxPos, minimap, out var pt1);
@@ -76,7 +79,7 @@ namespace GenshinbotCsharp.controllers
                 }
 
                 //we successfully found the coordinate
-                miniPos1=miniPos.Expect();
+                miniPos1 = miniPos.Expect();
             }
             else
             {
@@ -93,9 +96,9 @@ namespace GenshinbotCsharp.controllers
 
                 miniPos1 = miniPos.Expect();
             }
-            
+
             //convert minimap point back to map coordinates
-            var coord =  db.Coord2Minimap.Inverse(miniPos1);
+            var coord = db.Coord2Minimap.Inverse(miniPos1);
 
             //also, we can update approxPos in case we need it later
             approxPos = coord;
@@ -103,8 +106,16 @@ namespace GenshinbotCsharp.controllers
             return coord;
         }
 
-        ~LocationManager()
+        public static void Test()
         {
+            GenshinBot b = new GenshinBot();
+            var playingScreen = b.S(b.PlayingScreen);
+
+            while (true)
+            {
+                var pos = b.LocationManager.DeduceLocation(playingScreen);
+                Console.WriteLine(pos);
+            }
         }
     }
 }

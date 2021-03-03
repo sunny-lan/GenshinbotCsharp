@@ -13,6 +13,14 @@ namespace GenshinbotCsharp.algorithm
         Mat complex = new Mat();
         Mat magnitude = new Mat();
         public Mat output = new Mat();
+
+        ~FFT()
+        {
+            zeroes.Dispose();
+            complex.Dispose();
+            magnitude.Dispose();
+            output.Dispose();
+        }
        public void Run(Mat padded,int nonZeroRows=0)
         {
 

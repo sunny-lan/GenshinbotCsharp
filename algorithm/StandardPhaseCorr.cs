@@ -39,7 +39,7 @@ namespace GenshinbotCsharp.algorithm
         }
 
        public Input a=new Input(), b=new Input();
-        Mat empty = new Mat();
+       static Mat empty = new Mat();
         public Point2d Run(out double response)
         {
 

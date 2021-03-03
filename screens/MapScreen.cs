@@ -30,8 +30,8 @@ namespace GenshinbotCsharp.screens
 
         public PlayingScreen Close()
         {
-            b.W.K.KeyPress(input.Keys.Map);
-            Thread.Sleep(1000);//TODO
+            b.W.K.KeyPress(input.GenshinKeys.Map);
+            Thread.Sleep(2000);//TODO
             return b.S(b.PlayingScreen);
         }
 
@@ -115,9 +115,9 @@ namespace GenshinbotCsharp.screens
                 }
                 var center = r.Center();
                 b.W.I.MouseTo(center);
-                b.W.K.KeyDown(input.Keys.Attack);
+                b.W.K.KeyDown(input.GenshinKeys.Attack);
                 b.W.I.MouseMove((center - point).LimitDistance(100));
-                b.W.K.KeyUp(input.Keys.Attack);
+                b.W.K.KeyUp(input.GenshinKeys.Attack);
                 //TODO
             }
         }

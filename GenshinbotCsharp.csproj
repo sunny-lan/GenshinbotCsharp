@@ -126,7 +126,6 @@
     <Compile Include="database\Transformation.cs" />
     <Compile Include="error\Error.cs" />
     <Compile Include="experiments\MinimapMatcher.cs" />
-    <Compile Include="algorithm\PointSetMatch.cs" />
     <Compile Include="gui\GUI.cs" />
     <Compile Include="gui\WindowsGUI.cs">
       <SubType>Form</SubType>

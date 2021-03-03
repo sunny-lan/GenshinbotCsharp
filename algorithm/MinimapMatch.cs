@@ -154,7 +154,7 @@ namespace GenshinbotCsharp.algorithm.MinimapMatch
         public Mat mask = new Mat();
         ~FilterStage()
         {
-
+            
             output.Dispose();
             mask.Dispose();
         }
@@ -192,10 +192,6 @@ namespace GenshinbotCsharp.algorithm.MinimapMatch
 
     class LogPolarStage
     {
-        //the set of algorithms under algorithm.*
-        //are designed to reuse memory when given images of the same size every time
-        //however they still work if the image size changes
-        //TODO add destructors for all of them
 
         FilterStage filter;
         algorithm.Hanning hanning = new algorithm.Hanning();
@@ -232,7 +228,7 @@ namespace GenshinbotCsharp.algorithm.MinimapMatch
         {
             LogPolarStage miniP, bigP;
             algorithm.Hanning logPolarHanning = new algorithm.Hanning();
-            Mat empty = new Mat();
+            static Mat empty = new Mat();
 
             public ScaleMatchAlg(Settings db)
             {

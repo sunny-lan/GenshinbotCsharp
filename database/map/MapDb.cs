@@ -18,7 +18,9 @@ namespace GenshinbotCsharp.database.map
                 Features = new List<Feature>(),
             };
         }
-
-        
+        public Image BigMap { get; set; } = new Image
+        {
+            Path = "map/genshiniodata/assets/MapExtracted_12.png",
+        };
     }
 }

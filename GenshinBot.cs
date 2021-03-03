@@ -20,13 +20,14 @@ namespace GenshinbotCsharp
         {
             if (ActiveScreen is T t)
                 return t;
-            throw new Exception("Tried to control a screen which is inactive");
+            throw new Exception("Tried to access a screen which is inactive");
         }
 
         public T S<T>(T s) where T : Screen
         {
-            if(!s.CheckActive())
-                throw new Exception("Tried to control a screen which is inactive");
+            //TODO
+           // if(!s.CheckActive())
+           //     throw new Exception("Tried to give control to a screen which is inactive");
             ActiveScreen = s;
             return s;
         }

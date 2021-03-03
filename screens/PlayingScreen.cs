@@ -24,8 +24,8 @@ namespace GenshinbotCsharp.screens
 
         public MapScreen OpenMap()
         {
-            b.W.K.KeyPress(input.Keys.Map);
-            Thread.Sleep(1000);//TODO
+            b.W.K.KeyPress(input.GenshinKeys.Map);
+            Thread.Sleep(2000);//TODO
             return b.S(b.MapScreen);
         }
         private Rect thing = new Rect(53, 15, 189, 189);//TODO

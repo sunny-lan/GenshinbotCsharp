@@ -11,6 +11,11 @@ namespace GenshinbotCsharp.algorithm
     {
         Mat hanning = new Mat();
 
+        ~Hanning()
+        {
+            hanning.Dispose();
+        }
+
         /// <summary>
         /// Warning: applies on the original image!
         /// </summary>

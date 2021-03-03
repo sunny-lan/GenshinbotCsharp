@@ -11,6 +11,11 @@ namespace GenshinbotCsharp.algorithm
     {
         public Mat output = new Mat();
         public double radius;
+
+        ~LogPolar()
+        {
+            output.Dispose();
+        }
         public void Run(Mat recomb, Size sz = default)
         {
             var center = recomb.Center();

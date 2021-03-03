@@ -17,7 +17,7 @@ using GenshinbotCsharp.util;
 namespace GenshinbotCsharp
 {
 
-    class WindowAutomator
+    class WindowAutomator:input.IInputSimulator
     {
         public input.IInputSimulator I;
 
@@ -41,6 +41,7 @@ namespace GenshinbotCsharp
             initFocus();
             initRect();
 
+
         }
         public WindowAutomator(string TITLE, string CLASS)
         {
@@ -51,15 +52,34 @@ namespace GenshinbotCsharp
             
         }
 
-        #region Input
-
-
-        private void initInput()
+        ~WindowAutomator()
         {
-            //TODO
+            cleanupFocus();
+            cleanupRect();
         }
 
-        #endregion
+
+        public static void Test()
+        {
+            //var w = new WindowAutomator("*Untitled - Notepad", null);
+            var w = GenshinWindow.FindExisting();
+            w.WaitForFocus();
+            w.OnClientAreaChanged += (_, r) => Console.WriteLine("changed " + r);
+            w.OnFocusChanged += (_, f) => Console.WriteLine("focused " + f);
+            while (true)
+            {
+                var r = w.GetRect();
+                var b = Screenshot.GetBuffer(r.Width, r.Height);
+                while (w.GetRect().Size == r.Size)
+                {
+                    Thread.Sleep(1);
+                    //w.TakeScreenshot(0, 0, b);
+                    // Debug.img = b.Mat;
+                    // Debug.show();
+                }
+            }
+        }
+
 
         #region Screenshot 
 
@@ -261,32 +281,80 @@ namespace GenshinbotCsharp
 
         #endregion
 
-        ~WindowAutomator()
+        #region InputSimulator
+
+        private void initInput()
         {
-            cleanupFocus();
-            cleanupRect();
+            I = this;
+        }
+        public OpenCvSharp.Point2d MousePos()
+        {
+            WaitForFocus();
+            throw new NotImplementedException();
+
         }
 
-
-        public static void Test()
+        public void MouseMove(OpenCvSharp.Point2d d)
         {
-            //var w = new WindowAutomator("*Untitled - Notepad", null);
-            var w = GenshinWindow.FindExisting();
-            w.WaitForFocus();
-            w.OnClientAreaChanged += (_, r) => Console.WriteLine("changed " + r);
-            w.OnFocusChanged += (_, f) => Console.WriteLine("focused " + f);
-            while (true)
+            throw new NotImplementedException();
+        }
+
+        public void MouseTo(OpenCvSharp.Point2d p)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void MouseDown(int btn)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void MouseUp(int btn)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void MouseClick(int btn)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SendInput(User32.INPUT input)
+        {
+            WaitForFocus();
+            User32.SendInput(1, new User32.INPUT[] {
+               input
+            }, Marshal.SizeOf<User32.INPUT>());
+        }
+
+        public void SendKeyEvent(int k, bool down)
+        {
+            SendInput(new User32.INPUT
             {
-                var r = w.GetRect();
-                var b = Screenshot.GetBuffer(r.Width, r.Height);
-                while (w.GetRect().Size == r.Size)
+                type = User32.INPUTTYPE.INPUT_KEYBOARD,
+                ki = new User32.KEYBDINPUT
                 {
-                    Thread.Sleep(1);
-                    //w.TakeScreenshot(0, 0, b);
-                   // Debug.img = b.Mat;
-                   // Debug.show();
+                    wVk = (ushort)k,
+                    dwFlags=down?default:User32.KEYEVENTF.KEYEVENTF_KEYUP,
                 }
-            }
+            });
         }
+
+        public void KeyDown(int k)
+        {
+            SendKeyEvent(k, true);
+        }
+
+        public void KeyUp(int k)
+        {
+            SendKeyEvent(k, false);
+        }
+
+        public void KeyPress(int k)
+        {
+            KeyDown(k);
+            KeyUp(k);
+        }
+        #endregion
     }
 }
