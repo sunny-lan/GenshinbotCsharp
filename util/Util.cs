@@ -9,6 +9,10 @@ namespace GenshinbotCsharp
 {
     static class Util
     {
+        public static double Length(this Point2d p)
+        {
+            return p.DistanceTo(Origin);
+        }
         public static Point ReadPoint()
         {
             Console.Write("x:");
@@ -165,7 +169,7 @@ namespace GenshinbotCsharp
 
         public static Point2d Norm(this Point2d p)
         {
-            return p * (1.0 / p.DistanceTo(Origin));
+            return p * (1.0 / p.Length());
         }
 
         public static Point2d LimitDistance(this Point2d p, double maxDist)

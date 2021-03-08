@@ -34,10 +34,8 @@ namespace GenshinbotCsharp.controllers
 
         public Point2d GetLocationFromMap()
         {
-            var prevScreen = b.ActiveScreen;
-
-            if (b.ActiveScreen is screens.PlayingScreen p)
-                p.OpenMap();
+            var p = b.S<screens.PlayingScreen>();
+            p.OpenMap();
 
             var m = b.S<screens.MapScreen>();
 
@@ -45,15 +43,14 @@ namespace GenshinbotCsharp.controllers
             var screenCenter = b.W.GetBounds().Cv().Center();
             var approxPos = m.GetLocation().ToCoord(screenCenter);
 
-            if (prevScreen is screens.PlayingScreen)
-                m.Close();
+            m.Close();
 
             return approxPos;
         }
 
         public void CalculateCoord2Minimap()
         {
-            Debug.Assert(db.KnownMinimapCoords.Count >= 2, "At least 2 points required for ");
+            Debug.Assert(db.KnownMinimapCoords.Count >= 2, "At least 2 points required");
             var a = db.KnownMinimapCoords[0];
             var b = db.KnownMinimapCoords[1];
             var deltaCoord = a.Coord - b.Coord;
@@ -65,7 +62,7 @@ namespace GenshinbotCsharp.controllers
             db.Coord2Minimap = new database.Transformation
             {
                 Scale = scale,
-                Translation = a.Minimap-a.Coord*scale
+                Translation = a.Minimap - a.Coord * scale
             };
         }
 
@@ -152,9 +149,10 @@ namespace GenshinbotCsharp.controllers
         {
             GenshinBot b = new GenshinBot();
 
-          // b.LocationManager.Coord2MinimapTool();
+            // b.LocationManager.Coord2MinimapTool();
 
             b.S(b.PlayingScreen);
+
 
             while (true)
             {
@@ -186,7 +184,7 @@ namespace GenshinbotCsharp.controllers
                 var mini = p.SnapMinimap();
 
                 var miniP1 = this.m.FindScale(approxPos, mini, out var _);
-                if(miniP1 == null)
+                if (miniP1 == null)
                 {
                     Console.WriteLine("Minimap loc failed");
                     continue;

@@ -24,7 +24,8 @@ namespace GenshinbotCsharp
             //WindowAutomator.Test();
             // var g = gui.GUI.Instance;
             // algorithm.MinimapMatch.ScaleMatcher.test();
-            controllers.LocationManager.Test();
+            //controllers.LocationManager.Test();
+            screens.PlayingScreen.test();
         }
 
     }

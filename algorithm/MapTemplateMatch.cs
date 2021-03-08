@@ -121,7 +121,7 @@ namespace GenshinbotCsharp.algorithm
 
         public IEnumerable<Result> FindTeleporters(Mat buf)
         {
-            buf.CopyTo(Debug.img);
+           // buf.CopyTo(Debug.img);
 
             TemplateSat template = waypoint;
 
@@ -227,15 +227,15 @@ namespace GenshinbotCsharp.algorithm
 
                 if (score < 0.1)
                 {
-                    Debug.img.PutText("s:" + Round(score, 3)
+                /*    Debug.img.PutText("s:" + Round(score, 3)
                             + "d:" + Round(deviation, 3),
                         area.TopLeft, HersheyFonts.HersheyPlain, fontScale: 1, color: Scalar.Red, thickness: 2);
 
-                    Debug.img.Rectangle( area, color: Scalar.Blue, thickness: 2);
+                    Debug.img.Rectangle( area, color: Scalar.Blue, thickness: 2);*/
 
 
                     var mapPoint = new Point2d((area.Left + area.Right) / 2.0, area.Bottom);
-                    Debug.img.Circle( center: mapPoint.ToPoint(), radius: 2, color: Scalar.Green, thickness: 2);
+                //    Debug.img.Circle( center: mapPoint.ToPoint(), radius: 2, color: Scalar.Green, thickness: 2);
 
 
                     yield return new Result

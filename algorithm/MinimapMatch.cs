@@ -57,6 +57,8 @@ namespace GenshinbotCsharp.algorithm.MinimapMatch
             SubImageCenterPos = pos;
         }
 
+        Mat subImg;
+
         public Point2d? Match(Mat minimap)
         {
             var bigSz = minimap.Size().Scale(Scale).Pad(db.BigPadding);
@@ -66,14 +68,15 @@ namespace GenshinbotCsharp.algorithm.MinimapMatch
             if ( lastRect != subRect)
             {
                 Console.WriteLine("big rect change");
-                var subImg = db.BigMap[subRect];
+                subImg = db.BigMap[subRect];
                 lastRect = subRect;
                 bigF.Filter(subImg);
                 phaseCorr.b.Set(bigF.output);
             }
 
             //perform scaling, filtering
-            var miniScaled = minimap.Resize(default, fx: Scale, fy: Scale);
+            using var miniScaled = minimap.Resize(default, fx: Scale, fy: Scale);
+
             miniF.Filter(miniScaled);
 
             //run phase correlation
@@ -304,6 +307,7 @@ namespace GenshinbotCsharp.algorithm.MinimapMatch
                     continue;
                 }
 
+                //TODO fails when walking over water
                 Debug.Assert(Math.Abs(angle) < 2); //for now expect angle is 0
 
                 var actualScale = s * scale;

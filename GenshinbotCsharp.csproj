@@ -112,6 +112,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="algorithm\ArrowDirectionDetect.cs" />
     <Compile Include="algorithm\ConnectedComponents.cs" />
     <Compile Include="algorithm\FFT.cs" />
     <Compile Include="algorithm\LogPolar.cs" />
