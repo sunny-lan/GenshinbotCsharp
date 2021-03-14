@@ -27,8 +27,8 @@ namespace GenshinbotCsharp
             //controllers.LocationManager.Testwalkto();
             //screens.PlayingScreen.test();
             //  tools.Goto.Run();
-            //screens.MapScreen.Test();
-            experiments.XboxInput.Run();
+            screens.MapScreen.Test();
+            //experiments.XboxInput.Run();
         }
 
     }

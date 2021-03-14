@@ -9,11 +9,48 @@ using static System.Math;
 
 namespace GenshinbotCsharp.algorithm
 {
-     class MapTemplateMatch
-    {
 
-        public interface Template { }
-        public class TemplateSat:Template
+    class MapTemplateMatch
+    {
+        class Db
+        {
+            public class RD
+            {
+                //TODO actually think about this
+                public TemplateSat Teleporter { get; set; }
+
+            }
+
+            public Dictionary<Size, RD> R { get; set; } = new Dictionary<Size, RD>
+            {
+                [new Size(1440, 900)] = new RD
+                {
+                    Teleporter = new TemplateSat(
+                        Data.Get("map/icons/waypoint_1440x900.PNG"),
+                        Data.Get("map/icons/waypoint_1440x900_alpha.PNG")
+                    )
+                    {
+                        SatMinThres = 0.1,
+                        //ValMinThres = 0.1,
+                        FeatureType = FeatureType.Teleporter,
+                    },
+                },
+                [new Size(1680, 1050)] = new RD
+                {
+                    Teleporter = new TemplateSat(
+                        Data.Get("map/icons/waypoint_1680x1050.PNG"),
+                        Data.Get("map/icons/waypoint_1680x1050_alpha.PNG")
+                    )
+                    {
+                        SatMinThres = 0.1,
+                        //ValMinThres = 0.1,
+                        FeatureType = FeatureType.Teleporter,
+                    },
+                },
+            };
+        }
+
+        public class TemplateSat
         {
             public FeatureType FeatureType;
             public double SatMinThres;
@@ -22,7 +59,7 @@ namespace GenshinbotCsharp.algorithm
             public Mat Mask;
             public Mat UnweightedMask;
 
-           // public Mat Value
+            // public Mat Value
             public Mat Sat;
             //public Mat Hue;
 
@@ -76,37 +113,18 @@ namespace GenshinbotCsharp.algorithm
                 Filter.Dispose();
             }
 
-            public static TemplateSat Waypoint()
-            {
-                //TODO
-                return new TemplateSat(
-                    Data.Get("map/icons/waypoint_1440x900.PNG"), 
-                    Data.Get("map/icons/waypoint_1440x900_alpha.PNG")
-                    )
-                {
-                    SatMinThres = 0.1,
-                   //ValMinThres = 0.1,
-                   FeatureType=FeatureType.Teleporter,
-                };
-            }
         }
 
-
-        public MapTemplateMatch()
-        {
-            waypoint = TemplateSat.Waypoint();
-        }
-
+        private Db db=new Db();//TODO
 
 
         private ConnectedComponents components = new ConnectedComponents();
-        private TemplateSat waypoint;
         private Mat matchResult = new Mat();
         //private Mat matchResult2 = new Mat();
         Mat hsv = new Mat();
         //Mat t_sub_v = new Mat();
         //Mat t_sub_h = new Mat();
-       // Mat t_sub_mask = new Mat();
+        // Mat t_sub_mask = new Mat();
         //Mat t_unweighted_mask = new Mat();
         Mat filter = new Mat();
         //Mat t_sat = new Mat();
@@ -121,9 +139,9 @@ namespace GenshinbotCsharp.algorithm
 
         public IEnumerable<Result> FindTeleporters(Mat buf)
         {
-           // buf.CopyTo(Debug.img);
+            // buf.CopyTo(Debug.img);
 
-            TemplateSat template = waypoint;
+            TemplateSat template = db.R[buf.Size()].Teleporter;
 
 
             Cv2.CvtColor(buf, hsv, ColorConversionCodes.BGR2HSV);
@@ -191,16 +209,16 @@ namespace GenshinbotCsharp.algorithm
                     continue;
 
                 //match the templates using the hue and value channel
-               // using Mat value = sub.ExtractChannel(2);//value
+                // using Mat value = sub.ExtractChannel(2);//value
 
                 //adjust brightness
                 //Mat sub_filter = filter[c.Rect];
                 //double brightnessAdjust = waypoint.ValueAvg - value.Mean(sub_filter)[0];
-               // Cv2.Add(value, brightnessAdjust, value);
+                // Cv2.Add(value, brightnessAdjust, value);
 
                 //Cv2.PutText(debugImg, "v:" + brightnessAdjust, new Point(c.Right, c.Bottom), HersheyFonts.HersheyPlain, 1, Scalar.Pink, thickness: 2);
 
-               // Cv2.MatchTemplate(value, t_sub_v, matchResult2, TemplateMatchModes.SqDiffNormed, t_sub_mask);
+                // Cv2.MatchTemplate(value, t_sub_v, matchResult2, TemplateMatchModes.SqDiffNormed, t_sub_mask);
 
 
                 //using Mat hue = sub.ExtractChannel(0);//hue
@@ -222,20 +240,20 @@ namespace GenshinbotCsharp.algorithm
                     t_size
                 );
 
-                double deviation =  matchResult.Mean()[0]-score;
+                double deviation = matchResult.Mean()[0] - score;
 
 
                 if (score < 0.1)
                 {
-                /*    Debug.img.PutText("s:" + Round(score, 3)
-                            + "d:" + Round(deviation, 3),
-                        area.TopLeft, HersheyFonts.HersheyPlain, fontScale: 1, color: Scalar.Red, thickness: 2);
+                    /*    Debug.img.PutText("s:" + Round(score, 3)
+                                + "d:" + Round(deviation, 3),
+                            area.TopLeft, HersheyFonts.HersheyPlain, fontScale: 1, color: Scalar.Red, thickness: 2);
 
-                    Debug.img.Rectangle( area, color: Scalar.Blue, thickness: 2);*/
+                        Debug.img.Rectangle( area, color: Scalar.Blue, thickness: 2);*/
 
 
                     var mapPoint = new Point2d((area.Left + area.Right) / 2.0, area.Bottom);
-                //    Debug.img.Circle( center: mapPoint.ToPoint(), radius: 2, color: Scalar.Green, thickness: 2);
+                    //    Debug.img.Circle( center: mapPoint.ToPoint(), radius: 2, color: Scalar.Green, thickness: 2);
 
 
                     yield return new Result
@@ -249,7 +267,7 @@ namespace GenshinbotCsharp.algorithm
             }
 
         }
-      
+
 
         ~MapTemplateMatch()
         {
@@ -258,7 +276,7 @@ namespace GenshinbotCsharp.algorithm
             filter.Dispose();
             hsv.Dispose();
             matchResult.Dispose();
-            
+
         }
 
     }

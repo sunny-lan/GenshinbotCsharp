@@ -32,7 +32,7 @@ namespace GenshinbotCsharp.legacy
             while (true)
             {
                 var r = g.GetBounds();
-                var screen = g.TakeScreenshot(r);
+                var screen = g.Screenshot(r);
                 foreach (var x in m.FindTeleporters(screen)) ;
                 Cv2.WaitKey(1);
             }
@@ -98,7 +98,7 @@ namespace GenshinbotCsharp.legacy
             {
                 var d = g.GetBounds();
                 Console.WriteLine(d);
-                var s = g.TakeScreenshot(d);
+                var s = g.Screenshot(d);
                 Cv2.BitwiseNot(s,s);
                 Cv2.WaitKey(1);
             }

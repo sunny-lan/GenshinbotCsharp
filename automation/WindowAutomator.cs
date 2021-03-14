@@ -69,7 +69,7 @@ namespace GenshinbotCsharp
             while (true)
             {
                 var r = w.GetRect();
-                var b = Screenshot.GetBuffer(r.Width, r.Height);
+                var b = GenshinbotCsharp.Screenshot.GetBuffer(r.Width, r.Height);
                 while (w.GetRect().Size == r.Size)
                 {
                     Thread.Sleep(1);
@@ -86,7 +86,7 @@ namespace GenshinbotCsharp
         Point clientToScreen(Point p)
         {
             var pp = new System.Drawing.Point(p.X, p.Y);
-            if (User32.ClientToScreen(hWnd, ref pp))
+            if (!User32.ClientToScreen(hWnd, ref pp))
                 throw new Exception();
             return pp.Cv().ToPoint();
         }
@@ -94,12 +94,12 @@ namespace GenshinbotCsharp
         Screenshot.Buffer wholeBuf;
 
 
-        public Mat TakeScreenshot(OpenCvSharp.Rect r)
+        public Mat Screenshot(OpenCvSharp.Rect r)
         {
             var windowSz = GetSize();
-            if (wholeBuf == null | wholeBuf.Size != windowSz)
-                wholeBuf = Screenshot.GetBuffer(windowSz.Width, windowSz.Height);
-            Screenshot.Take(wholeBuf, r.Size, clientToScreen(r.TopLeft), r.TopLeft);
+            if (wholeBuf == null || wholeBuf.Size != windowSz)
+                wholeBuf = GenshinbotCsharp.Screenshot.GetBuffer(windowSz.Width, windowSz.Height);
+            GenshinbotCsharp.Screenshot.Take(wholeBuf, r.Size, clientToScreen(r.TopLeft), r.TopLeft);
             return wholeBuf.Mat[r];
         }
 
@@ -135,7 +135,7 @@ namespace GenshinbotCsharp
             var p = new System.Drawing.Point(x, y);
 
             User32.ClientToScreen(hWnd, ref p);
-            return Screenshot.GetPixelColor(p.X, p.Y);
+            return GenshinbotCsharp.Screenshot.GetPixelColor(p.X, p.Y);
         }
 
         #endregion
@@ -359,7 +359,7 @@ namespace GenshinbotCsharp
             p.Y = 65536*p.Y / desktop.bottom;
         }
 
-        public void MouseTo(OpenCvSharp.Point2d p)
+        public void MouseTo(Point2d p)
         {
             WaitForFocus();
             var pp = new System.Drawing. Point((int)Math.Round(p.X), (int)Math.Round(p.Y));
@@ -376,7 +376,7 @@ namespace GenshinbotCsharp
                 dwFlags = (uint)User32.MOUSEEVENTF.MOUSEEVENTF_MOVE | (uint)User32.MOUSEEVENTF.MOUSEEVENTF_ABSOLUTE |(uint)User32.MOUSEEVENTF.MOUSEEVENTF_VIRTUALDESK
             });*/
             if (!User32.SetCursorPos(pp.X, pp.Y))
-                throw new Exception();
+                throw new Win32Exception(Marshal.GetLastWin32Error());
         }
 
         static readonly User32.MOUSEEVENTF[] mouseDownF = {

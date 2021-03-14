@@ -223,7 +223,7 @@ namespace GenshinbotCsharp.algorithm.experiments
             while (true)
             {
                 g.WaitForFocus();
-                var sub1 = g.TakeScreenshot(minimap1);
+                var sub1 = g.Screenshot(minimap1);
                 sub1 = sub1.Resize(default, fx: 1.1, fy: 1.1, InterpolationFlags.Lanczos4);
                 Debug.show("re", sub1);
                 Test(whole2, sub1, out var angle, out var scale, out var trans,1);

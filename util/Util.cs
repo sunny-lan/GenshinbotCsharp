@@ -9,6 +9,10 @@ namespace GenshinbotCsharp
 {
     static class Util
     {
+        public static Point RandomWithin(this Rect r)
+        {
+            return new Point(rng.Next(r.Left, r.Right), rng.Next(r.Top, r.Bottom));
+        }
         public static Scalar cv3(this System.Drawing.Color c)
         {
             return Scalar.FromRgb(c.R, c.G, c.B);

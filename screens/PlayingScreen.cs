@@ -60,7 +60,7 @@ namespace GenshinbotCsharp.screens
         public Mat SnapMinimap()
         {
             var miniRect = miniMapLocs[b.W.GetSize()];
-            return b.W.TakeScreenshot(miniRect);
+            return b.W.Screenshot(miniRect);
         }
 
         private algorithm.ArrowDirectionDetect arrowDirection = new algorithm.ArrowDirectionDetect();
@@ -68,7 +68,7 @@ namespace GenshinbotCsharp.screens
         Mat snapArrow()
         {
             var miniRect = db.R[b.W.GetSize()].minimapLoc;
-            return b.W.TakeScreenshot(miniRect.Center().RectAround(new Size(db.arrowRadius * 2, db.arrowRadius * 2)));
+            return b.W.Screenshot(miniRect.Center().RectAround(new Size(db.arrowRadius * 2, db.arrowRadius * 2)));
         }
 
         public double GetArrowDirection()

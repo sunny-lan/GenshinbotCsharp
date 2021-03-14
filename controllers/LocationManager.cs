@@ -143,7 +143,6 @@ namespace GenshinbotCsharp.controllers
         {
             var curPos = DeduceLocation();
             var p = b.S<screens.PlayingScreen>();
-            var mouse = new input.MouseMover(b.W.I);
             
 
             while (true)
@@ -151,7 +150,7 @@ namespace GenshinbotCsharp.controllers
                 if (curPos.DistanceTo(dstPos) <= accuracy)
                 {
                     b.W.K.KeyUp(input.GenshinKeys.Forward);
-                    mouse.Stop();
+                    b.M.Stop();
                     return;
                 }
 
@@ -160,7 +159,7 @@ namespace GenshinbotCsharp.controllers
                 var curAng = p.GetArrowDirection();
 
                 var diff = curAng.RelativeAngle(dstAng);
-                mouse.Move(new Point2d(diff/2, 0));
+                b.M.Move(new Point2d(diff/2, 0));
                 b.W.K.KeyDown(input.GenshinKeys.Forward);
                 curPos = DeduceLocation();
 

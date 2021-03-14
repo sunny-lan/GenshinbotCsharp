@@ -10,25 +10,35 @@ using static System.Math;
 
 namespace GenshinbotCsharp.screens
 {
-    class MapScreenDb
-    {
-
-        public class ResolutionDependent
-        {
-            public Point2d ActionBtnLoc { get; internal set; }
-        }
-
-        public Dictionary<Size, ResolutionDependent> R { get; set; } = new Dictionary<Size, ResolutionDependent>
-        {
-            [new Size(1440,900)]=new ResolutionDependent {
-                ActionBtnLoc=new Point2d(1234,846)
-            }
-        };
-    }
+   
     class MapScreen : Screen
     {
+        public class Db
+        {
+
+            public class RD
+            {
+                public Point2d ActionBtnLoc { get; internal set; }
+                public Size ActiveArea { get; set; }
+            }
+
+            public Dictionary<Size, RD> R { get; set; } = new Dictionary<Size, RD>
+            {
+                [new Size(1440, 900)] = new RD
+                {
+                    ActionBtnLoc = new Point2d(1234, 846),
+                    ActiveArea = new Size(1000, 500),
+                },
+                [new Size(1680, 1050)] = new RD
+                {
+                    ActionBtnLoc = new Point2d(1496, 978),
+                    ActiveArea = new Size(1200, 700),
+                }
+            };
+        }
+
         private GenshinBot b;
-        private MapScreenDb db=new MapScreenDb();//TODO
+        private Db db=new Db();//TODO
 
         public Mat Map;
 
@@ -73,7 +83,7 @@ namespace GenshinbotCsharp.screens
 
         public void UpdateScreenshot()
         {
-            Map = b.W.TakeScreenshot(b.W.GetBounds());
+            Map = b.W.Screenshot(b.W.GetBounds());
 
             features = null;
             location = null;
@@ -104,7 +114,9 @@ namespace GenshinbotCsharp.screens
             Thread.Sleep(1000);
             b.W.MouseTo(db.R[b.W.GetSize()].ActionBtnLoc);
             b.W.MouseClick(0);
-            Thread.Sleep(2000);//TODO
+            b.SWait(b.LoadingScreen);
+            b.LoadingScreen.WaitTillDone();
+            Thread.Sleep(1000);
             b.S(b.PlayingScreen);
         }
 
@@ -115,31 +127,36 @@ namespace GenshinbotCsharp.screens
         /// <returns></returns>
         public Point2d ShowOnScreen(Point2d coord)
         {
-            input.MouseMover m = new input.MouseMover(b.W);
-
-
             while (true)
             {
                 UpdateScreenshot();
                 var r = b.W.GetBounds();
+                var center = r.Center();
+                var active = center.RectAround(db.R[r.Size].ActiveArea);
+
                 var l = GetLocation();
                 var point = l.ToPoint(coord);
 
-                if (r.Contains(point.ToPoint()))
+                if (active.Contains(point.ToPoint()))
                 {
                     return point;
                 }
 
+                //use a randomized draw start location, as the mouse move doesn't work when
+                // the drag begin location is on a clickable thing
+                var beginPos = active.RandomWithin();
 
+                b.W.I.MouseTo(beginPos);
+                Thread.Sleep(10);
 
-                var center = r.Center();
-                b.W.I.MouseTo(center);
+                b.W.I.MouseDown(0);
                 Thread.Sleep(10);
-                b.W.K.KeyDown(input.GenshinKeys.Attack);
+
+                b.M.Goto((beginPos - point).LimitDistance(200)+ beginPos).Wait();
+                Thread.Sleep(100); //pause to prevent flick gesture from happening
+
+                b.W.I.MouseUp(0);
                 Thread.Sleep(10);
-                m.Goto((center - point).LimitDistance(200)+center).Wait();
-                Thread.Sleep(100);
-                b.W.K.KeyUp(input.GenshinKeys.Attack);
 
             }
         }
@@ -147,15 +164,17 @@ namespace GenshinbotCsharp.screens
         public static void Test()
         {
             GenshinBot b = new GenshinBot();
+                Console.ReadKey();
             var m=b.S(b.MapScreen);
-            int i = 0;
+            Random rng = new Random();
+            var f = b.Db.MapDb.Features;
             while (true)
             {
-                Console.ReadKey();
-                m.TeleportTo(b.Db.MapDb.Features[i]);
-                i++;
+                m.TeleportTo(f[rng.Next(f.Count)]);
+                Console.WriteLine("done");
                 var p = b.S<screens.PlayingScreen>();
                 p.OpenMap();
+
             }
         }
 

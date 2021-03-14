@@ -47,7 +47,7 @@ namespace GenshinbotCsharp.tools
             {
                 g.WaitForFocus();
                 if (!g.Focused) break;
-                var scr = g.TakeScreenshot(r);
+                var scr = g.Screenshot(r);
 
 
                 var tr = m.FindTeleporters(scr).ToList();
