@@ -98,7 +98,7 @@ namespace GenshinbotCsharp.screens
         public algorithm.MapLocationMatch.Result GetLocation()
         {
             if (location == null)
-                location = LocationMatch.FindLocation2(GetFeatures(), b.W.GetRect().Size.cv(), ExpectUnknown);
+                location = LocationMatch.FindLocation2(GetFeatures(), b.W.GetRect().Size, ExpectUnknown);
             return location;
         }
 
@@ -128,7 +128,7 @@ namespace GenshinbotCsharp.screens
             while (true)
             {
                 UpdateScreenshot();
-                var r = b.W.GetBounds().Cv();
+                var r = b.W.GetBounds();
                 var l = GetLocation();
                 var point = l.ToPoint(coord);
 

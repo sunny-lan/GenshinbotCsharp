@@ -9,6 +9,10 @@ namespace GenshinbotCsharp
 {
     static class Util
     {
+        public static Scalar cv3(this System.Drawing.Color c)
+        {
+            return Scalar.FromRgb(c.R, c.G, c.B);
+        }
         public static double ConfineAngle(this double a)
         {
             a %= Math.PI * 2;

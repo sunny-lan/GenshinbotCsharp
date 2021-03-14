@@ -40,9 +40,9 @@ namespace GenshinbotCsharp.screens
         private Screenshot.Buffer buf;
         public Mat SnapMinimap()
         {
-            var r = b.W.GetRect().Cv();
+            var r = b.W.GetRect();
             var miniRect = miniMapLocs[r.Size];
-            if (buf==null || buf.Size.cv()!=r.Size)
+            if (buf==null || buf.Size!=r.Size)
             {
                 buf = Screenshot.GetBuffer(miniRect.Width, miniRect.Height);
             }
@@ -55,7 +55,7 @@ namespace GenshinbotCsharp.screens
         private Screenshot.Buffer arrowBuf;
         Mat snapArrow()
         {
-            var r = b.W.GetRect().Cv();
+            var r = b.W.GetRect();
             var miniRect = miniMapLocs[r.Size];
             if (arrowBuf == null)
                 arrowBuf = Screenshot.GetBuffer(arrowRadius*2, arrowRadius*2);

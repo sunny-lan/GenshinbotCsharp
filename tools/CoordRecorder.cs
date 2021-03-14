@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace GenshinbotCsharp.tools
 {
+    /// <summary>
+    /// Scans map for waypoints and records their location
+    /// </summary>
     class CoordRecorder
     {
         const string path = "map/db.json";
@@ -52,7 +55,7 @@ namespace GenshinbotCsharp.tools
                 algorithm.MapLocationMatch.Result lr;
                 try
                 {
-                    lr = lm.FindLocation2(tr, r.Cv().Size);
+                    lr = lm.FindLocation2(tr, r.Size);
                 }
                 catch (algorithm.MapLocationMatch.NoSolutionException _)
                 {

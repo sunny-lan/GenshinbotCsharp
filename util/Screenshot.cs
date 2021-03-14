@@ -6,8 +6,8 @@ namespace GenshinbotCsharp
 {
     using Vanara.PInvoke;
     using System.Runtime.InteropServices;
-    using System.Drawing;
     using System.ComponentModel;
+    using OpenCvSharp;
 
     class Screenshot
     {
@@ -35,7 +35,7 @@ namespace GenshinbotCsharp
             public IntPtr Raw;
             public Gdi32.SafeHBITMAP HBitmap;
             public OpenCvSharp.Mat Mat;
-            public Size Size;
+            public Size Size=>Mat.Size();
 
             ~Buffer()
             {
@@ -73,8 +73,7 @@ namespace GenshinbotCsharp
             {
                 HBitmap = sec,
                 Raw = raw,
-                Mat = new OpenCvSharp.Mat(height, width, OpenCvSharp.MatType.CV_8UC4, raw),
-                Size=new Size(width,height)
+                Mat = new OpenCvSharp.Mat(height, width, OpenCvSharp.MatType.CV_8UC4, raw)
             };
         }
 
@@ -96,11 +95,10 @@ namespace GenshinbotCsharp
 
         }
 
-        public static Color GetPixelColor(int x, int y)
+        public static Scalar GetPixelColor(int x, int y)
         {
             COLORREF pixel = Gdi32.GetPixel(hDesktopDC, x, y);
-            Color color = Color.FromArgb(pixel.R, pixel.G, pixel.B);
-            return color;
+            return Scalar.FromRgb(pixel.R, pixel.G, pixel.B);
         }
     }
 }

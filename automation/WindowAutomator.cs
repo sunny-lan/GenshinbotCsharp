@@ -1,7 +1,6 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -13,6 +12,7 @@ using Vanara.PInvoke;
 using System.ComponentModel;
 using GenshinbotCsharp.hooks;
 using GenshinbotCsharp.util;
+using OpenCvSharp;
 
 namespace GenshinbotCsharp
 {
@@ -106,7 +106,7 @@ namespace GenshinbotCsharp
             if (x + img.Mat.Width > r.Width || y + img.Mat.Height > r.Height)
                 throw new Exception("screenshot must be within genshin window");
 
-            Point p = new Point(x, y);
+            var p = new System.Drawing.Point(x, y);
 
             User32.ClientToScreen(hWnd, ref p);
 
@@ -114,11 +114,11 @@ namespace GenshinbotCsharp
 
         }
 
-        public Color GetPixelColor(int x, int y)
+        public Scalar GetPixelColor(int x, int y)
         {
             WaitForFocus();
 
-            Point p = new Point(x, y);
+            var p = new System.Drawing.Point(x, y);
 
             User32.ClientToScreen(hWnd, ref p);
             return Screenshot.GetPixelColor(p.X, p.Y);
@@ -207,12 +207,12 @@ namespace GenshinbotCsharp
 
 
         #region Rect
-        public event EventHandler<RECT> OnClientAreaChanged;
+        public event EventHandler<Rect> OnClientAreaChanged;
 
         WinEventHook locationChangeHook;
-        private RECT rect;
+        private Rect rect;
 
-        public RECT GetRect()
+        public Rect GetRect()
         {
             //Waiting for focus guarentees rect is intialized, 
             //as it will always fetch the rect as soon as the window recieves focus
@@ -220,12 +220,12 @@ namespace GenshinbotCsharp
             return rect;
         }
 
-        public OpenCvSharp.Size GetSize()
+        public Size GetSize()
         {
-            return GetRect().Size.cv();
+            return GetRect().Size;
         }
 
-        public RECT GetBounds()
+        public Rect GetBounds()
         {
             var r = GetRect();
             r.X = 0;
@@ -268,14 +268,14 @@ namespace GenshinbotCsharp
             locationChangeHook.Stop();
         }
 
-        private RECT GetRectDirect()
+        private Rect GetRectDirect()
         {
 
             RECT r;
             if (!User32.GetClientRect(hWnd, out r))
                 throw new Win32Exception(Marshal.GetLastWin32Error());
 
-            Point p = new Point(r.left, r.top);
+            var p = new System.Drawing.Point(r.left,r.top);
             User32.ClientToScreen(hWnd, ref p);
             r.left = p.X;
             r.top = p.Y;
@@ -286,7 +286,7 @@ namespace GenshinbotCsharp
             r.right = p.X;
             r.bottom = p.Y;
 
-            return r;
+            return r.Cv();
         }
 
         #endregion
@@ -342,7 +342,7 @@ namespace GenshinbotCsharp
         public void MouseTo(OpenCvSharp.Point2d p)
         {
             WaitForFocus();
-            Point pp = new Point((int)Math.Round(p.X), (int)Math.Round(p.Y));
+            var pp = new System.Drawing. Point((int)Math.Round(p.X), (int)Math.Round(p.Y));
 
             if (!User32.ClientToScreen(hWnd, ref pp))
                 throw new Exception();

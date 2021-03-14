@@ -39,7 +39,7 @@ namespace GenshinbotCsharp.controllers
             var m = b.S<screens.MapScreen>();
 
             m.UpdateScreenshot();
-            var screenCenter = b.W.GetBounds().Cv().Center();
+            var screenCenter = b.W.GetBounds().Center();
             var approxPos = m.GetLocation().ToCoord(screenCenter);
 
             m.Close();
