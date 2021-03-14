@@ -31,16 +31,10 @@ namespace GenshinbotCsharp.legacy
 
             while (true)
             {
-                g.WaitForFocus();
-                var r = g.GetRect();
-                var b = Screenshot.GetBuffer(r.Width, r.Height);
-                while (g.GetRect() == r)
-                {
-                    g.WaitForFocus();
-                    g.TakeScreenshot(0, 0, b);
-                    foreach (var x in m.FindTeleporters(b.Mat)) ;
-                    Cv2.WaitKey(1);
-                }
+                var r = g.GetBounds();
+                var screen = g.TakeScreenshot(r);
+                foreach (var x in m.FindTeleporters(screen)) ;
+                Cv2.WaitKey(1);
             }
 
         }
@@ -102,19 +96,11 @@ namespace GenshinbotCsharp.legacy
             g.WaitForFocus();
             while (true)
             {
-                var d = g.GetRect();
-                Console.WriteLine(d.Size);
-                var mt = Screenshot.GetBuffer(d.Width, d.Height);
-                while (g.GetRect().Size == d.Size)
-                {
-                    if (g.Focused)
-                    {
-                        g.TakeScreenshot(0, 0, mt);
-                        Cv2.BitwiseNot(mt.Mat, mt.Mat);
-                    }
-                    Cv2.ImShow("hi", mt.Mat);
-                    Cv2.WaitKey(1);
-                }
+                var d = g.GetBounds();
+                Console.WriteLine(d);
+                var s = g.TakeScreenshot(d);
+                Cv2.BitwiseNot(s,s);
+                Cv2.WaitKey(1);
             }
         }
         static void TestRecord()

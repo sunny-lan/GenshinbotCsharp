@@ -95,6 +95,23 @@ namespace GenshinbotCsharp
 
         }
 
+       /// <summary>
+       /// Copies desktop rect(src,sz) to img rect(dst,sz)
+       /// </summary>
+        public static void Take( Buffer img, Size sz, Point src, Point dst)
+        {
+            Debug.Assert(dst.X >= 0 && dst.Y >= 0);
+            Debug.Assert(dst.X+sz.Width <=img.Mat.Width && dst.Y+sz.Height <=img.Mat.Height);
+
+
+            hTmpDC.SelectObject(img.HBitmap);
+            if (!Gdi32.BitBlt(hTmpDC, dst.X, dst.Y,sz.Width, sz.Height, hDesktopDC,
+               src.X, src.Y, Gdi32.RasterOperationMode.SRCCOPY
+                ) || !Gdi32.GdiFlush())
+                throw new Win32Exception(Marshal.GetLastWin32Error());
+
+        }
+
         public static Scalar GetPixelColor(int x, int y)
         {
             COLORREF pixel = Gdi32.GetPixel(hDesktopDC, x, y);

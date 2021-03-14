@@ -219,14 +219,12 @@ namespace GenshinbotCsharp.algorithm.experiments
 
 
             GenshinWindow g = GenshinWindow.FindExisting();
-            var r = g.GetRect();
-            var buf = Screenshot.GetBuffer(r.Width, r.Height);
+           
             while (true)
             {
                 g.WaitForFocus();
-                g.TakeScreenshot(0, 0, buf);
-                var sub1 = buf.Mat;
-                sub1 = sub1[minimap1].Resize(default, fx: 1.1, fy: 1.1, InterpolationFlags.Lanczos4);
+                var sub1 = g.TakeScreenshot(minimap1);
+                sub1 = sub1.Resize(default, fx: 1.1, fy: 1.1, InterpolationFlags.Lanczos4);
                 Debug.show("re", sub1);
                 Test(whole2, sub1, out var angle, out var scale, out var trans,1);
             }

@@ -8,9 +8,31 @@ using System.Threading.Tasks;
 
 namespace GenshinbotCsharp.screens
 {
-    class PlayingScreen:Screen
+    class PlayingScreenDb
+    {
+        public class RD
+        {
+            public Rect minimapLoc { get; internal set; }
+        }
+
+        public Dictionary<Size, RD> R { get; set; } = new Dictionary<Size, RD>
+        {
+            [new Size(1440, 900)] = new RD
+            {
+                minimapLoc = new Rect(46, 13, 161, 161),
+
+            },
+            [new Size(1680, 1050)] = new RD
+            {
+                minimapLoc = new Rect(53, 15, 189, 189),
+            },
+        };
+        public int arrowRadius { get; internal set; } = 15;
+    }
+    class PlayingScreen : Screen
     {
         private GenshinBot b;
+        private PlayingScreenDb db = new PlayingScreenDb();//TODO
 
         public PlayingScreen(GenshinBot b)
         {
@@ -29,39 +51,24 @@ namespace GenshinbotCsharp.screens
             b.S(b.MapScreen);
         }
 
-        private int arrowRadius = 15;
-
         private static Dictionary<Size, Rect> miniMapLocs = new Dictionary<Size, Rect>
         {
-            [new Size(1440,900)]= new Rect(46, 13, 161, 161),
-            [new Size(1680,1050)]= new Rect(53, 15, 189, 189),
+            [new Size(1440, 900)] = new Rect(46, 13, 161, 161),
+            [new Size(1680, 1050)] = new Rect(53, 15, 189, 189),
         };
 
-        private Screenshot.Buffer buf;
         public Mat SnapMinimap()
         {
-            var r = b.W.GetRect();
-            var miniRect = miniMapLocs[r.Size];
-            if (buf==null || buf.Size!=r.Size)
-            {
-                buf = Screenshot.GetBuffer(miniRect.Width, miniRect.Height);
-            }
-            b.W.TakeScreenshot(miniRect.X, miniRect.Y, buf);
-            return buf.Mat;
+            var miniRect = miniMapLocs[b.W.GetSize()];
+            return b.W.TakeScreenshot(miniRect);
         }
 
-        private algorithm.ArrowDirectionDetect arrowDirection=new algorithm.ArrowDirectionDetect();
+        private algorithm.ArrowDirectionDetect arrowDirection = new algorithm.ArrowDirectionDetect();
 
-        private Screenshot.Buffer arrowBuf;
         Mat snapArrow()
         {
-            var r = b.W.GetRect();
-            var miniRect = miniMapLocs[r.Size];
-            if (arrowBuf == null)
-                arrowBuf = Screenshot.GetBuffer(arrowRadius*2, arrowRadius*2);
-            var vec = (miniRect.Center() - new Point2d(arrowRadius, arrowRadius)).ToPoint();
-            b.W.TakeScreenshot(vec.X, vec.Y, arrowBuf);
-            return arrowBuf.Mat;
+            var miniRect = db.R[b.W.GetSize()].minimapLoc;
+            return b.W.TakeScreenshot(miniRect.Center().RectAround(new Size(db.arrowRadius * 2, db.arrowRadius * 2)));
         }
 
         public double GetArrowDirection()

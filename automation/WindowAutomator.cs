@@ -83,10 +83,24 @@ namespace GenshinbotCsharp
 
         #region Screenshot 
 
-        Screenshot.Buffer wholeBuf;
-        public OpenCvSharp.Mat TakeScreenshot(OpenCvSharp.Rect r)
+        Point clientToScreen(Point p)
         {
-            return null;
+            var pp = new System.Drawing.Point(p.X, p.Y);
+            if (User32.ClientToScreen(hWnd, ref pp))
+                throw new Exception();
+            return pp.Cv().ToPoint();
+        }
+        
+        Screenshot.Buffer wholeBuf;
+
+
+        public Mat TakeScreenshot(OpenCvSharp.Rect r)
+        {
+            var windowSz = GetSize();
+            if (wholeBuf == null | wholeBuf.Size != windowSz)
+                wholeBuf = Screenshot.GetBuffer(windowSz.Width, windowSz.Height);
+            Screenshot.Take(wholeBuf, r.Size, clientToScreen(r.TopLeft), r.TopLeft);
+            return wholeBuf.Mat[r];
         }
 
         /// <summary>
@@ -96,7 +110,7 @@ namespace GenshinbotCsharp
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <param name="img"></param>
-        public void TakeScreenshot(int x, int y, Screenshot.Buffer img)
+       /* public void TakeScreenshot(int x, int y, Screenshot.Buffer img)
         {
             WaitForFocus();
 
@@ -112,7 +126,7 @@ namespace GenshinbotCsharp
 
             Screenshot.Take(p.X, p.Y, img);
 
-        }
+        }*/
 
         public Scalar GetPixelColor(int x, int y)
         {
@@ -212,7 +226,7 @@ namespace GenshinbotCsharp
         WinEventHook locationChangeHook;
         private Rect rect;
 
-        public Rect GetRect()
+         Rect GetRect()
         {
             //Waiting for focus guarentees rect is intialized, 
             //as it will always fetch the rect as soon as the window recieves focus
@@ -225,6 +239,12 @@ namespace GenshinbotCsharp
             return GetRect().Size;
         }
 
+        /// <summary>
+        /// returns the bounds of the client area
+        /// can assume x,y will always be 0
+        /// and size will be the size of the client area
+        /// </summary>
+        /// <returns></returns>
         public Rect GetBounds()
         {
             var r = GetRect();

@@ -28,10 +28,9 @@ namespace GenshinbotCsharp.screens
     class MapScreen : Screen
     {
         private GenshinBot b;
-        private Screenshot.Buffer buf;
         private MapScreenDb db=new MapScreenDb();//TODO
 
-        public Mat Map => buf.Mat;
+        public Mat Map;
 
         public MapScreen(GenshinBot b)
         {
@@ -74,13 +73,7 @@ namespace GenshinbotCsharp.screens
 
         public void UpdateScreenshot()
         {
-            var r = b.W.GetRect();
-            if (buf==null  || r.Size != buf.Size)
-            {
-                buf = Screenshot.GetBuffer(r.Width, r.Height);
-            }
-
-            b.W.TakeScreenshot(0, 0, buf);
+            Map = b.W.TakeScreenshot(b.W.GetBounds());
 
             features = null;
             location = null;
@@ -89,7 +82,7 @@ namespace GenshinbotCsharp.screens
         public List<algorithm.MapTemplateMatch.Result> GetFeatures()
         {
             if (features == null)
-                features = TemplateMatch.FindTeleporters(buf.Mat).ToList();
+                features = TemplateMatch.FindTeleporters(Map).ToList();
             return features;
         }
 
@@ -98,7 +91,7 @@ namespace GenshinbotCsharp.screens
         public algorithm.MapLocationMatch.Result GetLocation()
         {
             if (location == null)
-                location = LocationMatch.FindLocation2(GetFeatures(), b.W.GetRect().Size, ExpectUnknown);
+                location = LocationMatch.FindLocation2(GetFeatures(), b.W.GetSize(), ExpectUnknown);
             return location;
         }
 

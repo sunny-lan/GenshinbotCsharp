@@ -39,8 +39,7 @@ namespace GenshinbotCsharp.tools
 
             Console.WriteLine("Open map in genshin and focus onto it");
             g.WaitForFocus();
-            var r = g.GetRect();
-            var buf = Screenshot.GetBuffer(r.Width, r.Height);
+            var r = g.GetBounds();
             Console.WriteLine("data will be written automatically");
 
 
@@ -48,10 +47,10 @@ namespace GenshinbotCsharp.tools
             {
                 g.WaitForFocus();
                 if (!g.Focused) break;
-                g.TakeScreenshot(0, 0, buf);
+                var scr = g.TakeScreenshot(r);
 
 
-                var tr = m.FindTeleporters(buf.Mat).ToList();
+                var tr = m.FindTeleporters(scr).ToList();
                 algorithm.MapLocationMatch.Result lr;
                 try
                 {
