@@ -34,8 +34,7 @@ namespace GenshinbotCsharp.controllers
 
         public Point2d GetLocationFromMap()
         {
-            var p = b.S<screens.PlayingScreen>();
-            p.OpenMap();
+            b.PlayingScreen.OpenMap();
 
             var m = b.S<screens.MapScreen>();
 
@@ -70,14 +69,11 @@ namespace GenshinbotCsharp.controllers
         {
             if (db.Coord2Minimap == null)
                 throw new Exception("Missing setting");
-
-            var p = b.S<screens.PlayingScreen>();
-
-            Mat minimap = p.SnapMinimap();
             bool approxLocCalculated = false;
 
+            var p = b.S<screens.PlayingScreen>();
+            Mat minimap = p.SnapMinimap();
         begin:
-            //TODO support starting from MapScreen
 
             //check map to find initial location
             if (this.approxPos == null)
@@ -143,7 +139,45 @@ namespace GenshinbotCsharp.controllers
             return coord;
         }
 
+        public void WalkTo(Point2d dstPos, double accuracy = 1)
+        {
+            var curPos = DeduceLocation();
+            var p = b.S<screens.PlayingScreen>();
+            var mouse = new input.MouseMover(b.W.I);
+            
 
+            while (true)
+            {
+                if (curPos.DistanceTo(dstPos) <= accuracy)
+                {
+                    b.W.K.KeyUp(input.GenshinKeys.Forward);
+                    mouse.Stop();
+                    return;
+                }
+
+                b.W.K.KeyPress(input.GenshinKeys.Forward);
+                var dstAng = curPos.AngleTo(dstPos);
+                var curAng = p.GetArrowDirection();
+
+                var diff = curAng.RelativeAngle(dstAng);
+                mouse.Move(new Point2d(diff/2, 0));
+                b.W.K.KeyDown(input.GenshinKeys.Forward);
+                curPos = DeduceLocation();
+
+            }
+        }
+
+        public static void Testwalkto()
+        {
+            Point2d dst=new Point2d(x: 1956.43237304688, y: -303.038940429688);
+            GenshinBot b = new GenshinBot();
+
+            // b.LocationManager.Coord2MinimapTool();
+
+            b.S(b.PlayingScreen);
+
+            b.LocationManager.WalkTo(dst);
+        }
 
         public static void Test()
         {

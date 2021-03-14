@@ -27,14 +27,34 @@ namespace GenshinbotCsharp.input
         /// </summary>
         public double MaxSpeed = 1;
 
+        private bool Absolute = false;
+
         public MouseMover(IInputSimulator i)
         {
             this.i = i;
-            dst = i.MousePos();
+        }
+
+        Point2d speed;
+        /// <summary>
+        /// Consistently moves mouse at a given speed
+        /// </summary>
+        /// <param name="speed">In pixels per millisecond</param>
+        /// <returns></returns>
+        public Task Move(Point2d speed) 
+        {
+            Absolute = false;
+            this.speed = (speed*MoveInterval).LimitDistance(MaxSpeed*MoveInterval);
+            if (!Running)
+            {
+                Running = true;
+                t = Task.Run(thread);
+            }
+            return t;
         }
 
         public Task Goto(Point2d dst)
         {
+            Absolute = true;
             this.dst = dst;
             if (!Running)
             {
@@ -48,11 +68,22 @@ namespace GenshinbotCsharp.input
         {
             while (Running)
             {
-                var cur = i.MousePos();
-                if (cur == dst) break;
-
-                var delta = dst - cur;
-                i.MouseMove(delta.LimitDistance(MaxSpeed * MoveInterval));
+                if (Absolute)
+                {
+                    var cur = i.MousePos();
+                    if (cur.DistanceTo(dst) <= MaxSpeed * MoveInterval)
+                    {
+                        i.MouseTo(dst);
+                        break;
+                    }
+                    var delta = dst - cur;
+                    i.MouseMove(delta.LimitDistance(MaxSpeed * MoveInterval));
+                }
+                else
+                {
+                    i.MouseMove(speed);
+                }
+                Thread.Sleep(MoveInterval);
             }
             Running = false;
         }

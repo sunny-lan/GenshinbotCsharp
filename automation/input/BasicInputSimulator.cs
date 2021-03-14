@@ -24,6 +24,11 @@ namespace GenshinbotCsharp.input
             throw new NotImplementedException();
         }
 
+        public void MouseButton(Point2d pos, int btn, bool down)
+        {
+            throw new NotImplementedException();
+        }
+
         public void MouseClick(int btn)
         {
             throw new NotImplementedException();

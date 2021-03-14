@@ -9,9 +9,35 @@ namespace GenshinbotCsharp
 {
     static class Util
     {
+        public static double ConfineAngle(this double a)
+        {
+            a %= Math.PI * 2;
+            if (a < 0) a += Math.PI * 2;
+            return a;
+        }
+        public static double SmallerAngleBetween(double a, double b)
+        {
+            var diff = Math.Abs(a.ConfineAngle() - b.ConfineAngle());
+            return Math.Min(diff, 2 * Math.PI - diff);
+        }
+
+        public static double RelativeAngle(this double a, double b)
+        {
+            var diff = b.ConfineAngle() - a.ConfineAngle();
+            if (diff > Math.PI) return -(Math.PI * 2 - diff);
+            else return diff;
+        }
+        public static double Angle(this Point2d p)
+        {
+            return Math.Atan2(p.Y, p.X);
+        }
         public static double Length(this Point2d p)
         {
             return p.DistanceTo(Origin);
+        }
+        public static Point2d Cv(this System.Drawing.Point p)
+        {
+            return new Point2d(p.X, p.Y);
         }
         public static Point ReadPoint()
         {
@@ -24,6 +50,10 @@ namespace GenshinbotCsharp
         public static Rect ImgRect(this Mat m)
         {
             return new Rect(Origin, m.Size());
+        }
+        public static Point2d Vec(this double angle, double mag = 1)
+        {
+            return new Point2d(x: Math.Sin(angle) * mag, y: Math.Cos(angle) * mag);
         }
         public static T Expect<T>(this T? t, string assert="")where T:struct
         {

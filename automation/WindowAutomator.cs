@@ -83,6 +83,11 @@ namespace GenshinbotCsharp
 
         #region Screenshot 
 
+        Screenshot.Buffer wholeBuf;
+        public OpenCvSharp.Mat TakeScreenshot(OpenCvSharp.Rect r)
+        {
+            return null;
+        }
 
         /// <summary>
         /// screenshots rectangle starting at (x,y) in the client area into img
@@ -215,6 +220,11 @@ namespace GenshinbotCsharp
             return rect;
         }
 
+        public OpenCvSharp.Size GetSize()
+        {
+            return GetRect().Size.cv();
+        }
+
         public RECT GetBounds()
         {
             var r = GetRect();
@@ -290,34 +300,107 @@ namespace GenshinbotCsharp
         public OpenCvSharp.Point2d MousePos()
         {
             WaitForFocus();
-            throw new NotImplementedException();
+            if (!User32.GetCursorPos(out var pt))
+                throw new Exception();
+            if (!User32.ScreenToClient(hWnd, ref pt))
+                throw new Exception();
+            return pt.Cv();
+        }
+
+        public void SendMouseInput(User32.MOUSEINPUT mi)
+        {
+            SendInput(new User32.INPUT
+            {
+                type = User32.INPUTTYPE.INPUT_MOUSE,
+                mi = mi,
+            });
+        }
+
+        public void MouseMove(OpenCvSharp.Point2d p)
+        {
+            var cur = MousePos();
+            MouseTo(cur + p);
+            
+            /*Point pp = new Point((int)Math.Round(p.X), (int)Math.Round(p.Y));
+            cvtPixelToMouse(ref pp);
+            SendMouseInput(new User32.MOUSEINPUT
+            {
+                dx = pp.X,
+                dy = pp.Y,
+                dwFlags = (uint)User32.MOUSEEVENTF.MOUSEEVENTF_MOVE
+            });*/
 
         }
 
-        public void MouseMove(OpenCvSharp.Point2d d)
+        void cvtPixelToMouse(ref Point p)
         {
-            throw new NotImplementedException();
+            User32.GetClientRect(User32.GetDesktopWindow(), out var desktop);
+            p.X = 65536*p.X / desktop.right;
+            p.Y = 65536*p.Y / desktop.bottom;
         }
 
         public void MouseTo(OpenCvSharp.Point2d p)
         {
-            throw new NotImplementedException();
+            WaitForFocus();
+            Point pp = new Point((int)Math.Round(p.X), (int)Math.Round(p.Y));
+
+            if (!User32.ClientToScreen(hWnd, ref pp))
+                throw new Exception();
+
+            //cvtPixelToMouse(ref pp);
+
+            /*SendMouseInput(new User32.MOUSEINPUT
+            {
+                dx = pp.X,
+                dy = pp.Y,
+                dwFlags = (uint)User32.MOUSEEVENTF.MOUSEEVENTF_MOVE | (uint)User32.MOUSEEVENTF.MOUSEEVENTF_ABSOLUTE |(uint)User32.MOUSEEVENTF.MOUSEEVENTF_VIRTUALDESK
+            });*/
+            if (!User32.SetCursorPos(pp.X, pp.Y))
+                throw new Exception();
+        }
+
+        static readonly User32.MOUSEEVENTF[] mouseDownF = {
+            User32.MOUSEEVENTF.MOUSEEVENTF_LEFTDOWN,
+            User32.MOUSEEVENTF.MOUSEEVENTF_MIDDLEDOWN,
+            User32.MOUSEEVENTF.MOUSEEVENTF_RIGHTDOWN,
+        };
+        static readonly User32.MOUSEEVENTF[] mouseUpF = {
+            User32.MOUSEEVENTF.MOUSEEVENTF_LEFTUP,
+            User32.MOUSEEVENTF.MOUSEEVENTF_MIDDLEUP,
+            User32.MOUSEEVENTF.MOUSEEVENTF_RIGHTUP,
+        };
+
+        static uint CvtBtn(int btn, bool down)
+        {
+            var x = (down ? mouseDownF : mouseUpF);
+            return (uint)x[btn];
+        }
+
+        public void MouseButton(int btn, bool down)
+        {
+            SendMouseInput(new User32.MOUSEINPUT
+            {
+                dwFlags = CvtBtn(btn, down),
+            });
         }
 
         public void MouseDown(int btn)
         {
-            throw new NotImplementedException();
+            MouseButton(btn, true);
         }
 
         public void MouseUp(int btn)
         {
-            throw new NotImplementedException();
+            MouseButton(btn, false);
         }
 
         public void MouseClick(int btn)
         {
-            throw new NotImplementedException();
+            MouseDown(btn);
+            MouseUp(btn);
         }
+
+        
 
         public void SendInput(User32.INPUT input)
         {
@@ -354,6 +437,11 @@ namespace GenshinbotCsharp
         {
             KeyDown(k);
             KeyUp(k);
+        }
+
+        public void MouseButton(OpenCvSharp.Point2d pos, int btn, bool down)
+        {
+            throw new NotImplementedException();
         }
         #endregion
     }

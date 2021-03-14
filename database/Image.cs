@@ -11,9 +11,11 @@ namespace GenshinbotCsharp.database
     {
         public string Path { get; set; }
 
+        private Mat _cached;
         public Mat Load(ImreadModes mode = ImreadModes.Color)
         {
-            return Data.Imread(Path, mode);
+            if (_cached != null) return _cached;
+            return _cached = Data.Imread(Path, mode);
         }
     }
 }

@@ -18,7 +18,9 @@ namespace GenshinbotCsharp.input
         void MouseUp(int btn);
         void MouseClick(int btn);
 
+        void MouseButton(Point2d pos, int btn, bool down);
 
+        //TODO change everything to use enum
         void KeyDown(int k);
 
         void KeyUp(int k);

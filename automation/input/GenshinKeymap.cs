@@ -18,8 +18,11 @@ namespace GenshinbotCsharp.input
         private IInputSimulator s;
         Dictionary<GenshinKeys, int> MapKbd=new Dictionary<GenshinKeys, int> { 
             [GenshinKeys.Map]= (int)Keys.M,
+            [GenshinKeys.Forward]= (int)Keys.W,
         };
-        Dictionary<GenshinKeys, int>  MapMs=new Dictionary<GenshinKeys, int> { };
+        Dictionary<GenshinKeys, int>  MapMs=new Dictionary<GenshinKeys, int> {
+            [GenshinKeys.Attack]=0,
+        };
 
         public GenshinKeymap(IInputSimulator sim)
         {

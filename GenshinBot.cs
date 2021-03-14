@@ -63,7 +63,7 @@ namespace GenshinbotCsharp
 
             Console.WriteLine("Screens initialized");
 
-            LocationManager = new controllers.LocationManager(this);
+            //LocationManager = new controllers.LocationManager(this);
 
             Console.WriteLine("Controllers initialized");
             Console.WriteLine("Bot initialized");

@@ -20,5 +20,6 @@ namespace GenshinbotCsharp
         {
             return new GenshinWindow("Genshin Impact", "UnityWndClass");
         }
+
     }
 }

@@ -38,6 +38,9 @@
     <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Nefarius.ViGEm.Client, Version=1.17.178.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\Nefarius.ViGEm.Client.1.17.178\lib\net452\Nefarius.ViGEm.Client.dll</HintPath>
+    </Reference>
     <Reference Include="OpenCvSharp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6adad1e807fea099, processorArchitecture=MSIL">
       <HintPath>packages\OpenCvSharp4.4.5.1.20201229\lib\net461\OpenCvSharp.dll</HintPath>
     </Reference>
@@ -121,12 +124,14 @@
     <Compile Include="algorithm\MinimapMatch.cs" />
     <Compile Include="algorithm\Padding.cs" />
     <Compile Include="algorithm\StandardPhaseCorr.cs" />
+    <Compile Include="automation\Frame.cs" />
     <Compile Include="controllers\LocationManager.cs" />
     <Compile Include="database\controllers\LocationManagerDb.cs" />
     <Compile Include="database\Image.cs" />
     <Compile Include="database\Transformation.cs" />
     <Compile Include="error\Error.cs" />
     <Compile Include="experiments\MinimapMatcher.cs" />
+    <Compile Include="experiments\XboxInput.cs" />
     <Compile Include="gui\GUI.cs" />
     <Compile Include="gui\WindowsGUI.cs">
       <SubType>Form</SubType>
@@ -142,6 +147,7 @@
       <DependentUpon>MatPictureBox.cs</DependentUpon>
     </Compile>
     <Compile Include="legacy\Tests.cs" />
+    <Compile Include="tools\Goto.cs" />
     <Compile Include="util\Cache.cs" />
     <Compile Include="util\EventWaiter.cs" />
     <Compile Include="automation\input\BasicInputSimulator.cs" />
@@ -162,7 +168,7 @@
     <Compile Include="hooks\WindowHook.cs" />
     <Compile Include="database\map\GenshinIOMapData.cs" />
     <Compile Include="util\Screenshot.cs" />
-    <Compile Include="screens\Loading.cs" />
+    <Compile Include="screens\LoadingScreen.cs" />
     <Compile Include="screens\MapScreen.cs" />
     <Compile Include="screens\PlayingScreen.cs" />
     <Compile Include="screens\Screen.cs" />
@@ -185,6 +191,7 @@
     <Compile Include="legacy\Recording.cs" />
     <Compile Include="tools\CoordChecker.cs" />
     <Compile Include="hooks\HookBase.cs" />
+    <Compile Include="util\Vec2.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="data\map\genshiniodata\assets\Andrius.dds" />

@@ -28,16 +28,21 @@ namespace GenshinbotCsharp.screens
             Thread.Sleep(2000);//TODO
             b.S(b.MapScreen);
         }
-        private static Rect thing = new Rect(53, 15, 189, 189);//TODO
+
         private int arrowRadius = 15;
-        private static Rect thing_1440x900= new Rect(46, 13, 161, 161);
-        private Rect miniRect=thing; //TODO
-        
+
+        private static Dictionary<Size, Rect> miniMapLocs = new Dictionary<Size, Rect>
+        {
+            [new Size(1440,900)]= new Rect(46, 13, 161, 161),
+            [new Size(1680,1050)]= new Rect(53, 15, 189, 189),
+        };
 
         private Screenshot.Buffer buf;
         public Mat SnapMinimap()
         {
-            if(buf==null)
+            var r = b.W.GetRect().Cv();
+            var miniRect = miniMapLocs[r.Size];
+            if (buf==null || buf.Size.cv()!=r.Size)
             {
                 buf = Screenshot.GetBuffer(miniRect.Width, miniRect.Height);
             }
@@ -50,6 +55,8 @@ namespace GenshinbotCsharp.screens
         private Screenshot.Buffer arrowBuf;
         Mat snapArrow()
         {
+            var r = b.W.GetRect().Cv();
+            var miniRect = miniMapLocs[r.Size];
             if (arrowBuf == null)
                 arrowBuf = Screenshot.GetBuffer(arrowRadius*2, arrowRadius*2);
             var vec = (miniRect.Center() - new Point2d(arrowRadius, arrowRadius)).ToPoint();

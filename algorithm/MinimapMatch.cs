@@ -16,7 +16,7 @@ namespace GenshinbotCsharp.algorithm.MinimapMatch
 
         public int PlayerArrowRadius { get; internal set; } = 20;
         public int BigPadding { get; internal set; } = 25;
-        public double MinAcceptableCorrelationResponse { get; internal set; } = 0.1;
+        public double MinAcceptableCorrelationResponse { get; internal set; } = 0.2;
         public double MaxDistanceBeforeTrackerMoves { get; internal set; } = 30;
         public bool AutoUpdateTrackerWindowPos { get; internal set; } = true;
         public double MaxDistanceFromApproxToActual { get; internal set; } = 100;
