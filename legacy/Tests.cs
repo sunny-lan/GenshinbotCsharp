@@ -71,7 +71,7 @@ namespace GenshinbotCsharp.legacy
                 for (int i = 0; i < features.Count; i++)
                 {
                     var f = features[i];
-                    Debug.img.PutText("f:" + i, lr.ToPoint(f.Coordinates).ToPoint(),
+                    Debug.img.PutText("f:" + i, lr.ToPoint(f.Coordinates).Round(),
                         HersheyFonts.HersheyPlain, fontScale: 1, color: Scalar.Red, thickness: 2);
                 }
                 foreach (var match in lr.Matches)

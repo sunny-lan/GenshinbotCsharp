@@ -198,7 +198,7 @@ namespace GenshinbotCsharp.algorithm.experiments
 
                 var center_trans = ctr - trans;
                 var ans = whole1.Clone();
-                ans.Circle(center_trans.ToPoint(), 2, Scalar.Red, 2);
+                ans.Circle(center_trans.Round(), 2, Scalar.Red, 2);
                 Debug.show("f"+angle1,ans);
             }
         }
@@ -241,7 +241,7 @@ namespace GenshinbotCsharp.algorithm.experiments
             var sub1 = Data.Imread("test/minimap_test.png");
             sub1 = sub1[minimap1];
             sub1 = rotate(sub1, 20, 1, out _);
-            sub1.Circle(sub1.Center().ToPoint(), 2, Scalar.AliceBlue, 2);
+            sub1.Circle(sub1.Center().Round(), 2, Scalar.AliceBlue, 2);
             Cv2.ImShow("re", sub1);
             Test(whole2, sub1, out var angle, out var scale, out var trans);
             Cv2.WaitKey();

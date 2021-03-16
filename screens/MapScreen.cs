@@ -137,7 +137,7 @@ namespace GenshinbotCsharp.screens
                 var l = GetLocation();
                 var point = l.ToPoint(coord);
 
-                if (active.Contains(point.ToPoint()))
+                if (active.Contains(point.Round()))
                 {
                     return point;
                 }

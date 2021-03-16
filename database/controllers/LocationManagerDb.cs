@@ -1,4 +1,5 @@
-﻿using OpenCvSharp;
+﻿using GenshinbotCsharp.data;
+using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;

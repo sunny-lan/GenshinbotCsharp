@@ -43,9 +43,47 @@ namespace GenshinbotCsharp
         {
             return p.DistanceTo(Origin);
         }
-        public static Point2d Cv(this System.Drawing.Point p)
+        public static Point Cv(this System.Drawing.Point p)
         {
-            return new Point2d(p.X, p.Y);
+            return new Point(p.X, p.Y);
+        }
+        public static System.Drawing.Point Sys(this Point p)
+        {
+            return new System.Drawing.Point(p.X, p.Y);
+        }
+        public static System.Drawing.Size Sys(this Size p)
+        {
+            return new System.Drawing.Size(p.Width, p.Height);
+        }
+        public static System.Drawing.Rectangle Sys(this Rect p)
+        {
+            return new System.Drawing.Rectangle(p.TopLeft.Sys(), p.Size.Sys());
+        }
+        public static Rect Cv(this System.Drawing.Rectangle p)
+        {
+            return new Rect(p.Location.Cv(), p.Size.cv());
+            }
+
+        public static System.Drawing.Rectangle Union(this System.Drawing.Rectangle a, System.Drawing.Rectangle b)
+        {
+            var r= new System.Drawing.Rectangle
+            {
+                X=Math.Min(a.X,b.X),    
+                Y=Math.Min(a.Y,b.Y),    
+            };
+            r.Width = Math.Max(a.Right, b.Right) - r.Left;
+            r.Height = Math.Max(a.Bottom, b.Bottom) - r.Top;
+            return r;
+        }
+
+        public static System.Drawing.Bitmap ToBmpFast(this Mat m)
+        {
+            if (m.Channels() == 3)
+                return new System.Drawing.Bitmap(m.Width, m.Height,
+                    (int)m.Step(),
+                    System.Drawing.Imaging.PixelFormat.Format24bppRgb,
+                    m.Data);
+            throw new Exception("unable to convert");
         }
         public static Point ReadPoint()
         {
@@ -63,7 +101,7 @@ namespace GenshinbotCsharp
         {
             return new Point2d(x: Math.Sin(angle) * mag, y: Math.Cos(angle) * mag);
         }
-        public static T Expect<T>(this T? t, string assert="")where T:struct
+        public static T Expect<T>(this T? t, string assert = "") where T : struct
         {
             if (t == null) throw new ArgumentException(assert);
             return (T)t;
@@ -72,7 +110,7 @@ namespace GenshinbotCsharp
 
         public static Rect RectAround(this Point2d p, Size sz)
         {
-            return new Rect((p - sz.Center()).ToPoint(), sz);
+            return new Rect((p - sz.Center()).Round(), sz);
         }
 
         public static void Shuffle<T>(this IList<T> list)
@@ -89,14 +127,14 @@ namespace GenshinbotCsharp
         }
         public static Rect Pad(this Rect r, int sz)
         {
-            return new Rect(r.X-sz, r.Y-sz, r.Width+sz*2, r.Height+sz*2);
+            return new Rect(r.X - sz, r.Y - sz, r.Width + sz * 2, r.Height + sz * 2);
         }
         public static Size Pad(this Size r, int sz)
         {
             return new Size(r.Width + sz * 2, r.Height + sz * 2);
         }
 
-       public static void fftShift(this Mat src, Mat dst)
+        public static void fftShift(this Mat src, Mat dst)
         {
             int cx = src.Width >> 1;
             int cy = src.Height >> 1;
@@ -110,7 +148,7 @@ namespace GenshinbotCsharp
         {
             return 1.0 / (1 + Math.Abs(a - b));
         }
-        public static Point ToPoint(this Point2d p)
+        public static Point Round(this Point2d p)
         {
             return new Point(p.X, p.Y);
         }
@@ -154,12 +192,12 @@ namespace GenshinbotCsharp
 
         public static Point2d[] Corners(this Rect2d r)
         {
-            return  new Point2d[]{ r.TopLeft,r.BottomRight,new Point2d(r.Right, r.Top),new Point2d(r.Left, r.Bottom)};
+            return new Point2d[] { r.TopLeft, r.BottomRight, new Point2d(r.Right, r.Top), new Point2d(r.Left, r.Bottom) };
         }
 
-        public static Point2d Closest(this Point2d  p, Point2d[] pp)
+        public static Point2d Closest(this Point2d p, Point2d[] pp)
         {
-            Point2d r =default;
+            Point2d r = default;
             double mx = double.PositiveInfinity;
             foreach (var x in pp)
                 if (x.DistanceTo(p) < mx)
@@ -182,7 +220,7 @@ namespace GenshinbotCsharp
         }
         public static Point2d Center(this Rect img)
         {
-            return new Point2d((img.Left+img.Right) / 2.0, (img.Top+img.Bottom) / 2.0);
+            return new Point2d((img.Left + img.Right) / 2.0, (img.Top + img.Bottom) / 2.0);
         }
         public static Point2d Center(this Mat img)
         {

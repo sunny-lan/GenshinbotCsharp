@@ -67,7 +67,7 @@ namespace GenshinbotCsharp.tools
                     for (int i = 0; i < features.Count; i++)
                     {
                         var f = features[i];
-                        var p = lr.ToPoint(f.Coordinates).ToPoint();
+                        var p = lr.ToPoint(f.Coordinates).Round();
                         if (p.X > 0 && p.Y > 0 && p.X < r.Width && p.Y < r.Height)
                         {
                             Debug.img.PutText("f:" + i, p,

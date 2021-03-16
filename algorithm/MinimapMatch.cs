@@ -190,7 +190,7 @@ namespace GenshinbotCsharp.algorithm.MinimapMatch
                 Cv2.Multiply(mask, output, output);
 
                 //blot out arrow
-                Cv2.Circle(output, output.Center().ToPoint(), db.PlayerArrowRadius, Scalar.All(0), -1);
+                Cv2.Circle(output, output.Center().Round(), db.PlayerArrowRadius, Scalar.All(0), -1);
             }
         }
     }

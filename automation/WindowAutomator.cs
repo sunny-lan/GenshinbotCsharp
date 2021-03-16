@@ -88,7 +88,7 @@ namespace GenshinbotCsharp
             var pp = new System.Drawing.Point(p.X, p.Y);
             if (!User32.ClientToScreen(hWnd, ref pp))
                 throw new Exception();
-            return pp.Cv().ToPoint();
+            return pp.Cv();
         }
         
         Screenshot.Buffer wholeBuf;

@@ -1,4 +1,5 @@
 ﻿using GenshinbotCsharp.database.controllers;
+using GenshinbotCsharp.database.map;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -58,11 +59,21 @@ namespace GenshinbotCsharp.controllers
             double scaleY = deltaMini.Y / deltaCoord.Y;
             Debug.Assert(Math.Abs(scaleY - scaleX) < db.MaxMinimapScaleDistortion, "Calculated scaling is non uniform");
             double scale = (scaleX + scaleY) / 2.0;
-            db.Coord2Minimap = new database.Transformation
+            db.Coord2Minimap = new data.Transformation
             {
                 Scale = scale,
                 Translation = a.Minimap - a.Coord * scale
             };
+        }
+
+
+        public void TeleportTo(Feature waypoint)
+        {
+            Debug.Assert(waypoint.Type == FeatureType.Teleporter);
+            var m = b.S<screens.MapScreen>();
+            m.TeleportTo(waypoint);
+            approxPos = waypoint.Coordinates;
+            pt = null;
         }
 
         public Point2d DeduceLocation()
