@@ -19,7 +19,7 @@ namespace GenshinbotCsharp.database.controllers
         /// <summary>
         /// Approximate transformation of a coordinate to a pixel on BigMap
         /// </summary>
-        public Transformation Coord2Minimap { get; set; }
+        public Transformation? Coord2Minimap { get; set; }
 
         /// <summary>
         /// Stores a list of known points on the minimap, 

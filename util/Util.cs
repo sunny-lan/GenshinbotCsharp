@@ -9,6 +9,15 @@ namespace GenshinbotCsharp
 {
     static class Util
     {
+        public static Rect RectAround(Point initial , Point final)
+        {
+            var r = new OpenCvSharp.Rect();
+            r.Left = Math.Min(initial.X, final.X);
+            r.Width = Math.Max(initial.X, final.X) - r.Left;
+            r.Top = Math.Min(initial.Y, final.Y);
+            r.Height = Math.Max(initial.Y, final.Y) - r.Top;
+            return r;
+        }
         public static Point RandomWithin(this Rect r)
         {
             return new Point(rng.Next(r.Left, r.Right), rng.Next(r.Top, r.Bottom));
@@ -59,6 +68,7 @@ namespace GenshinbotCsharp
         {
             return new System.Drawing.Rectangle(p.TopLeft.Sys(), p.Size.Sys());
         }
+
         public static Rect Cv(this System.Drawing.Rectangle p)
         {
             return new Rect(p.Location.Cv(), p.Size.cv());
@@ -235,7 +245,26 @@ namespace GenshinbotCsharp
         {
             return new Size(size.Width * s, size.Height * s);
         }
-
+        public static Size round(this Size2d size)
+        {
+            return new Size(size.Width, size.Height);
+        }
+        public static Size2d cvt(this Size size)
+        {
+            return new Size2d(size.Width, size.Height);
+        }
+        public static Size2d Scale(this Size2d size, double s)
+        {
+            return new Size2d(size.Width * s, size.Height * s);
+        }
+        public static  Rect2d cvt(this Rect a)
+        {
+            return new Rect2d(a.X,a.Y,a.Width,a.Height);
+        }
+        public static Rect round(this Rect2d a)
+        {
+            return new Rect(a.Location.Round(),a.Size.round());
+        }
         public static Size cv(this System.Drawing.Size s)
         {
             return new Size(s.Width, s.Height);

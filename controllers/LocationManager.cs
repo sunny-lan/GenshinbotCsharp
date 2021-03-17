@@ -101,7 +101,7 @@ namespace GenshinbotCsharp.controllers
             {
                 Console.WriteLine("Recalculating scale");
                 //convert map coord to minimap pos so we can use minimap matcher
-                var bigApproxPos = db.Coord2Minimap.Transform(this.approxPos.Expect());
+                var bigApproxPos = db.Coord2Minimap.Expect().Transform(this.approxPos.Expect());
                 var miniPos = m.FindScale(bigApproxPos, minimap, out var pt1);
 
                 //we were unable to find a valid scale
@@ -142,7 +142,7 @@ namespace GenshinbotCsharp.controllers
             }
 
             //convert minimap point back to map coordinates
-            var coord = db.Coord2Minimap.Inverse(miniPos1);
+            var coord = db.Coord2Minimap.Expect().Inverse(miniPos1);
 
             //also, we can update approxPos in case we need it later
             approxPos = coord;

@@ -136,12 +136,34 @@
     <Compile Include="error\Error.cs" />
     <Compile Include="experiments\MinimapMatcher.cs" />
     <Compile Include="experiments\XboxInput.cs" />
-    <Compile Include="gui\YUI.cs" />
-    <Compile Include="gui\windows.forms\GUI.cs">
+    <Compile Include="util\ObjectPool.cs" />
+    <Compile Include="yui\Tests.cs" />
+    <Compile Include="yui\WindowsForms\Button.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="yui\WindowsForms\Container.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="yui\WindowsForms\ImageDrawable.cs" />
+    <Compile Include="yui\WindowsForms\RectDrawable.cs" />
+    <Compile Include="yui\WindowsForms\Image.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="yui\WindowsForms\Rect.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="yui\WindowsForms\Tab.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="yui\WindowsForms\Viewport.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="yui\YUI.cs" />
+    <Compile Include="yui\WindowsForms\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="gui\windows.forms\GUI.Designer.cs">
-      <DependentUpon>GUI.cs</DependentUpon>
+    <Compile Include="yui\WindowsForms\MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="legacy\Tests.cs" />
     <Compile Include="tools\Goto.cs" />
@@ -609,8 +631,11 @@
     <Folder Include="data\controllers\" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="gui\windows.forms\GUI.resx">
-      <DependentUpon>GUI.cs</DependentUpon>
+    <EmbeddedResource Include="yui\WindowsForms\MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="yui\WindowsForms\Tab.resx">
+      <DependentUpon>Tab.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

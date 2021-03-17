@@ -1,4 +1,6 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace GenshinbotCsharp.util
 {
@@ -59,6 +61,22 @@ namespace GenshinbotCsharp.util
                 has = true;
                 Monitor.PulseAll(lck);
             }
+        }
+
+        public static (Task<K>, Action<K>) Waiter<K>()
+        {
+            TaskCompletionSource<K> t = new TaskCompletionSource<K>();
+            return (
+                t.Task,
+                x=>t.TrySetResult(x)
+            );
+        }
+        public static Task<K> WaitEvent<K>(Action<Action<K>> subscribe, Action<Action<K>> unsubscribe)
+        {
+            var (t, a) = Waiter<K>();
+            subscribe(a);
+            subscribe((_) => unsubscribe(a));
+            return t;
         }
     }
 }
