@@ -20,6 +20,12 @@ namespace GenshinbotCsharp.yui.WindowsForms
             yui.Tests.GenericTest(_f);
             Application.Run(_f);
         }
+        public static YUI make()
+        {
+            var _f = new MainForm();
+            Task.Run(()=>Application.Run(_f));
+            return _f;
+        }
 
         public MainForm()
         {
@@ -29,7 +35,7 @@ namespace GenshinbotCsharp.yui.WindowsForms
         public yui.Tab CreateTab()
         {
             Tab t = new Tab();
-            this.tabs.TabPages.Add(t);
+           Invoke((MethodInvoker)delegate { tabs.TabPages.Add(t); });
             return t;
         }
     }

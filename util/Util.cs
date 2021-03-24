@@ -9,6 +9,10 @@ namespace GenshinbotCsharp
 {
     static class Util
     {
+        public static System.Drawing.Color SysBgr255(this Scalar s)
+        {
+            return System.Drawing.Color.FromArgb(blue:(int)s.Val0, green:(int)s.Val1, red:(int)s.Val2);
+        }
         public static Rect RectAround(Point initial , Point final)
         {
             var r = new OpenCvSharp.Rect();

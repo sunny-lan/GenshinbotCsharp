@@ -21,7 +21,7 @@ namespace GenshinbotCsharp.yui.WindowsForms
                 }// => Bounds = value.Sys();
             }
 
-            public Rect()
+            public Rect():base()
             {
                 //BackColor = Color.Red;
                 //BackColor = Color.Transparent;

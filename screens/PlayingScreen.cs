@@ -13,6 +13,11 @@ namespace GenshinbotCsharp.screens
         public class RD
         {
             public Rect minimapLoc { get; internal set; }
+
+            public class CharacterConfig
+            {
+                public Rect Number { get; set; }
+            }
         }
 
         public Dictionary<Size, RD> R { get; set; } = new Dictionary<Size, RD>
@@ -32,11 +37,12 @@ namespace GenshinbotCsharp.screens
     class PlayingScreen : Screen
     {
         private GenshinBot b;
-        private PlayingScreenDb db = new PlayingScreenDb();//TODO
+        private PlayingScreenDb db;
 
-        public PlayingScreen(GenshinBot b)
+        public PlayingScreen(GenshinBot b, PlayingScreenDb db)
         {
             this.b = b;
+            this.db = db;
         }
 
         public bool CheckActive()

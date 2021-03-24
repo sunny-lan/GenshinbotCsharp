@@ -51,6 +51,7 @@ namespace GenshinbotCsharp
             constructor(hWnd);
             
         }
+        //TODO attachment
 
         ~WindowAutomator()
         {

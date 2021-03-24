@@ -7,7 +7,7 @@ namespace GenshinbotCsharp.yui.WindowsForms
     {
         Container _children;
 
-        public Tab()
+        public Tab():base()
         {
             _children = new Container
             {

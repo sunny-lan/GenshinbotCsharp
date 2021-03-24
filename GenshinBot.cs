@@ -8,6 +8,7 @@ namespace GenshinbotCsharp
 {
     class GenshinBot
     {
+        public YUI Ui;
         public database.Database Db;
 
         public GenshinWindow W;
@@ -64,12 +65,18 @@ namespace GenshinbotCsharp
         }
 
         public controllers.LocationManager LocationManager;
+        yui.tools.GenericDbEditor editor;
 
-        
+        public static void generalTest()
+        {
+            GenshinBot b = new GenshinBot();
+            while (true) Task.Delay(10000).Wait();
+        }
 
         public GenshinBot()
         {
             Console.WriteLine("Bot load begin");
+            Ui = yui.WindowsForms.MainForm.make();//todo
 
             //TODO implement parallel loading
             Db = new database.Database
@@ -79,13 +86,21 @@ namespace GenshinbotCsharp
             };
 
             Console.WriteLine("Database load finish");
+            Task.Run(()=>editor=new yui.tools.GenericDbEditor(this));
+
+            AttachWindow();
+        }
+
+        //TODO
+        public void AttachWindow()
+        {
 
             W = GenshinWindow.FindExisting();
             M = new input.MouseMover(W);
 
             Console.WriteLine("Genshin window initialized");
 
-            PlayingScreen = new screens.PlayingScreen(this);
+            PlayingScreen = new screens.PlayingScreen(this, this.Db.PlayingScreenDb);
             MapScreen = new screens.MapScreen(this);
             LoadingScreen = new screens.LoadingScreen(W);
 
@@ -94,7 +109,6 @@ namespace GenshinbotCsharp
             //LocationManager = new controllers.LocationManager(this);
 
             Console.WriteLine("Controllers initialized");
-            Console.WriteLine("Bot initialized");
         }
     }
 }

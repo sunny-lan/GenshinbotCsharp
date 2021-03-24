@@ -28,8 +28,9 @@ namespace GenshinbotCsharp.yui.WindowsForms
             set
             {
                 _img = value;
-                bmp = value.ToBmpFast();
+                bmp = value?.ToBmpFast();
                 parent.Invalidate();
+
             }
         }
         public OpenCvSharp.Point TopLeft
@@ -54,6 +55,7 @@ namespace GenshinbotCsharp.yui.WindowsForms
 
         public void OnPaint(PaintEventArgs e)
         {
+            if(bmp!=null)
             e.Graphics.DrawImage(bmp, _pos.Sys());
         }
     }

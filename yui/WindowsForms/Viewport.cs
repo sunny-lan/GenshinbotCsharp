@@ -21,7 +21,13 @@ namespace GenshinbotCsharp.yui.WindowsForms
         private Transformation _transform = Transformation.Unit();
 
 
-        OpenCvSharp.Size yui.Viewport.Size { get => Size.cv(); set => Size = value.Sys(); }
+        OpenCvSharp.Size yui.Viewport.Size
+        {
+            get => Size.cv();
+            set => Invoke((MethodInvoker) delegate {
+                Size = value.Sys();
+            });
+        }
 
         private List<ViewportComponent> _controls = new List<ViewportComponent>();
         public Transformation T
@@ -37,7 +43,7 @@ namespace GenshinbotCsharp.yui.WindowsForms
         }
 
         public Func<MouseEvent, bool> OnMouseEvent { get; set; }
-        public Action<Transformation> OnTChange { get ; set ; }
+        public Action<Transformation> OnTChange { get; set; }
 
         private List<Drawable> drawable = new List<Drawable>();
 
@@ -48,7 +54,7 @@ namespace GenshinbotCsharp.yui.WindowsForms
                 c.SetTransform(_transform);
         }
 
-        public Viewport()
+        public Viewport() : base()
         {
             DoubleBuffered = true;
             // BackColor = Color.Black;
@@ -70,7 +76,7 @@ namespace GenshinbotCsharp.yui.WindowsForms
                 if (OnMouseEvent == null) return false;
                 return OnMouseEvent(new MouseEvent
                 {
-                    Location = T.Inverse( e.Location.Cv()),
+                    Location = T.Inverse(e.Location.Cv()),
                     Type = kind,
                 });
             };
@@ -102,7 +108,7 @@ namespace GenshinbotCsharp.yui.WindowsForms
         private void Viewport_MouseWheel(object sender, MouseEventArgs e)
         {
             var mouse = e.Location.Cv();
-            OnTChange?.Invoke( T.ScaleAround(mouse, Math.Max(0.1, e.Delta / Math.Abs(e.Delta) * 0.05 + _transform.Scale)));
+            OnTChange?.Invoke(T.ScaleAround(mouse, Math.Max(0.1, e.Delta / Math.Abs(e.Delta) * 0.05 + _transform.Scale)));
         }
 
         private void Viewport_MouseMove(object sender, MouseEventArgs e)
@@ -157,6 +163,28 @@ namespace GenshinbotCsharp.yui.WindowsForms
             gfx.ScaleTransform((float)_transform.Scale, (float)_transform.Scale);
             foreach (var d in drawable)
                 d.OnPaint(e);
+        }
+
+        public void ClearChildren()
+        {
+            Controls.Clear();
+            drawable.Clear();
+        }
+
+        public void Delete(object r)
+        {
+            if (r is Control c)
+            {
+                Controls.Remove(c);
+            }
+
+            if (r is ViewportComponent v)
+                _controls.Remove(v);
+
+            if (r is Drawable d)
+                drawable.Remove(d);
+
+
         }
     }
 }

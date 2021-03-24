@@ -1,10 +1,8 @@
 ﻿using GenshinbotCsharp.data;
-using GenshinbotCsharp.util;
 using GenshinbotCsharp.yui;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace GenshinbotCsharp
 {
@@ -12,7 +10,7 @@ namespace GenshinbotCsharp
     /// <summary>
     /// Platform independent abstraction of gui
     /// </summary>
-    interface YUI
+    public interface YUI
     {
         Tab CreateTab();
 
@@ -83,90 +81,8 @@ namespace GenshinbotCsharp.yui
         /// </summary>
         Func<MouseEvent, bool> OnMouseEvent { get; set; }
 
-    }
-
-    static class Ext
-    {
-        public static Func<K, bool> ConditionalSignal<K>(this EventWaiter<K> waiter, Func<K, bool> condition = null) where K : struct
-
-        {
-            return (e) =>
-           {
-               if (condition?.Invoke(e) == true)
-               {
-                   waiter.Signal(e);
-                   return true;
-               }
-               else
-               {
-                   return false;
-               }
-           };
-        }
-
-
-
-        public static Task<Rect> SelectAndCreate(this Viewport v)
-        {
-            var tsk = new TaskCompletionSource<Rect>();
-            var old = v.OnMouseEvent;
-
-            bool down = false;
-            Rect r=null;
-            Point initial=default, final=default;
-            v.OnMouseEvent = evt =>
-            {
-                if (!down)
-                {
-                    if (evt.Type == MouseEvent.Kind.Down)
-                    {
-                        down = true;
-
-                        initial = evt.Location.Round();
-
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    if (evt.Type == MouseEvent.Kind.Move)
-                    {
-                        if(r==null)
-                            r = v.CreateRect();
-
-                        final = evt.Location.Round();
-                        r.R = Util.RectAround(initial, final);
-                        return true;
-                    }
-                    else if(evt.Type==MouseEvent.Kind.Up)
-                    {
-                        v.OnMouseEvent = old;
-                        if (r == null)
-                            r = v.CreateRect();
-
-                        final = evt.Location.Round();
-                        r.R = Util.RectAround(initial, final);
-
-
-                        tsk.SetResult(r);
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-            };
-
-
-
-
-            return tsk.Task;
-        }
+        void ClearChildren();
+        void Delete(object r);
     }
 
     public interface Button
@@ -175,10 +91,44 @@ namespace GenshinbotCsharp.yui
         string Text { get; set; }
     }
 
+    public interface TreeView
+    {
+        public interface Node
+        {
+            Node CreateChild();
+            event EventHandler DoubleClick;
+            event EventHandler Selected;
+            event EventHandler Deselected;
+            string Text { get; set; }
+            Scalar Color { get; set; }
+
+            void ClearChildren();
+            void Invalidate();
+        }
+
+        public Node CreateNode();
+
+        public void BeginUpdate();
+        public void EndUpdate();
+    }
+
+    public interface PropertyGrid
+    {
+        public object SelectedObject { get; set; }
+    }
+
     public interface Container
     {
         Viewport CreateViewport();
         Button CreateButton();
+
+        TreeView CreateTreeview();
+
+        PropertyGrid CreatePropertyGrid();
+        Container CreateSubContainer();
+
+        void ClearChildren();
+        void Delete(object btn);
     }
 
     public interface Tab

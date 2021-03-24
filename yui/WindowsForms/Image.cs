@@ -46,7 +46,7 @@ namespace GenshinbotCsharp.yui.WindowsForms
                 }
             }
 
-            public Image()
+            public Image():base()
             {
                 SizeMode = PictureBoxSizeMode.StretchImage;
                 

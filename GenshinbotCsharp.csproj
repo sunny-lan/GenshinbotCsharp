@@ -136,8 +136,14 @@
     <Compile Include="error\Error.cs" />
     <Compile Include="experiments\MinimapMatcher.cs" />
     <Compile Include="experiments\XboxInput.cs" />
+    <Compile Include="Script.cs" />
+    <Compile Include="tools\GenericObjectEditor.cs" />
+    <Compile Include="tools\GenericSettingsEditor.cs" />
+    <Compile Include="util\Frame.cs" />
     <Compile Include="util\ObjectPool.cs" />
+    <Compile Include="yui\Ext.cs" />
     <Compile Include="yui\Tests.cs" />
+    <Compile Include="yui\tools\GenericDbEditor.cs" />
     <Compile Include="yui\WindowsForms\Button.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -145,6 +151,9 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="yui\WindowsForms\ImageDrawable.cs" />
+    <Compile Include="yui\WindowsForms\PropertyGrid.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="yui\WindowsForms\RectDrawable.cs" />
     <Compile Include="yui\WindowsForms\Image.cs">
       <SubType>Component</SubType>
@@ -154,6 +163,12 @@
     </Compile>
     <Compile Include="yui\WindowsForms\Tab.cs">
       <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="yui\WindowsForms\TreeView.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="yui\WindowsForms\TreeView.Designer.cs">
+      <DependentUpon>TreeView.cs</DependentUpon>
     </Compile>
     <Compile Include="yui\WindowsForms\Viewport.cs">
       <SubType>Component</SubType>
