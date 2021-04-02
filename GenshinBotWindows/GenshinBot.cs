@@ -162,9 +162,10 @@ namespace GenshinbotCsharp
 
         public static void generalTest()
         {
+            
             GenshinBot b = new GenshinBot();
             b.ParallelInitAll().Wait();
-            b.AttachWindow();
+           // b.AttachWindow();
             while (true) Task.Delay(10000).Wait();
         }
     }

@@ -1,14 +1,10 @@
 ﻿using OpenCvSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace GenshinbotCsharp.input
 {
-    class MouseMover
+    public class MouseMover
     {
         private IInputSimulator i;
         private Point2d dst;

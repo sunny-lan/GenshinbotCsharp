@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GenshinbotCsharp.algorithm
 {
-    class LogPolar
+    public class LogPolar
     {
         public Mat output = new Mat();
         public double radius;

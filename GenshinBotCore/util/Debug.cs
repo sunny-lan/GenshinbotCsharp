@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace GenshinbotCsharp
 {
-    class Debug
+    public class Debug
     {
         public static Mat img
         {

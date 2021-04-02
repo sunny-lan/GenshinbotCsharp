@@ -8,7 +8,7 @@ namespace GenshinbotCsharp.util
     /// Class to block a thread until a event is fired
     /// </summary>
     /// <typeparam name="T">The type of the eventarg</typeparam>
-    class EventWaiter<T> where T : struct
+    public class EventWaiter<T> where T : struct
     {
         private object lck = new object();
         private T value;

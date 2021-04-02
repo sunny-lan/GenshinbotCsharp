@@ -1,19 +1,15 @@
-﻿using System;
+﻿using GenshinBot.Core.automation.input;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Vanara.PInvoke;
-using  System.Windows.Forms;
 
 namespace GenshinbotCsharp.input
 {
-    enum GenshinKeys
+    public enum GenshinKeys
     {
        Forward,
        Back,Left,Right,Dash,Attack,Map
     }
-    class GenshinKeymap
+    public class GenshinKeymap
     {
         private IInputSimulator s;
         Dictionary<GenshinKeys, int> MapKbd=new Dictionary<GenshinKeys, int> { 

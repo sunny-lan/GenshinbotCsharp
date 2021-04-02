@@ -68,6 +68,13 @@ namespace GenshinbotCsharp.yui
         void Image(Mat m);
     }
 
+    public interface Viewport2
+    {
+        event EventHandler<DirectGfx> Paint;
+        void Invalidate(Rect region);
+        void Invalidate();
+    }
+
     public interface Viewport
     {
         Size Size { get; set; }
@@ -135,6 +142,8 @@ namespace GenshinbotCsharp.yui
 
         void ClearChildren();
         void Delete(object btn);
+
+        Viewport2 GetViewport2() { throw new NotImplementedException(); }
     }
 
     public interface Tab

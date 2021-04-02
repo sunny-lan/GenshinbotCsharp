@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GenshinbotCsharp.algorithm
 {
-    class StandardPhaseCorr
+    public class StandardPhaseCorr
     {
        public class Input
         {

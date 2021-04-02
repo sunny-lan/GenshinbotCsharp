@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 /// </summary>
 namespace GenshinbotCsharp.algorithm
 {
-    class Padding
+   public class Padding
     {
        public Mat output = new Mat();
 

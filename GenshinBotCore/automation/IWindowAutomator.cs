@@ -3,7 +3,7 @@ using System;
 
 namespace GenshinbotCsharp
 {
-    interface IWindowAutomator: input.IInputSimulator
+    public interface IWindowAutomator : input.IInputSimulator
     {
         bool Focused { get; }
 

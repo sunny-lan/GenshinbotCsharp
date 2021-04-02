@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 /// </summary>
 namespace GenshinbotCsharp.yui
 {
-    static class Ext
+   public static class Ext
     {
         public static Func<K, bool> ConditionalSignal<K>(this EventWaiter<K> waiter, Func<K, bool> condition = null) where K : struct
 

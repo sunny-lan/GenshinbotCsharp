@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GenshinbotCsharp.algorithm
 {
-    class FFT
+    public class FFT
     {
         Mat zeroes=new Mat();
         Mat complex = new Mat();

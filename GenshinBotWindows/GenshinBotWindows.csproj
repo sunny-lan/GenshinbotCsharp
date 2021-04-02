@@ -16,6 +16,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\GenshinBotCore\GenshinBotCore.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="yui\WindowsForms\Button.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -58,6 +62,10 @@
     <EmbeddedResource Update="yui\WindowsForms\Tab.resx">
       <DependentUpon>Tab.cs</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="automation\input\" />
   </ItemGroup>
 
   <Import Project="..\Data\Data.projitems" Label="Shared" />

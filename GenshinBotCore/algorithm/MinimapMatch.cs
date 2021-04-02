@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GenshinbotCsharp.algorithm.MinimapMatch
 {
-    class Settings
+    public class Settings
     {
         public virtual Mat BigMap { get; set; }
         public double MinScale { get; internal set; } = 1;
@@ -24,7 +24,7 @@ namespace GenshinbotCsharp.algorithm.MinimapMatch
 
 
     }
-    class PositionMatcher
+    public class PositionMatcher
     {
 
         internal Settings db;
@@ -92,7 +92,7 @@ namespace GenshinbotCsharp.algorithm.MinimapMatch
         }
     }
 
-    class PositionTracker
+    public class PositionTracker
     {
         private Settings db;
 
@@ -227,7 +227,7 @@ namespace GenshinbotCsharp.algorithm.MinimapMatch
         }
     }
 
-    class ScaleMatcher
+    public class ScaleMatcher
     {
         class ScaleMatchAlg
         {
@@ -324,22 +324,6 @@ namespace GenshinbotCsharp.algorithm.MinimapMatch
                 }
             }
             return null;
-        }
-
-        public static void test()
-        {
-            Mat big = Data.Imread("map/genshiniodata/assets/MapExtracted_12.png");
-            ScaleMatcher s = new ScaleMatcher(new Settings
-            {
-                BigMap = big,
-            });
-
-            Mat minimap = Data.Imread("test/minimap_test.png")[new Rect(46, 15, 189, 189)];
-
-            var p = s.FindScale(new Point2d(3969, 2169), minimap, out var matcher);
-
-            Console.WriteLine(p);
-            Console.ReadKey();
         }
     }
 

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GenshinbotCsharp
 {
-    static class Util
+    public static class Util
     {
         public static System.Drawing.Color SysBgr255(this Scalar s)
         {
@@ -197,11 +197,6 @@ namespace GenshinbotCsharp
                 }
             }
             return lo;
-        }
-
-        public static Rect Cv(this Vanara.PInvoke.RECT r)
-        {
-            return new Rect(r.X, r.Y, r.Width, r.Height);
         }
 
         public static Point2d[] Corners(this Rect2d r)

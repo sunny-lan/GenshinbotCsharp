@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace GenshinbotCsharp.database.map
 {
-    enum FeatureType
+    public enum FeatureType
     {
         Teleporter
     }
-    class Feature
+    public class Feature
     {
         private static int global_ctr = 0;
         public Feature()

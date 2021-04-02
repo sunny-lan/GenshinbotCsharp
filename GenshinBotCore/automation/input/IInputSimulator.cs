@@ -1,14 +1,9 @@
 ﻿using OpenCvSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GenshinbotCsharp.input
 {
     
-    interface IInputSimulator
+    public interface IInputSimulator
     {
         Point2d MousePos();
         void MouseMove(Point2d d);

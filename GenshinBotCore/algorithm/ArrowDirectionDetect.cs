@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GenshinbotCsharp.algorithm
 {
-    class ArrowDirectionDetect
+   public class ArrowDirectionDetect
     {
         class Settings
         {

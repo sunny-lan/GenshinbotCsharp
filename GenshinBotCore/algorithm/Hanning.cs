@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GenshinbotCsharp.algorithm
 {
-    class Hanning
+    public class Hanning
     {
         Mat hanning = new Mat();
 
