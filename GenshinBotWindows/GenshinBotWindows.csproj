@@ -1,0 +1,65 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <StartupObject></StartupObject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="OpenCvSharp4.Windows" Version="4.5.1.20210210" />
+    <PackageReference Include="Vanara.PInvoke.Gdi32" Version="3.3.7" />
+    <PackageReference Include="Vanara.PInvoke.Kernel32" Version="3.3.7" />
+    <PackageReference Include="Vanara.PInvoke.SHCore" Version="3.3.7" />
+    <PackageReference Include="Vanara.PInvoke.User32" Version="3.3.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="yui\WindowsForms\Button.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="yui\WindowsForms\Container.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="yui\WindowsForms\Image.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="yui\WindowsForms\MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="yui\WindowsForms\MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Update="yui\WindowsForms\PropertyGrid.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="yui\WindowsForms\Rect.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="yui\WindowsForms\Tab.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="yui\WindowsForms\TreeView.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="yui\WindowsForms\TreeView.Designer.cs">
+      <DependentUpon>TreeView.cs</DependentUpon>
+    </Compile>
+    <Compile Update="yui\WindowsForms\Viewport.cs">
+      <SubType>Component</SubType>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="yui\WindowsForms\MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="yui\WindowsForms\Tab.resx">
+      <DependentUpon>Tab.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <Import Project="..\Data\Data.projitems" Label="Shared" />
+
+</Project>
