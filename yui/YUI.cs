@@ -62,6 +62,12 @@ namespace GenshinbotCsharp.yui
         public Point2d Location;
         public Kind Type;
     }
+    public interface DirectGfx
+    {
+        void Rect(Rect r);
+        void Image(Mat m);
+    }
+
     public interface Viewport
     {
         Size Size { get; set; }

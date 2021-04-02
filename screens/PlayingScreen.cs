@@ -19,7 +19,12 @@ namespace GenshinbotCsharp.screens
                 public class CharacterConfig
                 {
                     public Rect Number { get; set; }
+
+                    public Rect Name { get; set; }
                 }
+
+                public CharacterConfig Template { get; set; }
+                public Point?[] Party4TemplateOffset { get; set; }
             }
 
             public Dictionary<Size, RD> R { get; set; } = new Dictionary<Size, RD>
@@ -55,15 +60,10 @@ namespace GenshinbotCsharp.screens
             b.S(b.MapScreen);
         }
 
-        private static Dictionary<Size, Rect> miniMapLocs = new Dictionary<Size, Rect>
-        {
-            [new Size(1440, 900)] = new Rect(46, 13, 161, 161),
-            [new Size(1680, 1050)] = new Rect(53, 15, 189, 189),
-        };
-
         public Mat SnapMinimap()
         {
-            var miniRect = miniMapLocs[b.W.GetSize()];
+            var db = b.Db.PlayingScreenDb;
+            var miniRect = db.R[b.W.GetSize()].minimapLoc;
             return b.W.Screenshot(miniRect);
         }
 
