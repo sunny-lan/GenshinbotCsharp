@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace GenshinBotWindows.badui
 {
-    public partial class StandardDbEditor : UserControl
+    public partial class Viewport : UserControl
     {
-        public StandardDbEditor()
+        public Viewport()
         {
             InitializeComponent();
         }

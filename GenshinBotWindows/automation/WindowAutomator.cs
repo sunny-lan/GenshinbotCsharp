@@ -11,7 +11,7 @@ using OpenCvSharp;
 namespace GenshinbotCsharp
 {
 
-    class WindowAutomator : input.IInputSimulator, IWindowAutomator
+    public class WindowAutomator : input.IInputSimulator, IWindowAutomator
     {
         public input.IInputSimulator I;
 

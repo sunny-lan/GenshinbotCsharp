@@ -7,12 +7,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using GenshinbotCsharp;
 
-namespace GenshinBotWindows.badui
+namespace GenshinBot.Windows.badui
 {
-    public partial class StandardDbEditor : UserControl
+    
+    public partial class MainForm : Form
     {
-        public StandardDbEditor()
+        public MainForm(GenshinbotCsharp.GenshinBot b)
         {
             InitializeComponent();
         }

@@ -10,7 +10,7 @@ using static System.Math;
 namespace GenshinbotCsharp.algorithm
 {
 
-    class MapTemplateMatch
+   public class MapTemplateMatch
     {
         class Db
         {

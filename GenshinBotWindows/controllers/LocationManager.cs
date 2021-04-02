@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace GenshinbotCsharp.controllers
 {
-    class LocationManager
+    public class LocationManager
     {
         
         GenshinBot b;

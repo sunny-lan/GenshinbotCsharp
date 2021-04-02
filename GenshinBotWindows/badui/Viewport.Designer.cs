@@ -1,7 +1,7 @@
 ﻿
 namespace GenshinBotWindows.badui
 {
-    partial class StandardDbEditor
+    partial class Viewport
     {
         /// <summary> 
         /// Required designer variable.
@@ -29,16 +29,8 @@ namespace GenshinBotWindows.badui
         /// </summary>
         private void InitializeComponent()
         {
-            this.SuspendLayout();
-            // 
-            // StandardDbEditor
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
+            components = new System.ComponentModel.Container();
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Name = "StandardDbEditor";
-            this.Size = new System.Drawing.Size(1083, 652);
-            this.ResumeLayout(false);
-
         }
 
         #endregion

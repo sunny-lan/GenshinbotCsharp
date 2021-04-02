@@ -8,7 +8,7 @@ using Vanara.PInvoke;
 
 namespace GenshinbotCsharp
 {
-    class GenshinWindow : WindowAutomator
+    public class GenshinWindow : WindowAutomator
     {
         public input.GenshinKeymap K;
         private GenshinWindow(string TITLE, string CLASS) : base(TITLE, CLASS)

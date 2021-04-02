@@ -11,7 +11,7 @@ using static System.Math;
 namespace GenshinbotCsharp.screens
 {
    
-    class MapScreen : Screen
+    public class MapScreen : Screen
     {
         public class Db
         {
@@ -62,8 +62,8 @@ namespace GenshinbotCsharp.screens
         }
 
 
-        public algorithm.MapLocationMatch LocationMatch { get; private set; }
-        public algorithm.MapTemplateMatch TemplateMatch { get; private set; }
+        algorithm.MapLocationMatch LocationMatch;
+        algorithm.MapTemplateMatch TemplateMatch;
 
         private void initLocator()
         {

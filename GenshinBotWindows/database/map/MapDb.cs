@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace GenshinbotCsharp.database.map
 {
-    class MapDb
+    public class MapDb
     {
         public List<Feature> Features { get; set; }
 

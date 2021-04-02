@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GenshinbotCsharp
 {
-    class GenshinBot
+    public class GenshinBot
     {
         #region Database
         public class Database

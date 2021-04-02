@@ -9,7 +9,7 @@ using static System.Math;
 
 namespace GenshinbotCsharp.algorithm
 {
-    class MapLocationMatch
+   public class MapLocationMatch
     {
         class Pair : IComparable<Pair>
         {

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GenshinbotCsharp.database
 {
-    class Image
+   public class Image
     {
         public string Path { get; set; }
 

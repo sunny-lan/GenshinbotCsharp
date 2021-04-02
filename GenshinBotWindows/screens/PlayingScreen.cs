@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace GenshinbotCsharp.screens
 {
-    class PlayingScreen : Screen
+    public class PlayingScreen : Screen
     {
         public class Db
         {
