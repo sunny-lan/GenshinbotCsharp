@@ -11,57 +11,22 @@ namespace GenshinbotCsharp.controllers
 {
     class LocationManager
     {
-        public class Db
-        {
-
-            /// <summary>
-            /// Approximate transformation of a coordinate to a pixel on BigMap
-            /// </summary>
-            public Transformation? Coord2Minimap { get; set; }
-
-            /// <summary>
-            /// Stores a list of known points on the minimap, 
-            /// and the corresponding map coordinate
-            /// Used to calculate coord2minimap
-            /// Tuple.First=  minimap, second=coord
-            /// </summary>
-            public List<KnownPoint> KnownMinimapCoords { get; set; } = new List<KnownPoint>
-            {
-                new KnownPoint
-                {
-                    Minimap=new Point2d(x:3820.34275379058, y:1832.533690062),
-                    Coord=new Point2d(x:2059.64044189453 ,y:-621.944061279297),
-                },
-
-                 new KnownPoint
-                {
-                    Minimap=new Point2d(x:2743.18303450733, y:3222.58239108457),
-                    Coord=new Point2d(x:1093.4270324707, y:621.195953369141),
-                }
-            };
-            public double MaxMinimapScaleDistortion { get; internal set; } = 0.005;
-
-            public struct KnownPoint
-            {
-                public Point2d Minimap { get; set; }
-                public Point2d Coord { get; set; }
-            }
-        }
+        
         GenshinBot b;
-        Db db;
+
+        class MinimapMatchSettingsAdapter: algorithm.MinimapMatch.Settings
+        {
+            public GenshinBot b;
+            public override Mat BigMap { get => b.Db.MapDb.BigMap.Load(); set => throw new NotImplementedException(); }
+        }
 
         public LocationManager(GenshinBot b)
         {
             this.b = b;
-            this.db = b.Db.LocationManagerDb;
-
-            this.m = new algorithm.MinimapMatch.ScaleMatcher(new algorithm.MinimapMatch.Settings
-            {
-                BigMap = b.Db.MapDb.BigMap.Load(),
-            });
+            this.m = new algorithm.MinimapMatch.ScaleMatcher(new MinimapMatchSettingsAdapter { b = b });
 
             //if we don't know transformation, we can get it using knownpoints
-            if (db.Coord2Minimap == null)
+            if (b.Db.MapDb.Coord2Minimap == null)
                 CalculateCoord2Minimap();
         }
 
@@ -86,6 +51,7 @@ namespace GenshinbotCsharp.controllers
 
         public void CalculateCoord2Minimap()
         {
+            var db = this.b.Db.MapDb;
             Debug.Assert(db.KnownMinimapCoords.Count >= 2, "At least 2 points required");
             var a = db.KnownMinimapCoords[0];
             var b = db.KnownMinimapCoords[1];
@@ -114,6 +80,7 @@ namespace GenshinbotCsharp.controllers
 
         public Point2d DeduceLocation()
         {
+            var db = this.b.Db.MapDb;
             if (db.Coord2Minimap == null)
                 throw new Exception("Missing setting");
             bool approxLocCalculated = false;

@@ -11,11 +11,21 @@ namespace GenshinbotCsharp.database
     {
         public string Path { get; set; }
 
-        private Mat _cached;
+        private Lazy<Mat> mat;
+        private ImreadModes prevMode;
+
         public Mat Load(ImreadModes mode = ImreadModes.Color)
         {
-            if (_cached != null) return _cached;
-            return _cached = Data.Imread(Path, mode);
+            if(mode != prevMode)
+            {
+                prevMode = mode;
+                mat = null;
+            }
+            if (mat == null)
+            {
+                mat = new Lazy<Mat>(() => Data.Imread(Path, mode));
+            }
+            return mat.Value;
         }
     }
 }

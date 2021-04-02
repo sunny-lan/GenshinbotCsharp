@@ -38,7 +38,6 @@ namespace GenshinbotCsharp.screens
         }
 
         private GenshinBot b;
-        private Db db=new Db();//TODO
 
         public Mat Map;
 
@@ -107,6 +106,7 @@ namespace GenshinbotCsharp.screens
 
         public void TeleportTo(Feature teleporter)
         {
+            var db = b.Db.MapScreenDb;
             Debug.Assert(teleporter.Type == FeatureType.Teleporter);
             var p = ShowOnScreen(teleporter.Coordinates);
             b.W.MouseTo(p);
@@ -127,6 +127,7 @@ namespace GenshinbotCsharp.screens
         /// <returns></returns>
         public Point2d ShowOnScreen(Point2d coord)
         {
+            var db = b.Db.MapScreenDb;
             while (true)
             {
                 UpdateScreenshot();

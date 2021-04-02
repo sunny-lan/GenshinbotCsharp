@@ -38,12 +38,9 @@ namespace GenshinbotCsharp.screens
         }
 
         private GenshinBot b;
-        private Db db;
-
-        public PlayingScreen(GenshinBot b, Db db)
+        public PlayingScreen(GenshinBot b)
         {
             this.b = b;
-            this.db = db;
         }
 
         public bool CheckActive()
@@ -74,6 +71,7 @@ namespace GenshinbotCsharp.screens
 
         Mat snapArrow()
         {
+            var db = b.Db.PlayingScreenDb;
             var miniRect = db.R[b.W.GetSize()].minimapLoc;
             return b.W.Screenshot(miniRect.Center().RectAround(new Size(db.arrowRadius * 2, db.arrowRadius * 2)));
         }

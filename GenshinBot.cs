@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,11 +9,30 @@ namespace GenshinbotCsharp
 {
     class GenshinBot
     {
-        public YUI Ui;
-        public database.Database Db;
+        #region Database
+        public class Database
+        {
+            private Lazy<database.map.MapDb> mapDb = new Lazy<database.map.MapDb>(() => Data.ReadJson("map/db.json", database.map.MapDb.Default()));
+            public database.map.MapDb MapDb=>mapDb.Value;  
 
-        public GenshinWindow W;
-        public input.MouseMover M;
+            public screens.PlayingScreen.Db PlayingScreenDb { get; } = new screens.PlayingScreen.Db();
+            public screens.LoadingScreen.Db LoadingScreenDb { get;} = new screens.LoadingScreen.Db();
+            public screens.MapScreen.Db MapScreenDb { get; } = new screens.MapScreen.Db();
+        }
+
+        public Database Db;
+
+        public void InitDb()
+        {
+            Debug.Assert(Db == null);
+
+            Db = new Database();
+            Console.WriteLine("Database load finish");
+        }
+
+        #endregion
+
+        #region Screens
 
         public Screen ActiveScreen;
         public screens.PlayingScreen PlayingScreen;
@@ -64,51 +84,88 @@ namespace GenshinbotCsharp
             return S(s);
         }
 
-        public controllers.LocationManager LocationManager;
-        yui.tools.GenericDbEditor editor;
-
-        public static void generalTest()
+        bool screensInit = false;
+        public void InitScreens()
         {
-            GenshinBot b = new GenshinBot();
-            while (true) Task.Delay(10000).Wait();
+            Debug.Assert(!screensInit);
+            Debug.Assert(Db != null);
+
+            PlayingScreen = new screens.PlayingScreen(this);
+            MapScreen = new screens.MapScreen(this);
+            LoadingScreen = new screens.LoadingScreen(this);
+
+            Console.WriteLine("Screens initialized");
+            screensInit = true;
         }
 
-        public GenshinBot()
+        #endregion
+
+        #region UI
+
+        public YUI Ui;
+        public void InitUi()
         {
-            Console.WriteLine("Bot load begin");
-            Ui = yui.WindowsForms.MainForm.make();//todo
+            Debug.Assert(Ui == null);
 
-            //TODO implement parallel loading
-            Db = new database.Database
-            {
-                MapDb = Data.ReadJson("map/db.json", database.map.MapDb.Default()),
-                LocationManagerDb = Data.ReadJson("controllers/LocationManager.json", new controllers.LocationManager.Db())
-            };
-
-            Console.WriteLine("Database load finish");
-            Task.Run(()=>editor=new yui.tools.GenericDbEditor(this));
-
-            AttachWindow();
+            Ui = yui.WindowsForms.MainForm.make();
+            Console.WriteLine("UI initialized");
         }
 
-        //TODO
+        #endregion
+
+        #region Automation
+
+        public GenshinWindow W;
+        public input.MouseMover M;
         public void AttachWindow()
         {
+            Debug.Assert(Db != null);
+            Debug.Assert(W == null);
+
+            Console.WriteLine("Attaching to window");
 
             W = GenshinWindow.FindExisting();
             M = new input.MouseMover(W);
 
             Console.WriteLine("Genshin window initialized");
+        }
 
-            PlayingScreen = new screens.PlayingScreen(this, this.Db.PlayingScreenDb);
-            MapScreen = new screens.MapScreen(this);
-            LoadingScreen = new screens.LoadingScreen(W);
+        #endregion
 
-            Console.WriteLine("Screens initialized");
+        #region Controllers
 
-            //LocationManager = new controllers.LocationManager(this);
+        public controllers.LocationManager LocationManager;
 
+        public void InitControllers()
+        {
+            Debug.Assert(LocationManager == null);
+            Debug.Assert(Db != null);
+            Debug.Assert(screensInit);
+
+
+            LocationManager = new controllers.LocationManager(this);
             Console.WriteLine("Controllers initialized");
+        }
+
+        #endregion
+        
+        public async Task ParallelInitAll()
+        {
+            Console.WriteLine("Bot init begin");
+            Task initDb = Task.Run(InitDb);
+            Task initUi = Task.Run(InitUi);
+            Task initScreens = initDb.ContinueWith(_=>InitScreens());
+            Task initControllers = initScreens.ContinueWith(_=>InitControllers());
+            await Task.WhenAll(initDb, initUi, initScreens, initControllers);
+            Console.WriteLine("Bot init done");
+        }
+
+        public static void generalTest()
+        {
+            GenshinBot b = new GenshinBot();
+            b.ParallelInitAll().Wait();
+            b.AttachWindow();
+            while (true) Task.Delay(10000).Wait();
         }
     }
 }

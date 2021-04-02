@@ -9,7 +9,7 @@ namespace GenshinbotCsharp.algorithm.MinimapMatch
 {
     class Settings
     {
-        public Mat BigMap;
+        public virtual Mat BigMap { get; set; }
         public double MinScale { get; internal set; } = 1;
         public double MaxScale { get; internal set; } = 3;
         public double ScaleStep { get; internal set; } = 1.3;
