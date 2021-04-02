@@ -8,38 +8,39 @@ using System.Threading.Tasks;
 
 namespace GenshinbotCsharp.screens
 {
-    class PlayingScreenDb
-    {
-        public class RD
-        {
-            public Rect minimapLoc { get; internal set; }
-
-            public class CharacterConfig
-            {
-                public Rect Number { get; set; }
-            }
-        }
-
-        public Dictionary<Size, RD> R { get; set; } = new Dictionary<Size, RD>
-        {
-            [new Size(1440, 900)] = new RD
-            {
-                minimapLoc = new Rect(46, 13, 161, 161),
-
-            },
-            [new Size(1680, 1050)] = new RD
-            {
-                minimapLoc = new Rect(53, 15, 189, 189),
-            },
-        };
-        public int arrowRadius { get; internal set; } = 15;
-    }
     class PlayingScreen : Screen
     {
-        private GenshinBot b;
-        private PlayingScreenDb db;
+        public class Db
+        {
+            public class RD
+            {
+                public Rect minimapLoc { get; internal set; }
 
-        public PlayingScreen(GenshinBot b, PlayingScreenDb db)
+                public class CharacterConfig
+                {
+                    public Rect Number { get; set; }
+                }
+            }
+
+            public Dictionary<Size, RD> R { get; set; } = new Dictionary<Size, RD>
+            {
+                [new Size(1440, 900)] = new RD
+                {
+                    minimapLoc = new Rect(46, 13, 161, 161),
+
+                },
+                [new Size(1680, 1050)] = new RD
+                {
+                    minimapLoc = new Rect(53, 15, 189, 189),
+                },
+            };
+            public int arrowRadius { get; internal set; } = 15;
+        }
+
+        private GenshinBot b;
+        private Db db;
+
+        public PlayingScreen(GenshinBot b, Db db)
         {
             this.b = b;
             this.db = db;

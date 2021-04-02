@@ -130,7 +130,6 @@
     <Compile Include="algorithm\StandardPhaseCorr.cs" />
     <Compile Include="automation\Frame.cs" />
     <Compile Include="controllers\LocationManager.cs" />
-    <Compile Include="database\controllers\LocationManagerDb.cs" />
     <Compile Include="database\Image.cs" />
     <Compile Include="database\Transformation.cs" />
     <Compile Include="error\Error.cs" />

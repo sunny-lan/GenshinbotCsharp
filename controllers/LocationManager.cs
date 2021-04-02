@@ -1,4 +1,4 @@
-﻿using GenshinbotCsharp.database.controllers;
+﻿using GenshinbotCsharp.data;
 using GenshinbotCsharp.database.map;
 using OpenCvSharp;
 using System;
@@ -11,8 +11,44 @@ namespace GenshinbotCsharp.controllers
 {
     class LocationManager
     {
+        public class Db
+        {
+
+            /// <summary>
+            /// Approximate transformation of a coordinate to a pixel on BigMap
+            /// </summary>
+            public Transformation? Coord2Minimap { get; set; }
+
+            /// <summary>
+            /// Stores a list of known points on the minimap, 
+            /// and the corresponding map coordinate
+            /// Used to calculate coord2minimap
+            /// Tuple.First=  minimap, second=coord
+            /// </summary>
+            public List<KnownPoint> KnownMinimapCoords { get; set; } = new List<KnownPoint>
+            {
+                new KnownPoint
+                {
+                    Minimap=new Point2d(x:3820.34275379058, y:1832.533690062),
+                    Coord=new Point2d(x:2059.64044189453 ,y:-621.944061279297),
+                },
+
+                 new KnownPoint
+                {
+                    Minimap=new Point2d(x:2743.18303450733, y:3222.58239108457),
+                    Coord=new Point2d(x:1093.4270324707, y:621.195953369141),
+                }
+            };
+            public double MaxMinimapScaleDistortion { get; internal set; } = 0.005;
+
+            public struct KnownPoint
+            {
+                public Point2d Minimap { get; set; }
+                public Point2d Coord { get; set; }
+            }
+        }
         GenshinBot b;
-        LocationManagerDb db;
+        Db db;
 
         public LocationManager(GenshinBot b)
         {
@@ -154,7 +190,7 @@ namespace GenshinbotCsharp.controllers
         {
             var curPos = DeduceLocation();
             var p = b.S<screens.PlayingScreen>();
-            
+
 
             while (true)
             {
@@ -170,7 +206,7 @@ namespace GenshinbotCsharp.controllers
                 var curAng = p.GetArrowDirection();
 
                 var diff = curAng.RelativeAngle(dstAng);
-                b.M.Move(new Point2d(diff/2, 0));
+                b.M.Move(new Point2d(diff / 2, 0));
                 b.W.K.KeyDown(input.GenshinKeys.Forward);
                 curPos = DeduceLocation();
 
@@ -179,7 +215,7 @@ namespace GenshinbotCsharp.controllers
 
         public static void Testwalkto()
         {
-            Point2d dst=new Point2d(x: 1956.43237304688, y: -303.038940429688);
+            Point2d dst = new Point2d(x: 1956.43237304688, y: -303.038940429688);
             GenshinBot b = new GenshinBot();
 
             // b.LocationManager.Coord2MinimapTool();

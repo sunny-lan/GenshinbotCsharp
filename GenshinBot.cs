@@ -82,7 +82,7 @@ namespace GenshinbotCsharp
             Db = new database.Database
             {
                 MapDb = Data.ReadJson("map/db.json", database.map.MapDb.Default()),
-                LocationManagerDb = Data.ReadJson("controllers/LocationManager.json", database.controllers.LocationManagerDb.Default())
+                LocationManagerDb = Data.ReadJson("controllers/LocationManager.json", new controllers.LocationManager.Db())
             };
 
             Console.WriteLine("Database load finish");

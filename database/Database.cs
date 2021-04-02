@@ -16,8 +16,8 @@ namespace GenshinbotCsharp.database
     class Database
     {
         public map.MapDb MapDb { get; set; }
-        public controllers.LocationManagerDb LocationManagerDb { get; set; }
+        public controllers.LocationManager.Db LocationManagerDb { get; set; }
 
-        public screens.PlayingScreenDb PlayingScreenDb { get; set; } = new screens.PlayingScreenDb();
+        public screens.PlayingScreen.Db PlayingScreenDb { get; set; } = new screens.PlayingScreen.Db();
     }
 }
