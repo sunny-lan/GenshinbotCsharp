@@ -7,7 +7,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace GenshinbotCsharp.database.jsonconverters
+namespace genshinbot.database.jsonconverters
 {
     //TODO make internal classes vector2d and such
     class Point2dConverter : JsonConverter<Point2d>

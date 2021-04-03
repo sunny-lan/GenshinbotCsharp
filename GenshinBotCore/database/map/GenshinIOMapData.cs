@@ -1,4 +1,4 @@
-﻿namespace GenshinbotCsharp.data.genshinio
+﻿namespace genshinbot.data.genshinio
 {
 
     public class MapData

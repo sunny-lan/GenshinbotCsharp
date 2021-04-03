@@ -1,6 +1,6 @@
-﻿using genshinbot.core.automation;
-using GenshinbotCsharp;
-using GenshinbotCsharp.yui;
+﻿using genshinbot.automation;
+using genshinbot;
+using genshinbot.yui;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;

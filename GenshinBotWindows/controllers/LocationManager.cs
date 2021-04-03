@@ -1,5 +1,6 @@
-﻿using GenshinbotCsharp.data;
-using GenshinbotCsharp.database.map;
+﻿using genshinbot.screens;
+using genshinbot.data;
+using genshinbot.database.map;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GenshinbotCsharp.controllers
+namespace genshinbot.controllers
 {
     public class LocationManager
     {
@@ -85,7 +86,7 @@ namespace GenshinbotCsharp.controllers
                 throw new Exception("Missing setting");
             bool approxLocCalculated = false;
 
-            var p = b.S<screens.PlayingScreen>();
+            var p = b.S<PlayingScreen>();
             Mat minimap = p.SnapMinimap();
         begin:
 
@@ -156,7 +157,7 @@ namespace GenshinbotCsharp.controllers
         public void WalkTo(Point2d dstPos, double accuracy = 1)
         {
             var curPos = DeduceLocation();
-            var p = b.S<screens.PlayingScreen>();
+            var p = b.S<PlayingScreen>();
 
 
             while (true)
@@ -227,7 +228,7 @@ namespace GenshinbotCsharp.controllers
                 var coord1 = GetLocationFromMap();
                 m.Close();
 
-                var p = b.S<screens.PlayingScreen>();
+                var p = b.S<PlayingScreen>();
                 var mini = p.SnapMinimap();
 
                 var miniP1 = this.m.FindScale(approxPos, mini, out var _);

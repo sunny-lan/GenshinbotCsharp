@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace genshinbot.hooks
+namespace genshinbot.windows.tools
 {
-    class WindowHook
+    class LocationMgrUI
     {
     }
 }

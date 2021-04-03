@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GenshinbotCsharp.util
+namespace genshinbot.util
 {
     interface Frame
     {

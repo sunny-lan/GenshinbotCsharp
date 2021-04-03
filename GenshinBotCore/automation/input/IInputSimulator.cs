@@ -1,6 +1,6 @@
 ﻿using OpenCvSharp;
 
-namespace genshinbot.core.automation.input
+namespace genshinbot.automation.input
 {
 
     public interface IInputSimulator

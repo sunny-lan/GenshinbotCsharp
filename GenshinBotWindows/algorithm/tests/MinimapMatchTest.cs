@@ -1,5 +1,5 @@
-﻿using GenshinbotCsharp;
-using GenshinbotCsharp.algorithm.MinimapMatch;
+﻿using genshinbot;
+using genshinbot.algorithm.MinimapMatch;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;

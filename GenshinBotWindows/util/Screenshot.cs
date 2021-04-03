@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace GenshinbotCsharp
+namespace genshinbot
 {
     using Vanara.PInvoke;
     using System.Runtime.InteropServices;

@@ -2,7 +2,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace GenshinbotCsharp.yui
+namespace genshinbot.yui
 {
     static class Tests
     {

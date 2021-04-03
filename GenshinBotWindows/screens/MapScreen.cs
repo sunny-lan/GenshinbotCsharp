@@ -1,4 +1,5 @@
-﻿using GenshinbotCsharp.database.map;
+﻿using genshinbot.screens;
+using genshinbot.database.map;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -8,9 +9,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using static System.Math;
 
-namespace GenshinbotCsharp.screens
+namespace genshinbot.screens
 {
-   
+
     public class MapScreen : Screen
     {
         public class Db
@@ -173,7 +174,7 @@ namespace GenshinbotCsharp.screens
             {
                 m.TeleportTo(f[rng.Next(f.Count)]);
                 Console.WriteLine("done");
-                var p = b.S<screens.PlayingScreen>();
+                var p = b.S<PlayingScreen>();
                 p.OpenMap();
 
             }

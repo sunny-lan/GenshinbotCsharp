@@ -4,13 +4,13 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Vanara.PInvoke;
 using System.ComponentModel;
-using GenshinbotCsharp.hooks;
-using GenshinbotCsharp.util;
+using genshinbot.hooks;
+using genshinbot.util;
 using OpenCvSharp;
-using genshinbot.core.automation;
-using genshinbot.core.automation.input;
+using genshinbot.automation;
+using genshinbot.automation.input;
 
-namespace GenshinbotCsharp
+namespace genshinbot
 {
 
     public class WindowAutomator : IInputSimulator, IWindowAutomator
@@ -85,8 +85,8 @@ namespace GenshinbotCsharp
         {
             var windowSz = GetSize();
             if (wholeBuf == null || wholeBuf.Size != windowSz)
-                wholeBuf = GenshinbotCsharp.Screenshot.GetBuffer(windowSz.Width, windowSz.Height);
-            GenshinbotCsharp.Screenshot.Take(wholeBuf, r.Size, clientToScreen(r.TopLeft), r.TopLeft);
+                wholeBuf = genshinbot.Screenshot.GetBuffer(windowSz.Width, windowSz.Height);
+            genshinbot.Screenshot.Take(wholeBuf, r.Size, clientToScreen(r.TopLeft), r.TopLeft);
             return wholeBuf.Mat[r];
         }
 
@@ -122,7 +122,7 @@ namespace GenshinbotCsharp
             var p = new System.Drawing.Point(x, y);
 
             User32.ClientToScreen(hWnd, ref p);
-            return GenshinbotCsharp.Screenshot.GetPixelColor(p.X, p.Y);
+            return genshinbot.Screenshot.GetPixelColor(p.X, p.Y);
         }
 
         #endregion

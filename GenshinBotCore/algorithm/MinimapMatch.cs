@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GenshinbotCsharp.algorithm.MinimapMatch
+namespace genshinbot.algorithm.MinimapMatch
 {
     public class Settings
     {

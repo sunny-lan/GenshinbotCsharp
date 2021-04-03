@@ -1,8 +1,8 @@
-﻿using genshinbot.core.automation.input;
+﻿using genshinbot.automation.input;
 using OpenCvSharp;
 using System;
 
-namespace GenshinbotCsharp.input
+namespace genshinbot.input
 {
     class BasicInputSimulator : IInputSimulator
     {

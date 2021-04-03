@@ -1,5 +1,5 @@
 ﻿
-namespace GenshinbotCsharp.yui.WindowsForms
+namespace genshinbot.yui.WindowsForms
 {
     partial class TreeView
     {

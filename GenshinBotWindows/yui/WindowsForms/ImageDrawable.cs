@@ -1,10 +1,10 @@
-﻿using GenshinbotCsharp.data;
+﻿using genshinbot.data;
 using OpenCvSharp;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace GenshinbotCsharp.yui.WindowsForms
+namespace genshinbot.yui.WindowsForms
 {
     class ImageDrawable : Drawable,yui.Image
     {

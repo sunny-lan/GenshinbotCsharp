@@ -1,4 +1,4 @@
-﻿using GenshinbotCsharp.database.map;
+﻿using genshinbot.database.map;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Math;
 
-namespace GenshinbotCsharp.algorithm
+namespace genshinbot.algorithm
 {
 
    public class MapTemplateMatch

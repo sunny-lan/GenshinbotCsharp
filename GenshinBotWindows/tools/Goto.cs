@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GenshinbotCsharp.tools
+namespace genshinbot.tools
 {
     class Goto
     {

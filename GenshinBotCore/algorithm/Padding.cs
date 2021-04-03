@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 /// are designed to reuse memory when given images of the same size every time
 /// however they still work if the image size changes
 /// </summary>
-namespace GenshinbotCsharp.algorithm
+namespace genshinbot.algorithm
 {
    public class Padding
     {

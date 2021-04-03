@@ -1,4 +1,4 @@
-﻿using GenshinbotCsharp.data;
+﻿using genshinbot.data;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GenshinbotCsharp.database.map
+namespace genshinbot.database.map
 {
     public class MapDb
     {

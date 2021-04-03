@@ -1,6 +1,6 @@
 ﻿using OpenCvSharp;
 using System;
-namespace GenshinbotCsharp.tools
+namespace genshinbot.tools
 {
     class CoordChecker
     {

@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GenshinbotCsharp.screens
+namespace genshinbot.screens
 {
 
     public class LoadingScreen : Screen

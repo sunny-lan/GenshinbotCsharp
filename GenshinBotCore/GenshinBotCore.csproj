@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <RootNamespace>genshinbot.core</RootNamespace>
+    <RootNamespace>genshinbot</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

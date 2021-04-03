@@ -1,9 +1,9 @@
-﻿using genshinbot.core.automation.input;
+﻿using genshinbot.automation.input;
 using OpenCvSharp;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GenshinbotCsharp.input
+namespace genshinbot.input
 {
     public class MouseMover
     {

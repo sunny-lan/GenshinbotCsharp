@@ -1,6 +1,7 @@
-﻿using genshinbot.core.automation;
-using GenshinbotCsharp;
-using GenshinbotCsharp.yui;
+﻿using genshinbot.automation;
+using genshinbot.screens;
+using genshinbot;
+using genshinbot.yui;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -35,7 +36,7 @@ namespace genshinbot.tools.config
             screenshotBtn.Enabled = b.W != null;
             b.AttachedWindowChanged += (s, attached) => screenshotBtn.Enabled = attached;
 
-            var uiRects = new List<GenshinbotCsharp.yui.Rect>();
+            var uiRects = new List<genshinbot.yui.Rect>();
 
             var prevSize = new Size();
             screenshotBtn.Click += async (s, e) =>
@@ -54,16 +55,19 @@ namespace genshinbot.tools.config
 
                     prevSize = size;
                     if (!db.R.ContainsKey(size))
-                        db.R[size] = new GenshinbotCsharp.screens.PlayingScreen.Db.RD();
+                        db.R[size] = new PlayingScreen.Db.RD();
                     var r = db.R[size];
+
+                    var characters=new PlayingScreen.Db.RD.CharacterConfig[4];
+
                     for (int i = 0; i < 4; i++)
                     {
-                        GenshinbotCsharp.yui.Rect name, number;
+                        genshinbot.yui.Rect name, number;
                         var character = r.Characters[i];
                        // if (character == null)
                         {
                             //TODO
-                            character = r.Characters[i] = new GenshinbotCsharp.screens.PlayingScreen.Db.RD.CharacterConfig();
+                            character = r.Characters[i] = new PlayingScreen.Db.RD.CharacterConfig();
                         }
                         tab.Status = "Select character " + i + " name";
                         ui.GiveFocus(tab);

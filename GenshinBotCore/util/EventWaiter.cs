@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GenshinbotCsharp.util
+namespace genshinbot.util
 {
     /// <summary>
     /// Class to block a thread until a event is fired

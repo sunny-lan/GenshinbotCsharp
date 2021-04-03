@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AvalonEdit" Version="6.1.1" />
     <PackageReference Include="OpenCvSharp4.Windows" Version="4.5.1.20210210" />
     <PackageReference Include="Vanara.PInvoke.Gdi32" Version="3.3.7" />
     <PackageReference Include="Vanara.PInvoke.Kernel32" Version="3.3.7" />
@@ -67,6 +68,7 @@
 
   <ItemGroup>
     <Folder Include="automation\input\" />
+    <Folder Include="badui\" />
   </ItemGroup>
 
   <Import Project="..\Data\Data.projitems" Label="Shared" />

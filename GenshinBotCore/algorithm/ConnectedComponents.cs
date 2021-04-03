@@ -1,7 +1,7 @@
 ﻿using OpenCvSharp;
 using System;
 
-namespace GenshinbotCsharp.algorithm
+namespace genshinbot.algorithm
 {
         //TODO switch this to included one
         public class ConnectedComponents

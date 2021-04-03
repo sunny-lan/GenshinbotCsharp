@@ -1,5 +1,5 @@
-﻿using GenshinbotCsharp.data;
-using GenshinbotCsharp.util;
+﻿using genshinbot.data;
+using genshinbot.util;
 using OpenCvSharp.Extensions;
 using System.ComponentModel;
 using System.Data;
@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace GenshinbotCsharp.yui.WindowsForms
+namespace genshinbot.yui.WindowsForms
 {
     /// <summary>
     /// provides implementation of gui using windows forms

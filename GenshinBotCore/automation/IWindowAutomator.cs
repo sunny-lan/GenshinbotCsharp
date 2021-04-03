@@ -2,7 +2,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace genshinbot.core.automation
+namespace genshinbot.automation
 {
     public interface IWindowAutomator : input.IInputSimulator
     {

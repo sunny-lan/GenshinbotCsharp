@@ -1,4 +1,4 @@
-﻿using genshinbot.core.automation;
+﻿using genshinbot.automation;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Math;
 
-namespace GenshinbotCsharp.algorithm.experiments
+namespace genshinbot.algorithm.experiments
 {
     static class MinimapMatcher
     {

@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Vanara.PInvoke;
 
-namespace GenshinbotCsharp.hooks
+namespace genshinbot.hooks
 {
 
     /// <summary>

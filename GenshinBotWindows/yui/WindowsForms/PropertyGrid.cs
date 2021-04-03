@@ -1,4 +1,4 @@
-﻿namespace GenshinbotCsharp.yui.WindowsForms
+﻿namespace genshinbot.yui.WindowsForms
 {
     class PropertyGrid :System.Windows.Forms.PropertyGrid, yui.PropertyGrid
     {

@@ -1,7 +1,7 @@
-﻿using genshinbot.core.automation;
+﻿using genshinbot.automation;
 using System;
 
-namespace GenshinbotCsharp
+namespace genshinbot
 {
     public class GenshinWindow : WindowAutomator
     {

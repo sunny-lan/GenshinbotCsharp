@@ -1,4 +1,4 @@
-﻿using GenshinbotCsharp.database.map;
+﻿using genshinbot.database.map;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GenshinbotCsharp.tools
+namespace genshinbot.tools
 {
     /// <summary>
     /// Scans map for waypoints and records their location

@@ -1,10 +1,10 @@
-﻿using GenshinbotCsharp.data;
-using GenshinbotCsharp.yui;
+﻿using genshinbot.data;
+using genshinbot.yui;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 
-namespace GenshinbotCsharp
+namespace genshinbot
 {
 
     /// <summary>
@@ -34,7 +34,7 @@ namespace GenshinbotCsharp
 /// <summary>
 /// Platform independent abstraction of gui
 /// </summary>
-namespace GenshinbotCsharp.yui
+namespace genshinbot.yui
 {
     public interface Notification
     {
@@ -163,9 +163,16 @@ namespace GenshinbotCsharp.yui
         Container CreateSubContainer();
 
         void ClearChildren();
-        void Delete(object btn);
+        void Delete(object child);
 
         Viewport2 GetViewport2() { throw new NotImplementedException(); }
+
+        /// <summary>
+        /// Used to add a unsupported child to the container
+        /// For example directly adding a Windows Forms control to the container.
+        /// </summary>
+        /// <param name="unknown"></param>
+        void AddExternal(object unknown) { throw new NotImplementedException(); }
     }
 
     public interface Tab

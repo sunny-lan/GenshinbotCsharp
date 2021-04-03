@@ -1,6 +1,6 @@
 ﻿using System.Windows.Forms;
 
-namespace GenshinbotCsharp.yui.WindowsForms
+namespace genshinbot.yui.WindowsForms
 {
     class Button : System.Windows.Forms.Button, yui.Button
     {

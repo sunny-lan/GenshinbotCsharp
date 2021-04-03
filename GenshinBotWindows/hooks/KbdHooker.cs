@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Vanara.PInvoke;
 
-namespace GenshinbotCsharp.hooks
+namespace genshinbot.hooks
 {
     class KbdHooker : BasicWindowsHookEx<User32.KBDLLHOOKSTRUCT>
     {

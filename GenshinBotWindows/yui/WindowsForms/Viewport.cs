@@ -1,11 +1,11 @@
-﻿using GenshinbotCsharp.data;
+﻿using genshinbot.data;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace GenshinbotCsharp.yui.WindowsForms
+namespace genshinbot.yui.WindowsForms
 {
 
     interface ViewportComponent

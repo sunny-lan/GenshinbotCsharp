@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace GenshinbotCsharp.yui.WindowsForms
+namespace genshinbot.yui.WindowsForms
 {
 
     class Tab : TabPage, yui.Tab

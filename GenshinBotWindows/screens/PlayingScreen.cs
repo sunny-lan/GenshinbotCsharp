@@ -1,4 +1,5 @@
-﻿using OpenCvSharp;
+﻿using genshinbot;
+using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GenshinbotCsharp.screens
+namespace genshinbot.screens
 {
     public class PlayingScreen : Screen
     {
@@ -23,7 +24,7 @@ namespace GenshinbotCsharp.screens
                     public Rect Name { get; set; }
                 }
 
-                public CharacterConfig[] Characters { get; set; } = new CharacterConfig[4];
+                public CharacterConfig[] Characters { get; set; }
             }
 
             public Dictionary<Size, RD> R { get; set; } = new Dictionary<Size, RD>

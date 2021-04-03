@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GenshinbotCsharp.yui.tools
+namespace genshinbot.yui.tools
 {
     class GenericDbEditor : GenericDbEditor.Processor
     {

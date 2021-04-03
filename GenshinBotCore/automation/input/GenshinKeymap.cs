@@ -1,9 +1,9 @@
-﻿using genshinbot.core.automation.input;
+﻿using genshinbot.automation.input;
 using genshinbot.Core.automation.input;
 using System;
 using System.Collections.Generic;
 
-namespace GenshinbotCsharp.input
+namespace genshinbot.input
 {
     public enum GenshinKeys
     {

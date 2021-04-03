@@ -1,8 +1,8 @@
-﻿using GenshinbotCsharp.data;
+﻿using genshinbot.data;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace GenshinbotCsharp.yui.WindowsForms
+namespace genshinbot.yui.WindowsForms
 {
         class Rect : Control, yui.Rect, ViewportComponent
         {

@@ -1,4 +1,4 @@
-﻿using GenshinbotCsharp.util;
+﻿using genshinbot.util;
 using OpenCvSharp;
 using System;
 using System.Threading.Tasks;
@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 /// <summary>
 /// Platform independent abstraction of gui
 /// </summary>
-namespace GenshinbotCsharp.yui
+namespace genshinbot.yui
 {
    public static class Ext
     {
