@@ -1,4 +1,6 @@
-﻿using System.Windows.Forms;
+﻿using System;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace GenshinbotCsharp.yui.WindowsForms
 {
@@ -6,6 +8,8 @@ namespace GenshinbotCsharp.yui.WindowsForms
     class Tab : TabPage, yui.Tab
     {
         Container _children;
+        private string status;
+        
 
         public Tab() : base()
         {
@@ -24,8 +28,17 @@ namespace GenshinbotCsharp.yui.WindowsForms
 
         public yui.Container Content => _children;
 
-        public string Status { get; set; }
+        public string Status
+        {
+            get => status; set
+            {
+                status = value;
+                StatusChanged?.Invoke(value);
+            }
+        }
+        internal Action<string> StatusChanged;
 
         public Notifications Notifications => throw new System.NotImplementedException();
+
     }
 }

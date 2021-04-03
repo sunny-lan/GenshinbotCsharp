@@ -2,7 +2,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace GenshinbotCsharp
+namespace genshinbot.core.automation
 {
     public interface IWindowAutomator : input.IInputSimulator
     {
@@ -17,7 +17,8 @@ namespace GenshinbotCsharp
         bool IsForegroundWindow();
         Mat Screenshot(Rect r);
 
-        Task<Mat> ScreenshotAsync(Rect r) {
+        Task<Mat> ScreenshotAsync(Rect r)
+        {
             return Task.Run(() => Screenshot(r));
         }
 

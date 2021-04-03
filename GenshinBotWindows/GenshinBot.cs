@@ -1,4 +1,5 @@
 ﻿
+using GenshinbotCsharp.util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,10 +14,10 @@ namespace GenshinbotCsharp
         public class Database
         {
             private Lazy<database.map.MapDb> mapDb = new Lazy<database.map.MapDb>(() => Data.ReadJson("map/db.json", database.map.MapDb.Default()));
-            public database.map.MapDb MapDb=>mapDb.Value;  
+            public database.map.MapDb MapDb => mapDb.Value;
 
             public screens.PlayingScreen.Db PlayingScreenDb { get; } = new screens.PlayingScreen.Db();
-            public screens.LoadingScreen.Db LoadingScreenDb { get;} = new screens.LoadingScreen.Db();
+            public screens.LoadingScreen.Db LoadingScreenDb { get; } = new screens.LoadingScreen.Db();
             public screens.MapScreen.Db MapScreenDb { get; } = new screens.MapScreen.Db();
         }
 
@@ -49,7 +50,7 @@ namespace GenshinbotCsharp
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public T S<T>() where T:Screen
+        public T S<T>() where T : Screen
         {
             if (ActiveScreen is T t)
                 return t;
@@ -66,8 +67,8 @@ namespace GenshinbotCsharp
         public T S<T>(T s) where T : Screen
         {
             //TODO
-           // if(!s.CheckActive())
-           //     throw new Exception("Tried to give control to a screen which is inactive");
+            // if(!s.CheckActive())
+            //     throw new Exception("Tried to give control to a screen which is inactive");
             ActiveScreen = s;
             return s;
         }
@@ -103,15 +104,16 @@ namespace GenshinbotCsharp
         #region UI
 
         public YUI Ui;
-        genshinbot.tools.ScriptList scriptListUi = new genshinbot.tools.ScriptList();
+        genshinbot.tools.BotControlPanel scriptListUi = new genshinbot.tools.BotControlPanel();
         public void InitUi()
         {
             Debug.Assert(Ui == null);
 
             Ui = yui.WindowsForms.MainForm.make();
-            Console.WriteLine("UI initialized");
 
             Load(scriptListUi);
+
+            Console.WriteLine("UI initialized");
         }
 
         #endregion
@@ -120,6 +122,8 @@ namespace GenshinbotCsharp
 
         public GenshinWindow W;
         public input.MouseMover M;
+
+        public event EventHandler<bool> AttachedWindowChanged;
         public void AttachWindow()
         {
             Debug.Assert(Db != null);
@@ -131,6 +135,8 @@ namespace GenshinbotCsharp
             M = new input.MouseMover(W);
 
             Console.WriteLine("Genshin window initialized");
+
+            AttachedWindowChanged?.Invoke(this, true);
         }
 
         #endregion
@@ -151,25 +157,25 @@ namespace GenshinbotCsharp
         }
 
         #endregion
-        
+
         public async Task ParallelInitAll()
         {
             Console.WriteLine("Bot init begin");
             Task initDb = Task.Run(InitDb);
             Task initUi = Task.Run(InitUi);
-            Task initScreens = initDb.ContinueWith(_=>InitScreens());
-            Task initControllers = initScreens.ContinueWith(_=>InitControllers());
+            Task initScreens = initDb.ContinueWith(_ => InitScreens());
+            Task initControllers = initScreens.ContinueWith(_ => InitControllers());
             await Task.WhenAll(initDb, initUi, initScreens, initControllers);
             Console.WriteLine("Bot init done");
         }
 
+        #region Scripts
 
-       
         HashSet<Script> loadedScripts = new HashSet<Script>();
 
         public void Load(Script s)
         {
-            if(loadedScripts.Contains(s))
+            if (loadedScripts.Contains(s))
                 throw new Exception("Script already loaded");
 
             loadedScripts.Add(s);
@@ -184,13 +190,16 @@ namespace GenshinbotCsharp
             s.Unload(this);
         }
 
+        #endregion
+
         public static void generalTest()
         {
-            
+
             GenshinBot b = new GenshinBot();
             b.ParallelInitAll().Wait();
-           // b.AttachWindow();
-            while (true) Task.Delay(10000).Wait();
+            var waiter = EventWaiter.Waiter<object>();
+            b.Ui.OnClose = () => { waiter.Item2(null); return true; };
+            waiter.Item1.Wait();
         }
     }
 }

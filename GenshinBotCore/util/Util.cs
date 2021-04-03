@@ -97,6 +97,11 @@ namespace GenshinbotCsharp
                     (int)m.Step(),
                     System.Drawing.Imaging.PixelFormat.Format24bppRgb,
                     m.Data);
+            if (m.Channels() == 4)
+                return new System.Drawing.Bitmap(m.Width, m.Height,
+                    (int)m.Step(),
+                    System.Drawing.Imaging.PixelFormat.Format32bppArgb,
+                    m.Data);
             throw new Exception("unable to convert");
         }
         public static Point ReadPoint()

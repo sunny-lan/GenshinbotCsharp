@@ -14,10 +14,12 @@ namespace GenshinbotCsharp
         {
             get
             {
+                throw new NotSupportedException();
                 lock (locker) return img1;
             }
             set
             {
+                throw new NotSupportedException();
                 lock (locker) img1 = value;
             }
         }
@@ -28,7 +30,7 @@ namespace GenshinbotCsharp
         private static bool inited = false;
         static Debug()
         {
-            Task.Run(() =>
+           /* Task.Run(() =>
             {
                // Cv2.NamedWindow("debug", WindowMode.KeepRatio);
                 lock (waitInit)
@@ -45,11 +47,12 @@ namespace GenshinbotCsharp
                         key = -1;
                     }
                 }
-            });
+            });*/
         }
 
         public static void show()
         {
+            throw new NotSupportedException();
             lock (waitInit)
             {
                 if(!inited)
@@ -59,12 +62,14 @@ namespace GenshinbotCsharp
         }
         public static void show(string  name, Mat img)
         {
-             Cv2.ImShow(name, img);
+            throw new NotSupportedException();
+            Cv2.ImShow(name, img);
             Cv2.WaitKey(1);
         }
 
         public static int WaitKey()
         {
+            throw new NotSupportedException();
             lock (locker)
             {
                 Monitor.Wait(locker);

@@ -31,6 +31,8 @@ namespace GenshinbotCsharp.yui.WindowsForms
         {
             this.tabs = new System.Windows.Forms.TabControl();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
+            this.statusMessage = new System.Windows.Forms.ToolStripStatusLabel();
+            this.statusStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabs
@@ -46,12 +48,22 @@ namespace GenshinbotCsharp.yui.WindowsForms
             // 
             // statusStrip
             // 
+            this.statusStrip.BackColor = System.Drawing.SystemColors.Highlight;
             this.statusStrip.ImageScalingSize = new System.Drawing.Size(24, 24);
-            this.statusStrip.Location = new System.Drawing.Point(0, 540);
+            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.statusMessage});
+            this.statusStrip.Location = new System.Drawing.Point(0, 530);
             this.statusStrip.Name = "statusStrip";
-            this.statusStrip.Size = new System.Drawing.Size(889, 22);
+            this.statusStrip.Size = new System.Drawing.Size(889, 32);
             this.statusStrip.TabIndex = 1;
             this.statusStrip.Text = "statusStrip1";
+            // 
+            // statusMessage
+            // 
+            this.statusMessage.ForeColor = System.Drawing.SystemColors.Info;
+            this.statusMessage.Name = "statusMessage";
+            this.statusMessage.Size = new System.Drawing.Size(41, 25);
+            this.statusMessage.Text = "Idle";
             // 
             // MainForm
             // 
@@ -63,6 +75,9 @@ namespace GenshinbotCsharp.yui.WindowsForms
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "MainForm";
             this.Text = "GUI";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
+            this.statusStrip.ResumeLayout(false);
+            this.statusStrip.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -72,5 +87,6 @@ namespace GenshinbotCsharp.yui.WindowsForms
 
         private System.Windows.Forms.TabControl tabs;
         private System.Windows.Forms.StatusStrip statusStrip;
+        private System.Windows.Forms.ToolStripStatusLabel statusMessage;
     }
 }

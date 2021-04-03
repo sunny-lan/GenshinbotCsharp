@@ -1,8 +1,8 @@
 ﻿using OpenCvSharp;
 
-namespace GenshinbotCsharp.input
+namespace genshinbot.core.automation.input
 {
-    
+
     public interface IInputSimulator
     {
         Point2d MousePos();

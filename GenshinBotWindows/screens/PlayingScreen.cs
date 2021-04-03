@@ -23,7 +23,7 @@ namespace GenshinbotCsharp.screens
                     public Rect Name { get; set; }
                 }
 
-                public CharacterConfig[] Characters { get; set; }
+                public CharacterConfig[] Characters { get; set; } = new CharacterConfig[4];
             }
 
             public Dictionary<Size, RD> R { get; set; } = new Dictionary<Size, RD>

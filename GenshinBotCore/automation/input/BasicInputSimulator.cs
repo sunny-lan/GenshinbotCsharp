@@ -1,4 +1,5 @@
-﻿using OpenCvSharp;
+﻿using genshinbot.core.automation.input;
+using OpenCvSharp;
 using System;
 
 namespace GenshinbotCsharp.input

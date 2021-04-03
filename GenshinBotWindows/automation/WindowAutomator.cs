@@ -7,13 +7,15 @@ using System.ComponentModel;
 using GenshinbotCsharp.hooks;
 using GenshinbotCsharp.util;
 using OpenCvSharp;
+using genshinbot.core.automation;
+using genshinbot.core.automation.input;
 
 namespace GenshinbotCsharp
 {
 
-    public class WindowAutomator : input.IInputSimulator, IWindowAutomator
+    public class WindowAutomator : IInputSimulator, IWindowAutomator
     {
-        public input.IInputSimulator I;
+        public IInputSimulator I;
 
 
 
@@ -41,7 +43,7 @@ namespace GenshinbotCsharp
         {
             hWnd = User32.FindWindow(CLASS, TITLE);
             if (hWnd == IntPtr.Zero)
-                throw new Exception("failed to find window");
+                throw new AttachWindowFailedException();
             constructor(hWnd);
 
         }

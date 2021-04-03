@@ -15,6 +15,19 @@ namespace GenshinbotCsharp
         Tab CreateTab();
 
         void RemoveTab(Tab tab);
+
+        /// <summary>
+        /// Return true to cancel the close event
+        /// </summary>
+        Func<bool> OnClose { get; set; }
+
+        /// <summary>
+        /// Show a message box. Can only be closed by user
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="title"></param>
+        void Popup(string message, string title = "");
+        void GiveFocus(Tab t);
     }
 }
 
@@ -104,6 +117,8 @@ namespace GenshinbotCsharp.yui
     {
         event EventHandler Click;
         string Text { get; set; }
+
+        bool Enabled { get; set; }
     }
 
     public interface TreeView
@@ -157,6 +172,6 @@ namespace GenshinbotCsharp.yui
         Container Content { get; }
 
         public string Status { get; set; }
-        Notifications Notifications { get; }
+       // Notifications Notifications { get; }
     }
 }

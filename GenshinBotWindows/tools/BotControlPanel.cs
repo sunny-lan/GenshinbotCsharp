@@ -1,4 +1,5 @@
-﻿using GenshinbotCsharp;
+﻿using genshinbot.core.automation;
+using GenshinbotCsharp;
 using GenshinbotCsharp.yui;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace genshinbot.tools
 {
-    class ScriptList : Script
+    class BotControlPanel : Script
     {
         HashSet<Script> scripts = new HashSet<Script> {
             new genshinbot.tools.config.PlayingScreenConfig(),
@@ -26,13 +27,29 @@ namespace genshinbot.tools
 
             var ui = b.Ui;
             tab = ui.CreateTab();
-            tab.Title = "Scripts";
+            tab.Title = "Control panel";
             var content = tab.Content;
             var unloaded = content.CreateTreeview();
             var loaded = content.CreateTreeview();
-            var btn = content.CreateButton();
+            var loadUnloadBtn = content.CreateButton();
             Action onClick = null;
-            btn.Click += (s, e) => onClick?.Invoke();
+            loadUnloadBtn.Click += (s, e) => onClick?.Invoke();
+            loadUnloadBtn.Enabled = false;
+
+            var attach = content.CreateButton();
+            attach.Text = "Attach to window";
+            attach.Click += (s, e) =>
+            {
+                try
+                {
+                    b.AttachWindow();
+                }
+                catch (AttachWindowFailedException ex) {
+                    ui.Popup(ex.ToString(), "Error!");
+                }
+            };
+            attach.Enabled = b.W == null;
+            b.AttachedWindowChanged += (s, attached) => attach.Enabled = !attached;
 
             Action<Script> addToLoaded = null;
             Action<Script> addToUnloaded = script =>
@@ -41,11 +58,13 @@ namespace genshinbot.tools
                 node.Text = script.DisplayName;
                 node.Selected += (s, e) =>
                 {
-                    btn.Text = "Load";
+                    loadUnloadBtn.Enabled = true;
+                    loadUnloadBtn.Text = "Load";
                     onClick = () =>
                     {
-                        btn.Text = "";
+                        loadUnloadBtn.Text = "";
                         onClick = null;
+                        loadUnloadBtn.Enabled = false;
                         unloaded.Delete(node);
                         b.Load(script);
                         addToLoaded(script);
@@ -59,11 +78,13 @@ namespace genshinbot.tools
                 node.Text = script.DisplayName;
                 node.Selected += (s, e) =>
                 {
-                    btn.Text = "Unload";
+                    loadUnloadBtn.Enabled = true;
+                    loadUnloadBtn.Text = "Unload";
                     onClick = () =>
                     {
-                        btn.Text = "";
+                        loadUnloadBtn.Text = "";
                         onClick = null;
+                        loadUnloadBtn.Enabled = false;
                         loaded.Delete(node);
                         b.Unload(script);
                         addToUnloaded(script);

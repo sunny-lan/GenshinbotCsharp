@@ -1,4 +1,5 @@
-﻿using GenshinbotCsharp;
+﻿using genshinbot.core.automation;
+using GenshinbotCsharp;
 using GenshinbotCsharp.yui;
 using OpenCvSharp;
 using System;
@@ -24,9 +25,15 @@ namespace genshinbot.tools.config
             tab.Title = "Playing screen";
             var content = tab.Content;
             var vp = tab.Content.CreateViewport();
+            vp.Size = new Size(500, 500);
+            vp.OnTChange = t => vp.T = t;
             var img = vp.CreateImage();
             var screenshotBtn = content.CreateButton();
             screenshotBtn.Text = "Screenshot";
+
+            //only enable button when attached
+            screenshotBtn.Enabled = b.W != null;
+            b.AttachedWindowChanged += (s, attached) => screenshotBtn.Enabled = attached;
 
             var uiRects = new List<GenshinbotCsharp.yui.Rect>();
 
@@ -53,27 +60,22 @@ namespace genshinbot.tools.config
                     {
                         GenshinbotCsharp.yui.Rect name, number;
                         var character = r.Characters[i];
-                        if (character == null)
+                       // if (character == null)
                         {
-                            tab.Status = "Select character " + i + " name";
-                            uiRects.Add(name = await vp.SelectAndCreate());
-                            character.Name = name.R;
-
-                            tab.Status = "Select character " + i + " number";
-                            uiRects.Add(number = await vp.SelectAndCreate());
-                            character.Number = number.R;
+                            //TODO
+                            character = r.Characters[i] = new GenshinbotCsharp.screens.PlayingScreen.Db.RD.CharacterConfig();
                         }
-                        else
-                        {
-                            name = vp.CreateRect();
-                            name.R = character.Name;
+                        tab.Status = "Select character " + i + " name";
+                        uiRects.Add(name = await vp.SelectAndCreate());
+                        character.Name = name.R;
 
-                            number = vp.CreateRect();
-                            number.R = character.Name;
-                        }
+                        tab.Status = "Select character " + i + " number";
+                        uiRects.Add(number = await vp.SelectAndCreate());
+                        character.Number = number.R;
 
 
                     }
+                    tab.Status = "Idle";
                 }
             };
 
