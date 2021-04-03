@@ -54,7 +54,7 @@ namespace GenshinbotCsharp.screens
 
         public void OpenMap()
         {
-            b.W.K.KeyPress(input.GenshinKeys.Map);
+            b.K.KeyPress(input.GenshinKeys.Map);
             Thread.Sleep(2000);//TODO
             b.S(b.MapScreen);
         }
@@ -78,7 +78,7 @@ namespace GenshinbotCsharp.screens
         public double GetArrowDirection()
         {
             //make sure we are facing same direction as arrow
-            //b.W.K.KeyPress(input.GenshinKeys.Forward);
+            //b.K.KeyPress(input.GenshinKeys.Forward);
             return arrowDirection.GetAngle(snapArrow());
         }
 

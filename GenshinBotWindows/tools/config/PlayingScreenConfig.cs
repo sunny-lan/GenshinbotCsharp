@@ -40,8 +40,8 @@ namespace genshinbot.tools.config
             var prevSize = new Size();
             screenshotBtn.Click += async (s, e) =>
             {
-                var rect = b.W.GetBounds();
-                var screenshot = await (b.W as IWindowAutomator).ScreenshotAsync(rect);
+                var rect = await b.W.GetBoundsAsync();
+                var screenshot = await b.W.ScreenshotAsync(rect);
                 img.Mat = screenshot;
 
                 var size = rect.Size;

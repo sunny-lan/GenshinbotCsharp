@@ -15,9 +15,6 @@ namespace GenshinbotCsharp
 
     public class WindowAutomator : IInputSimulator, IWindowAutomator
     {
-        public IInputSimulator I;
-
-
 
         private HWND hWnd;
         private uint pid, thread;
@@ -65,15 +62,8 @@ namespace GenshinbotCsharp
             w.OnFocusChanged += (_, f) => Console.WriteLine("focused " + f);
             while (true)
             {
-                var r = w.GetRect();
-                var b = GenshinbotCsharp.Screenshot.GetBuffer(r.Width, r.Height);
-                while (w.GetRect().Size == r.Size)
-                {
-                    Thread.Sleep(1);
-                    //w.TakeScreenshot(0, 0, b);
-                    // Debug.img = b.Mat;
-                    // Debug.show();
-                }
+                
+               Thread.Sleep(1);
             }
         }
 
@@ -312,7 +302,6 @@ namespace GenshinbotCsharp
 
         private void initInput()
         {
-            I = this;
         }
         public OpenCvSharp.Point2d MousePos()
         {

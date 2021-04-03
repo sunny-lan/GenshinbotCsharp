@@ -1,4 +1,5 @@
 ﻿
+using genshinbot.core.automation;
 using GenshinbotCsharp.util;
 using System;
 using System.Collections.Generic;
@@ -120,8 +121,9 @@ namespace GenshinbotCsharp
 
         #region Automation
 
-        public GenshinWindow W;
+        public IWindowAutomator W;
         public input.MouseMover M;
+        public input.GenshinKeymap K;
 
         public event EventHandler<bool> AttachedWindowChanged;
         public void AttachWindow()
@@ -133,6 +135,7 @@ namespace GenshinbotCsharp
 
             W = GenshinWindow.FindExisting();
             M = new input.MouseMover(W);
+            K = new input.GenshinKeymap(W);
 
             Console.WriteLine("Genshin window initialized");
 

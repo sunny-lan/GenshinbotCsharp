@@ -51,7 +51,7 @@ namespace GenshinbotCsharp.screens
 
         public void Close()
         {
-            b.W.K.KeyPress(input.GenshinKeys.Map);
+            b.K.KeyPress(input.GenshinKeys.Map);
             Thread.Sleep(2000);//TODO
             b.S(b.PlayingScreen);
         }
@@ -147,16 +147,16 @@ namespace GenshinbotCsharp.screens
                 // the drag begin location is on a clickable thing
                 var beginPos = active.RandomWithin();
 
-                b.W.I.MouseTo(beginPos);
+                b.W.MouseTo(beginPos);
                 Thread.Sleep(10);
 
-                b.W.I.MouseDown(0);
+                b.W.MouseDown(0);
                 Thread.Sleep(10);
 
                 b.M.Goto((beginPos - point).LimitDistance(200)+ beginPos).Wait();
                 Thread.Sleep(100); //pause to prevent flick gesture from happening
 
-                b.W.I.MouseUp(0);
+                b.W.MouseUp(0);
                 Thread.Sleep(10);
 
             }

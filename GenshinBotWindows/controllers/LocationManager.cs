@@ -163,18 +163,18 @@ namespace GenshinbotCsharp.controllers
             {
                 if (curPos.DistanceTo(dstPos) <= accuracy)
                 {
-                    b.W.K.KeyUp(input.GenshinKeys.Forward);
+                    b.K.KeyUp(input.GenshinKeys.Forward);
                     b.M.Stop();
                     return;
                 }
 
-                b.W.K.KeyPress(input.GenshinKeys.Forward);
+                b.K.KeyPress(input.GenshinKeys.Forward);
                 var dstAng = curPos.AngleTo(dstPos);
                 var curAng = p.GetArrowDirection();
 
                 var diff = curAng.RelativeAngle(dstAng);
                 b.M.Move(new Point2d(diff / 2, 0));
-                b.W.K.KeyDown(input.GenshinKeys.Forward);
+                b.K.KeyDown(input.GenshinKeys.Forward);
                 curPos = DeduceLocation();
 
             }

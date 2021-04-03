@@ -17,12 +17,19 @@ namespace genshinbot.core.automation
         bool IsForegroundWindow();
         Mat Screenshot(Rect r);
 
+        
+
+        void TryFocus();
+        void WaitForFocus(int timeout = -1);
+
         Task<Mat> ScreenshotAsync(Rect r)
         {
             return Task.Run(() => Screenshot(r));
         }
 
-        void TryFocus();
-        void WaitForFocus(int timeout = -1);
+        Task<Rect> GetBoundsAsync()
+        {
+            return Task.Run(GetBounds);
+        }
     }
 }

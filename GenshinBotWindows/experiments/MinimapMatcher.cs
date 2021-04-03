@@ -1,4 +1,5 @@
-﻿using OpenCvSharp;
+﻿using genshinbot.core.automation;
+using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -218,7 +219,7 @@ namespace GenshinbotCsharp.algorithm.experiments
             var minimap1 = new Rect(53, 15, 189, 189);
 
 
-            GenshinWindow g = GenshinWindow.FindExisting();
+            IWindowAutomator g = GenshinWindow.FindExisting();
            
             while (true)
             {
