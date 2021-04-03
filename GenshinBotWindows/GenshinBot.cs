@@ -176,6 +176,10 @@ namespace GenshinbotCsharp
 
         HashSet<Script> loadedScripts = new HashSet<Script>();
 
+        public bool IsLoaded(Script s)
+        {
+            return loadedScripts.Contains(s);
+        }
         public void Load(Script s)
         {
             if (loadedScripts.Contains(s))

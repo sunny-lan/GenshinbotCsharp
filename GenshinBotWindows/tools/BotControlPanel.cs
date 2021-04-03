@@ -1,6 +1,7 @@
 ﻿using genshinbot.core.automation;
 using GenshinbotCsharp;
 using GenshinbotCsharp.yui;
+using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,12 +30,49 @@ namespace genshinbot.tools
             tab = ui.CreateTab();
             tab.Title = "Control panel";
             var content = tab.Content;
-            var unloaded = content.CreateTreeview();
-            var loaded = content.CreateTreeview();
+            var scriptList = content.CreateTreeview();
             var loadUnloadBtn = content.CreateButton();
             Action onClick = null;
             loadUnloadBtn.Click += (s, e) => onClick?.Invoke();
             loadUnloadBtn.Enabled = false;
+
+            scriptList.BeginUpdate();
+            foreach (var script in scripts)
+            {
+                var node = scriptList.CreateNode();
+                node.Text = script.DisplayName;
+
+                Action<bool> update = loaded =>
+                {
+                    loadUnloadBtn.Text = loaded ? "Unload" : "Load";
+                    node.Color = loaded?Scalar.Green:Scalar.Gray;
+                };
+
+
+                node.Selected += (s, e) =>
+                {
+                    bool loaded = b.IsLoaded(script);
+                    loadUnloadBtn.Enabled = true;
+                    update(loaded);
+                    onClick = () =>
+                    {
+                        loadUnloadBtn.Enabled = false;
+                        if (loaded)
+                        {
+                            b.Unload(script);
+                            loaded = false;
+                        }
+                        else
+                        {
+                            b.Load(script);
+                            loaded = true;
+                        }
+                        update(loaded);
+                        loadUnloadBtn.Enabled = true;
+                    };
+                };
+            }
+            scriptList.EndUpdate();
 
             var attach = content.CreateButton();
             attach.Text = "Attach to window";
@@ -44,60 +82,13 @@ namespace genshinbot.tools
                 {
                     b.AttachWindow();
                 }
-                catch (AttachWindowFailedException ex) {
+                catch (AttachWindowFailedException ex)
+                {
                     ui.Popup(ex.ToString(), "Error!");
                 }
             };
             attach.Enabled = b.W == null;
             b.AttachedWindowChanged += (s, attached) => attach.Enabled = !attached;
-
-            Action<Script> addToLoaded = null;
-            Action<Script> addToUnloaded = script =>
-            {
-                var node = unloaded.CreateNode();
-                node.Text = script.DisplayName;
-                node.Selected += (s, e) =>
-                {
-                    loadUnloadBtn.Enabled = true;
-                    loadUnloadBtn.Text = "Load";
-                    onClick = () =>
-                    {
-                        loadUnloadBtn.Text = "";
-                        onClick = null;
-                        loadUnloadBtn.Enabled = false;
-                        unloaded.Delete(node);
-                        b.Load(script);
-                        addToLoaded(script);
-                    };
-                };
-            };
-
-            addToLoaded = script =>
-            {
-                var node = loaded.CreateNode();
-                node.Text = script.DisplayName;
-                node.Selected += (s, e) =>
-                {
-                    loadUnloadBtn.Enabled = true;
-                    loadUnloadBtn.Text = "Unload";
-                    onClick = () =>
-                    {
-                        loadUnloadBtn.Text = "";
-                        onClick = null;
-                        loadUnloadBtn.Enabled = false;
-                        loaded.Delete(node);
-                        b.Unload(script);
-                        addToUnloaded(script);
-                    };
-                };
-            };
-
-            unloaded.BeginUpdate();
-            foreach (var script in scripts)
-            {
-                addToUnloaded(script);
-            }
-            unloaded.EndUpdate();
         }
 
         public void Unload(GenshinBot b)

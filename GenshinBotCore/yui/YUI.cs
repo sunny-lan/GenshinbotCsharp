@@ -143,6 +143,8 @@ namespace GenshinbotCsharp.yui
 
         public void BeginUpdate();
         public void EndUpdate();
+
+        public void GiveFocus(Node n);
     }
 
     public interface PropertyGrid

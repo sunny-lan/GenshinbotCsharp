@@ -66,10 +66,12 @@ namespace genshinbot.tools.config
                             character = r.Characters[i] = new GenshinbotCsharp.screens.PlayingScreen.Db.RD.CharacterConfig();
                         }
                         tab.Status = "Select character " + i + " name";
+                        ui.GiveFocus(tab);
                         uiRects.Add(name = await vp.SelectAndCreate());
                         character.Name = name.R;
 
                         tab.Status = "Select character " + i + " number";
+                        ui.GiveFocus(tab);
                         uiRects.Add(number = await vp.SelectAndCreate());
                         character.Number = number.R;
 

@@ -21,9 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="badui\Viewport2.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Update="yui\WindowsForms\Button.cs">
       <SubType>Component</SubType>
     </Compile>

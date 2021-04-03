@@ -87,6 +87,7 @@ namespace GenshinbotCsharp.yui.WindowsForms
             InitializeComponent();
             //TODO
             Size = new Size(500, 500);
+            
 
         }
 
@@ -105,6 +106,13 @@ namespace GenshinbotCsharp.yui.WindowsForms
             }
         }
 
+        protected override void OnLostFocus(EventArgs e)
+        {
+            base.OnLostFocus(e);
+            prevSelected?.OnDeselect(e);
+            prevSelected = null;
+        }
+
         protected override void OnAfterSelect(TreeViewEventArgs e)
         {
             base.OnAfterSelect(e);
@@ -113,6 +121,7 @@ namespace GenshinbotCsharp.yui.WindowsForms
                 prevSelected?.OnDeselect(e);
                 prevSelected = n;
                 n.OnSelect(e);
+                
             }
             else
             {
@@ -157,6 +166,12 @@ namespace GenshinbotCsharp.yui.WindowsForms
         void yui.TreeView.EndUpdate()
         {
             Invoke((MethodInvoker)delegate { base.EndUpdate(); });
+        }
+
+        public void GiveFocus(yui.TreeView.Node n)
+        {
+            var x = n as TreeNode;
+            Invoke((MethodInvoker)delegate { SelectedNode = x; });
         }
     }
 }
