@@ -5,7 +5,7 @@
     <TargetFramework>net5.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <StartupObject></StartupObject>
-    <RootNamespace>GenshinBot.Windows</RootNamespace>
+    <RootNamespace>genshinbot.windows</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,6 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="badui\Viewport2.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Update="yui\WindowsForms\Button.cs">
       <SubType>Component</SubType>
     </Compile>

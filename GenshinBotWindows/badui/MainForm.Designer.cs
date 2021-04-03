@@ -1,5 +1,5 @@
 ﻿
-namespace GenshinBot.Windows.badui
+namespace genshinbot.windows.badui
 {
     partial class MainForm
     {

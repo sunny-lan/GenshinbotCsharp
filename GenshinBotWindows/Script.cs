@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace GenshinbotCsharp
 {
-    interface Script
+    public interface Script
     {
+        string DisplayName => this.GetType().FullName;
         void Load(GenshinBot b);
         void Unload(GenshinBot b);
     }

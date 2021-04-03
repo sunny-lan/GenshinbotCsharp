@@ -63,19 +63,28 @@ namespace GenshinbotCsharp.util
             }
         }
 
+    }
+
+    public static class EventWaiter
+    {
         public static (Task<K>, Action<K>) Waiter<K>()
         {
             TaskCompletionSource<K> t = new TaskCompletionSource<K>();
             return (
                 t.Task,
-                x=>t.TrySetResult(x)
+                x => t.TrySetResult(x)
             );
         }
         public static Task<K> WaitEvent<K>(Action<Action<K>> subscribe, Action<Action<K>> unsubscribe)
         {
             var (t, a) = Waiter<K>();
-            subscribe(a);
-            subscribe((_) => unsubscribe(a));
+            Action<K> x = null;
+            x = y =>
+              {
+                  a(y);
+                  unsubscribe(x);
+              };
+            subscribe(x);
             return t;
         }
     }

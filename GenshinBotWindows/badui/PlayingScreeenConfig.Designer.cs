@@ -1,7 +1,7 @@
 ﻿
-namespace GenshinBotWindows.badui
+namespace genshinbot.windows.badui
 {
-    partial class Viewport
+    partial class PlayingScreeenConfig
     {
         /// <summary> 
         /// Required designer variable.

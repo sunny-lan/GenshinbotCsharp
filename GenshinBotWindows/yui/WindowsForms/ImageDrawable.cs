@@ -27,8 +27,11 @@ namespace GenshinbotCsharp.yui.WindowsForms
             get => _img;
             set
             {
-                _img = value;
-                bmp = value?.ToBmpFast();
+                if (value != _img)
+                {
+                    _img = value;
+                    bmp = value?.ToBmpFast();
+                }
                 parent.Invalidate();
 
             }

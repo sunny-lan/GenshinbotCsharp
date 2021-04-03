@@ -14,7 +14,7 @@ namespace GenshinbotCsharp
     {
         Tab CreateTab();
 
-
+        void RemoveTab(Tab tab);
     }
 }
 
@@ -96,6 +96,8 @@ namespace GenshinbotCsharp.yui
 
         void ClearChildren();
         void Delete(object r);
+
+        
     }
 
     public interface Button
@@ -114,12 +116,15 @@ namespace GenshinbotCsharp.yui
             event EventHandler Deselected;
             string Text { get; set; }
             Scalar Color { get; set; }
-
+            void Delete(Node child);
             void ClearChildren();
             void Invalidate();
         }
 
         public Node CreateNode();
+        void Delete(Node child);
+        void ClearChildren();
+
 
         public void BeginUpdate();
         public void EndUpdate();
@@ -151,6 +156,7 @@ namespace GenshinbotCsharp.yui
         string Title { get; set; }
         Container Content { get; }
 
+        public string Status { get; set; }
         Notifications Notifications { get; }
     }
 }

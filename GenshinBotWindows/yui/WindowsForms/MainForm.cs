@@ -1,4 +1,5 @@
 ﻿using GenshinbotCsharp.data;
+using GenshinbotCsharp.util;
 using OpenCvSharp.Extensions;
 using System.ComponentModel;
 using System.Data;
@@ -24,7 +25,10 @@ namespace GenshinbotCsharp.yui.WindowsForms
         {
             var _f = new MainForm();
             Task.Run(()=>Application.Run(_f));
-            return _f;
+            var waiter = EventWaiter.Waiter<YUI>();
+            _f.Load += (s, e) => waiter.Item2(_f);
+            waiter.Item1.Wait();
+            return waiter.Item1.Result;
         }
 
         public MainForm()
@@ -37,6 +41,23 @@ namespace GenshinbotCsharp.yui.WindowsForms
             Tab t = new Tab();
            Invoke((MethodInvoker)delegate { tabs.TabPages.Add(t); });
             return t;
+        }
+
+        public void RemoveTab(yui.Tab tab)
+        {
+            if (tab is TabPage pg)
+                Invoke((MethodInvoker)delegate { tabs.TabPages.Remove(pg); });
+            else Debug.Assert(false);
+        }
+
+        private void tabs_Selected(object sender, TabControlEventArgs e)
+        {
+           if(e.TabPage is Tab tab)
+            {
+                statusStrip.Text = tab.Status;
+            }
+            else Debug.Assert(false);
+
         }
     }
 }

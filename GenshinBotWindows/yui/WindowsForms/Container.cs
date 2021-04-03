@@ -4,6 +4,8 @@ namespace GenshinbotCsharp.yui.WindowsForms
 {
     class Container : FlowLayoutPanel, yui.Container
     {
+        public override bool AutoScroll => true;
+        
         public void ClearChildren()
         {
             Invoke((MethodInvoker)delegate
@@ -17,6 +19,7 @@ namespace GenshinbotCsharp.yui.WindowsForms
             var btn = new Button();
             Invoke((MethodInvoker)delegate
             {
+                btn.AutoSize = true;
                 Controls.Add(btn);
             });
             return btn;
@@ -37,6 +40,7 @@ namespace GenshinbotCsharp.yui.WindowsForms
             var pg = new Container();
             Invoke((MethodInvoker)delegate
             {
+                pg.AutoSize = true;
                 Controls.Add(pg);
             });
             return pg;

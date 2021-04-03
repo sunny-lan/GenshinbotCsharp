@@ -103,12 +103,15 @@ namespace GenshinbotCsharp
         #region UI
 
         public YUI Ui;
+        genshinbot.tools.ScriptList scriptListUi = new genshinbot.tools.ScriptList();
         public void InitUi()
         {
             Debug.Assert(Ui == null);
 
             Ui = yui.WindowsForms.MainForm.make();
             Console.WriteLine("UI initialized");
+
+            Load(scriptListUi);
         }
 
         #endregion
@@ -158,6 +161,27 @@ namespace GenshinbotCsharp
             Task initControllers = initScreens.ContinueWith(_=>InitControllers());
             await Task.WhenAll(initDb, initUi, initScreens, initControllers);
             Console.WriteLine("Bot init done");
+        }
+
+
+       
+        HashSet<Script> loadedScripts = new HashSet<Script>();
+
+        public void Load(Script s)
+        {
+            if(loadedScripts.Contains(s))
+                throw new Exception("Script already loaded");
+
+            loadedScripts.Add(s);
+            s.Load(this);
+        }
+
+        public void Unload(Script s)
+        {
+            if (!loadedScripts.Remove(s))
+                throw new Exception("Script not loaded");
+
+            s.Unload(this);
         }
 
         public static void generalTest()

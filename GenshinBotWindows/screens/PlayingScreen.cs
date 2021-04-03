@@ -23,8 +23,7 @@ namespace GenshinbotCsharp.screens
                     public Rect Name { get; set; }
                 }
 
-                public CharacterConfig Template { get; set; }
-                public Point?[] Party4TemplateOffset { get; set; }
+                public CharacterConfig[] Characters { get; set; }
             }
 
             public Dictionary<Size, RD> R { get; set; } = new Dictionary<Size, RD>

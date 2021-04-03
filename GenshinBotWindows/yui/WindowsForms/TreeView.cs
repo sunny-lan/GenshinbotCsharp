@@ -10,11 +10,12 @@ using System.Windows.Forms;
 
 namespace GenshinbotCsharp.yui.WindowsForms
 {
-    public partial class TreeView : System.Windows.Forms.TreeView,yui.TreeView
+    public partial class TreeView : System.Windows.Forms.TreeView, yui.TreeView
     {
         class Node : TreeNode, yui.TreeView.Node
         {
-            public OpenCvSharp.Scalar Color {
+            public OpenCvSharp.Scalar Color
+            {
                 get => this.ForeColor.cv3();
                 set => this.ForeColor = value.SysBgr255();
             }
@@ -23,20 +24,30 @@ namespace GenshinbotCsharp.yui.WindowsForms
             public event EventHandler Selected;
             public event EventHandler Deselected;
 
-            public Node():base()
+            string yui.TreeView.Node.Text
+            {
+                get => base.Text; 
+                set=> TreeView.Invoke((MethodInvoker)delegate { base.Text = value; });
+            }
+
+            public Node() : base()
             {
             }
 
             public yui.TreeView.Node CreateChild()
             {
                 var nd = new Node();
-                Nodes.Add(nd);
+                TreeView.Invoke((MethodInvoker)delegate
+                {
+                    Nodes.Add(nd);
+                });
                 return nd;
             }
 
 
 
-            internal void  OnSelect(EventArgs e) {
+            internal void OnSelect(EventArgs e)
+            {
                 Selected?.Invoke(this, e);
             }
             internal void OnDoubleClick(EventArgs e)
@@ -50,21 +61,33 @@ namespace GenshinbotCsharp.yui.WindowsForms
             }
             public void ClearChildren()
             {
-                Nodes.Clear();
+                TreeView.Invoke((MethodInvoker)delegate
+                {
+                    Nodes.Clear();
+                });
             }
 
             public void Invalidate()
             {
-               
+
+            }
+
+            public void Delete(yui.TreeView.Node child)
+            {
+                TreeView.Invoke((MethodInvoker)delegate
+                {
+                    Nodes.Remove(child as TreeNode);
+                });
             }
         }
 
-        public TreeView():base()
+
+        public TreeView() : base()
         {
             InitializeComponent();
             //TODO
             Size = new Size(500, 500);
-            
+
         }
 
         Node prevSelected;
@@ -85,7 +108,7 @@ namespace GenshinbotCsharp.yui.WindowsForms
         protected override void OnAfterSelect(TreeViewEventArgs e)
         {
             base.OnAfterSelect(e);
-            if(e.Node is Node n)
+            if (e.Node is Node n)
             {
                 prevSelected?.OnDeselect(e);
                 prevSelected = n;
@@ -105,8 +128,35 @@ namespace GenshinbotCsharp.yui.WindowsForms
         public yui.TreeView.Node CreateNode()
         {
             var nd = new Node();
-            Nodes.Add(nd);
+            Invoke((MethodInvoker)delegate
+            {
+                Nodes.Add(nd);
+            });
             return nd;
+        }
+
+        public void Delete(yui.TreeView.Node child)
+        {
+            Invoke((MethodInvoker)delegate
+            {
+                Nodes.Remove(child as TreeNode);
+            });
+        }
+
+        public void ClearChildren()
+        {
+            Invoke((MethodInvoker)delegate
+            {
+                Nodes.Clear();
+            });
+        }
+        void yui.TreeView.BeginUpdate()
+        {
+            Invoke((MethodInvoker)delegate { base.BeginUpdate(); });
+        }
+        void yui.TreeView.EndUpdate()
+        {
+            Invoke((MethodInvoker)delegate { base.EndUpdate(); });
         }
     }
 }

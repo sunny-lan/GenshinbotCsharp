@@ -1,5 +1,6 @@
 ﻿using OpenCvSharp;
 using System;
+using System.Threading.Tasks;
 
 namespace GenshinbotCsharp
 {
@@ -15,6 +16,11 @@ namespace GenshinbotCsharp
         Size GetSize();
         bool IsForegroundWindow();
         Mat Screenshot(Rect r);
+
+        Task<Mat> ScreenshotAsync(Rect r) {
+            return Task.Run(() => Screenshot(r));
+        }
+
         void TryFocus();
         void WaitForFocus(int timeout = -1);
     }

@@ -3,11 +3,11 @@
 namespace GenshinbotCsharp.yui.WindowsForms
 {
 
-    class Tab :TabPage, yui.Tab
+    class Tab : TabPage, yui.Tab
     {
         Container _children;
 
-        public Tab():base()
+        public Tab() : base()
         {
             _children = new Container
             {
@@ -16,9 +16,15 @@ namespace GenshinbotCsharp.yui.WindowsForms
             Controls.Add(_children);
         }
 
-        public string Title { get => Text; set => Text = value; }
+        public string Title
+        {
+            get => Text;
+            set => Invoke((MethodInvoker)delegate { Text = value; });
+        }
 
         public yui.Container Content => _children;
+
+        public string Status { get; set; }
 
         public Notifications Notifications => throw new System.NotImplementedException();
     }

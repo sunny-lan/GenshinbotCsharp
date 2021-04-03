@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using GenshinbotCsharp;
 
-namespace GenshinBot.Windows.badui
+namespace genshinbot.windows.badui
 {
     
     public partial class MainForm : Form

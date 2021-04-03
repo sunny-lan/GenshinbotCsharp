@@ -8,13 +8,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace GenshinBotWindows.badui
+namespace genshinbot.windows.badui
 {
-    public partial class Viewport : UserControl
+    public partial class PlayingScreeenConfig : UserControl
     {
-        public Viewport()
+        public PlayingScreeenConfig()
         {
             InitializeComponent();
         }
+
+
     }
 }
