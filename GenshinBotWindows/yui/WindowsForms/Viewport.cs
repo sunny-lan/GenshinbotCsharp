@@ -65,8 +65,10 @@ namespace genshinbot.yui.WindowsForms
             var a = switch_bet(Viewport_MouseMove, mouse_wrp(MouseEvent.Kind.Move));
             MouseMove += (o, e) => a(o, e);
 
-            var b = switch_bet(Viewport_MouseWheel, mouse_wrp(MouseEvent.Kind.Up));
-            MouseWheel += (o, e) => b(o, e);
+            MouseWheel += Viewport_MouseWheel;
+
+            var c = switch_bet(Viewport_MouseMove, mouse_wrp(MouseEvent.Kind.Click));
+            MouseClick += (o, e) => c(o, e);
         }
 
         Func<MouseEventArgs, bool> mouse_wrp(MouseEvent.Kind kind)
@@ -145,6 +147,7 @@ namespace genshinbot.yui.WindowsForms
         {
             var i = new ImageDrawable(this);
             drawable.Add(i);
+            Invalidate();
             return i;
         }
 
@@ -152,9 +155,18 @@ namespace genshinbot.yui.WindowsForms
         {
             var r = new RectDrawable(this);
             drawable.Add(r);
+            Invalidate();
             return r;
         }
 
+
+        public yui.Line CreateLine()
+        {
+            var l = new Line(this);
+            drawable.Add(l);
+            Invalidate();
+            return l;
+        }
         protected override void OnPaint(PaintEventArgs e)
         {
             // base.OnPaint(e);

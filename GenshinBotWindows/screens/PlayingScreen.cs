@@ -15,28 +15,36 @@ namespace genshinbot.screens
         {
             public class RD
             {
-                public Rect minimapLoc { get; internal set; }
+                public Rect MinimapLoc { get; internal set; }
 
-                public class CharacterConfig
+                public class CharacterReadTemplate
                 {
-                    public Rect Number { get; set; }
+                    public int? HealthY { get; set; }
 
-                    public Rect Name { get; set; }
+                    public int? NumberYBegin { get; set; }
+                    public int? NumberYEnd { get; set; }
+
+                    public int? NumberXBegin { get; set; }
+                    public int? NumberXEnd { get; set; }
+
+                    public int? HealthXBegin { get; set; }
+                    public int? HealthXEnd { get; set; }
                 }
 
-                public CharacterConfig[] Characters { get; set; }
+                public CharacterReadTemplate CharTemplate { get; set; } = new CharacterReadTemplate();
+                public int?[] TemplateYOffset { get; set; } = { 0, null, null, null };
             }
 
             public Dictionary<Size, RD> R { get; set; } = new Dictionary<Size, RD>
             {
                 [new Size(1440, 900)] = new RD
                 {
-                    minimapLoc = new Rect(46, 13, 161, 161),
+                    MinimapLoc = new Rect(46, 13, 161, 161),
 
                 },
                 [new Size(1680, 1050)] = new RD
                 {
-                    minimapLoc = new Rect(53, 15, 189, 189),
+                    MinimapLoc = new Rect(53, 15, 189, 189),
                 },
             };
             public int arrowRadius { get; internal set; } = 15;
@@ -63,7 +71,7 @@ namespace genshinbot.screens
         public Mat SnapMinimap()
         {
             var db = b.Db.PlayingScreenDb;
-            var miniRect = db.R[b.W.GetSize()].minimapLoc;
+            var miniRect = db.R[b.W.GetSize()].MinimapLoc;
             return b.W.Screenshot(miniRect);
         }
 
@@ -72,7 +80,7 @@ namespace genshinbot.screens
         Mat snapArrow()
         {
             var db = b.Db.PlayingScreenDb;
-            var miniRect = db.R[b.W.GetSize()].minimapLoc;
+            var miniRect = db.R[b.W.GetSize()].MinimapLoc;
             return b.W.Screenshot(miniRect.Center().RectAround(new Size(db.arrowRadius * 2, db.arrowRadius * 2)));
         }
 

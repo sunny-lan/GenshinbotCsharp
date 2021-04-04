@@ -8,7 +8,7 @@ using System.Windows.Forms;
 
 namespace genshinbot.yui.WindowsForms
 {
-    class RectDrawable : Drawable,yui.Rect
+    class RectDrawable : Drawable, yui.Rect
     {
         private OpenCvSharp.Rect r;
         private Viewport parent;
@@ -17,15 +17,15 @@ namespace genshinbot.yui.WindowsForms
         {
             this.parent = parent;
         }
-
-        public bool Editable { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public OpenCvSharp.Rect R { get =>r; set
+        public OpenCvSharp.Rect R
+        {
+            get => r; set
             {
+                //parent.Invalidate(new Region(r.Sys()));
                 r = value;
-                //todo improve efficiency
                 parent.Invalidate();
-            } }
-        
+            }
+        }
 
         public void OnPaint(PaintEventArgs e)
         {

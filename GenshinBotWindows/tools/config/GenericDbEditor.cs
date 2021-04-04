@@ -190,7 +190,7 @@ namespace genshinbot.yui.tools
             }
             else
             {
-                var t = vp.SelectAndCreate();
+                var t = vp.SelectCreateRect();
                 t.Wait();
                 r = t.Result;
                 onChange(r.R);

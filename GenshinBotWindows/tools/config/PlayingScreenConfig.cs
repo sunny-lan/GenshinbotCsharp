@@ -36,7 +36,44 @@ namespace genshinbot.tools.config
             screenshotBtn.Enabled = b.W != null;
             b.AttachedWindowChanged += (s, attached) => screenshotBtn.Enabled = attached;
 
-            var uiRects = new List<genshinbot.yui.Rect>();
+            var repaintList = new List<XYLine>();
+
+            PlayingScreen.Db.RD activeRD;
+
+            void repaint()
+            {
+                //clear old ui
+                foreach (var xyline in repaintList)
+                    xyline.Delete();
+                repaintList.Clear();
+
+                if (activeRD == null) return;
+
+                void createLine(int? _v, Orientation o, int? min = null, int? max = null)
+                {
+                    if (_v is int v)
+                    {
+                        var line = XYLine.Create(vp, o, min, max);
+                        line.V = v;
+                        repaintList.Add(line);
+                    }
+                }
+
+                var template = activeRD.CharTemplate;
+
+                createLine(template.HealthXBegin, Orientation.Vertical);
+                createLine(template.HealthXEnd, Orientation.Vertical);
+                createLine(template.NumberXBegin, Orientation.Vertical);
+                createLine(template.NumberXEnd, Orientation.Vertical);
+
+                for (int i = 0; i < 4; i++)
+                {
+                    int? offset = activeRD.TemplateYOffset[i];
+                    createLine(template.HealthY + offset, Orientation.Horizontal, template.HealthXBegin, template.HealthXEnd);
+                    createLine(template.NumberYBegin + offset, Orientation.Horizontal, template.NumberXBegin, template.NumberXEnd);
+                    createLine(template.NumberYEnd + offset, Orientation.Horizontal, template.NumberXBegin, template.NumberXEnd);
+                }
+            }
 
             var prevSize = new Size();
             screenshotBtn.Click += async (s, e) =>
@@ -48,39 +85,49 @@ namespace genshinbot.tools.config
                 var size = rect.Size;
                 if (size != prevSize)
                 {
-                    //clear old ui
-                    foreach (var uiRect in uiRects)
-                        vp.Delete(uiRect);
-                    uiRects.Clear();
 
                     prevSize = size;
                     if (!db.R.ContainsKey(size))
                         db.R[size] = new PlayingScreen.Db.RD();
-                    var r = db.R[size];
+                    activeRD = db.R[size];
 
-                    var characters=new PlayingScreen.Db.RD.CharacterConfig[4];
 
-                    for (int i = 0; i < 4; i++)
+                    async Task askUser(string selectionMessage, int? val, Action<int> set, Orientation o)
                     {
-                        genshinbot.yui.Rect name, number;
-                        var character = r.Characters[i];
-                       // if (character == null)
+                        if (val is null)
                         {
-                            //TODO
-                            character = r.Characters[i] = new PlayingScreen.Db.RD.CharacterConfig();
+                            tab.Status = selectionMessage;
+                            ui.GiveFocus(tab);
+                            set(await vp.SelectXY(o));
+                            repaint();
                         }
-                        tab.Status = "Select character " + i + " name";
-                        ui.GiveFocus(tab);
-                        uiRects.Add(name = await vp.SelectAndCreate());
-                        character.Name = name.R;
-
-                        tab.Status = "Select character " + i + " number";
-                        ui.GiveFocus(tab);
-                        uiRects.Add(number = await vp.SelectAndCreate());
-                        character.Number = number.R;
-
 
                     }
+
+                    Debug.Assert(activeRD.TemplateYOffset != null);
+                    repaint();
+
+                    var template = activeRD.CharTemplate;
+                    await askUser("Health X begin", template.HealthXBegin, v => template.HealthXBegin = v, Orientation.Vertical);
+                    await askUser("Health X end", template.HealthXEnd, v => template.HealthXEnd = v, Orientation.Vertical);
+                    await askUser("Number X begin", template.NumberXBegin, v => template.NumberXBegin = v, Orientation.Vertical);
+                    await askUser("Number X end", template.NumberXEnd, v => template.NumberXEnd = v, Orientation.Vertical);
+
+                    await askUser("Number Y begin", template.NumberYBegin, v => template.NumberYBegin = v, Orientation.Horizontal);
+                    await askUser("Number Y end", template.NumberYEnd, v => template.NumberYEnd = v, Orientation.Horizontal);
+
+                    await askUser("C0 Health Y", template.HealthY, v => template.HealthY = v, Orientation.Horizontal);
+
+                    for (int i = 1; i < 4; i++)
+                    {
+                        await askUser("C" + i + " Health Y", activeRD.TemplateYOffset[i], y =>
+                        {
+                            activeRD.TemplateYOffset[i] = y - template.HealthY;
+                            repaint();
+                        }, Orientation.Horizontal);
+                    }
+
+
                     tab.Status = "Idle";
                 }
             };

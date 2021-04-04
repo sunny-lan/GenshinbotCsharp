@@ -49,7 +49,6 @@ namespace genshinbot.yui
 
     public interface Rect
     {
-        bool Editable { get; set; }
         OpenCvSharp.Rect R { get; set; }
     }
 
@@ -88,6 +87,18 @@ namespace genshinbot.yui
         void Invalidate();
     }
 
+    public enum Orientation
+    {
+        Horizontal,
+        Vertical
+    }
+
+    public interface Line
+    {
+        Point A { get; set; }
+        Point B { get; set; }
+    }
+
     public interface Viewport
     {
         Size Size { get; set; }
@@ -99,6 +110,7 @@ namespace genshinbot.yui
         Action<Transformation> OnTChange { get; set; }
 
         Rect CreateRect();
+        Line CreateLine();
         Image CreateImage();
 
         /// <summary>

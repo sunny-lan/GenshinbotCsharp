@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 /// </summary>
 namespace genshinbot.yui
 {
-   public static class Ext
+    public static partial class Ext
     {
         public static Func<K, bool> ConditionalSignal<K>(this EventWaiter<K> waiter, Func<K, bool> condition = null) where K : struct
 
@@ -28,8 +28,15 @@ namespace genshinbot.yui
         }
 
 
+        public static async Task<OpenCvSharp.Rect> SelectRect(this Viewport v)
+        {
+            var r = await v.SelectCreateRect();
+            v.Delete(r);
+            return r.R;
+        }
 
-        public static Task<Rect> SelectAndCreate(this Viewport v)
+
+        public static Task<Rect> SelectCreateRect(this Viewport v)
         {
             var tsk = new TaskCompletionSource<Rect>();
             var old = v.OnMouseEvent;

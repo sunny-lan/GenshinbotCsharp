@@ -48,7 +48,7 @@ namespace genshinbot.yui
             };
 
 
-           Task.Run(()=> { while (true) view.SelectAndCreate().Wait(); });
+           Task.Run(()=> { while (true) view.SelectCreateRect().Wait(); });
         }
     }
 }
