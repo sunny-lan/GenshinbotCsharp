@@ -20,7 +20,15 @@ namespace genshinbot
         {
             Converters =
             {
-                new database.jsonconverters.Point2dConverter()
+                new database.jsonconverters.Point2dConverter(),
+                new database.jsonconverters.PointConverter(),
+
+                new database.jsonconverters.RDConverterFactory(),
+
+                new database.jsonconverters.Rect2dConverter(),
+                new database.jsonconverters.RectConverter(),
+
+                
             },
             IgnoreNullValues = true,
         };
@@ -39,9 +47,14 @@ namespace genshinbot
             return File.ReadAllText(Get(name));
         }
 
-        public static void Write(string name, string value)
+        public static void Write(string name, string value, bool createDirs=true)
         {
-            File.WriteAllText(Get(name), value);
+            var path = Get(name);
+            if (createDirs)
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+            }
+            File.WriteAllText(path, value);
         }
 
         public static T ReadJson<T>(string name, T def)

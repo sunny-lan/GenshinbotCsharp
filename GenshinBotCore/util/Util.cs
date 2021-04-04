@@ -9,6 +9,12 @@ namespace genshinbot
 {
     public static class Util
     {
+        public static void Swap<T>(ref T a, ref T b)
+        {
+            T tmp = a;
+            a = b;
+            b = tmp;
+        }
         public static System.Drawing.Color SysBgr255(this Scalar s)
         {
             return System.Drawing.Color.FromArgb(blue:(int)s.Val0, green:(int)s.Val1, red:(int)s.Val2);

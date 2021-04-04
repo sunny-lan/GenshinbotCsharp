@@ -24,12 +24,12 @@ namespace genshinbot.yui.WindowsForms
         OpenCvSharp.Size yui.Viewport.Size
         {
             get => Size.cv();
-            set => Invoke((MethodInvoker) delegate {
+            set => Invoke((MethodInvoker)delegate
+            {
                 Size = value.Sys();
             });
         }
 
-        private List<ViewportComponent> _controls = new List<ViewportComponent>();
         public Transformation T
         {
             get => _transform;
@@ -47,12 +47,6 @@ namespace genshinbot.yui.WindowsForms
 
         private List<Drawable> drawable = new List<Drawable>();
 
-
-        void Recalc()
-        {
-            foreach (var c in _controls)
-                c.SetTransform(_transform);
-        }
 
         public Viewport() : base()
         {
@@ -136,26 +130,24 @@ namespace genshinbot.yui.WindowsForms
             dragViewPoint = T.Inverse(mouse);
         }
         #endregion
-        private void Add<T>(T i) where T : Control, ViewportComponent
+        private void add(Drawable i)
         {
-            i.SetTransform(this.T);
-            _controls.Add(i);
-            Controls.Add(i);
+            lock (drawable) drawable.Add(i);
+            Invalidate();
         }
+
 
         public yui.Image CreateImage()
         {
             var i = new ImageDrawable(this);
-            drawable.Add(i);
-            Invalidate();
+            add(i);
             return i;
         }
 
         public yui.Rect CreateRect()
         {
             var r = new RectDrawable(this);
-            drawable.Add(r);
-            Invalidate();
+            add(r);
             return r;
         }
 
@@ -163,8 +155,7 @@ namespace genshinbot.yui.WindowsForms
         public yui.Line CreateLine()
         {
             var l = new Line(this);
-            drawable.Add(l);
-            Invalidate();
+            add(l);
             return l;
         }
         protected override void OnPaint(PaintEventArgs e)
@@ -173,29 +164,24 @@ namespace genshinbot.yui.WindowsForms
             var gfx = e.Graphics;
             gfx.TranslateTransform((float)_transform.Translation.X, (float)_transform.Translation.Y);
             gfx.ScaleTransform((float)_transform.Scale, (float)_transform.Scale);
-            foreach (var d in drawable)
-                d.OnPaint(e);
+            lock (drawable)
+                foreach (var d in drawable)
+                    d.OnPaint(e);
         }
 
         public void ClearChildren()
         {
-            Controls.Clear();
-            drawable.Clear();
+            lock (drawable)
+                drawable.Clear();
+            Invalidate();
         }
 
         public void Delete(object r)
         {
-            if (r is Control c)
-            {
-                Controls.Remove(c);
-            }
 
-            if (r is ViewportComponent v)
-                _controls.Remove(v);
-
-            if (r is Drawable d)
-                drawable.Remove(d);
-
+            lock (drawable)
+                drawable.Remove(r as Drawable);
+            Invalidate();
 
         }
     }

@@ -14,10 +14,18 @@ namespace genshinbot
         #region Database
         public class Database
         {
-            private Lazy<database.map.MapDb> mapDb = new Lazy<database.map.MapDb>(() => Data.ReadJson("map/db.json", database.map.MapDb.Default()));
+            private Lazy<database.map.MapDb> mapDb = new Lazy<database.map.MapDb>(
+                () => Data.ReadJson("map/db.json", database.map.MapDb.Default()));
             public database.map.MapDb MapDb => mapDb.Value;
 
-            public screens.PlayingScreen.Db PlayingScreenDb { get; } = new screens.PlayingScreen.Db();
+            private Lazy<screens.PlayingScreen.Db> playingScreenDb = new Lazy<screens.PlayingScreen.Db>(
+                () => Data.ReadJson("screens/PlayingScreen.json", new screens.PlayingScreen.Db()));
+            public screens.PlayingScreen.Db PlayingScreenDb => playingScreenDb.Value;
+            public void SavePlayingScreenDb()
+            {
+                Data.WriteJson("screens/PlayingScreen.json", playingScreenDb.Value);
+            }
+
             public screens.LoadingScreen.Db LoadingScreenDb { get; } = new screens.LoadingScreen.Db();
             public screens.MapScreen.Db MapScreenDb { get; } = new screens.MapScreen.Db();
         }

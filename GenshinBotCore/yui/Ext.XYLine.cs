@@ -44,7 +44,7 @@ namespace genshinbot.yui
             return new XYLine(orientation, v, min ?? -10000, max ?? 10000);
         }
 
-        public static Task<XYLine> Select(Viewport v, Orientation orientation)
+        public static Task<XYLine> Select(Viewport v, Orientation orientation, int? min = null, int? max = null)
         {
             XYLine line = null;
             var tsk = new TaskCompletionSource<XYLine>();
@@ -62,7 +62,7 @@ namespace genshinbot.yui
                 }
                 else if (evt.Type == MouseEvent.Kind.Move)
                 {
-                    if (line == null) { line = XYLine.Create(v, orientation); }
+                    if (line == null) { line = XYLine.Create(v, orientation,min,max); }
                     if (orientation == Orientation.Vertical)
                     {
                         line.X = (int)Math.Round(evt.Location.X);

@@ -17,22 +17,13 @@ namespace genshinbot.screens
             {
                 public Rect MinimapLoc { get; internal set; }
 
-                public class CharacterReadTemplate
+                public class CharacterTemplate
                 {
-                    public int? HealthY { get; set; }
-
-                    public int? NumberYBegin { get; set; }
-                    public int? NumberYEnd { get; set; }
-
-                    public int? NumberXBegin { get; set; }
-                    public int? NumberXEnd { get; set; }
-
-                    public int? HealthXBegin { get; set; }
-                    public int? HealthXEnd { get; set; }
+                    public Rect Health { get; set; }
+                    public Rect Number { get; set; }
                 }
 
-                public CharacterReadTemplate CharTemplate { get; set; } = new CharacterReadTemplate();
-                public int?[] TemplateYOffset { get; set; } = { 0, null, null, null };
+                public CharacterTemplate[] Characters { get; set; }
             }
 
             public Dictionary<Size, RD> R { get; set; } = new Dictionary<Size, RD>
