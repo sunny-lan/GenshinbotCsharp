@@ -20,7 +20,7 @@ namespace genshinbot.yui.WindowsForms
     {
         private Transformation _transform = Transformation.Unit();
 
-
+        public event Action<MouseEvent> MouseEvent;
         OpenCvSharp.Size yui.Viewport.Size
         {
             get => Size.cv();
@@ -45,32 +45,40 @@ namespace genshinbot.yui.WindowsForms
         public Func<MouseEvent, bool> OnMouseEvent { get; set; }
         public Action<Transformation> OnTChange { get; set; }
 
+        public Point2d? MousePos { get; private set; }
+
         private List<Drawable> drawable = new List<Drawable>();
+        protected override bool DoubleBuffered => true;
 
 
-        public Viewport() : base()
+        protected override void OnMouseDown(MouseEventArgs e)
         {
-            DoubleBuffered = true;
-            // BackColor = Color.Black;
-            var x = switch_bet(Viewport_MouseUp, mouse_wrp(MouseEvent.Kind.Up));
-            MouseUp += (o, e) => x(o, e);
-            var y = switch_bet(Viewport_MouseDown, mouse_wrp(MouseEvent.Kind.Down));
-            MouseDown += (o, e) => y(o, e);
-            var a = switch_bet(Viewport_MouseMove, mouse_wrp(MouseEvent.Kind.Move));
-            MouseMove += (o, e) => a(o, e);
-
-            MouseWheel += Viewport_MouseWheel;
-
-            var c = switch_bet(Viewport_MouseMove, mouse_wrp(MouseEvent.Kind.Click));
-            MouseClick += (o, e) => c(o, e);
+            switch_bet(Viewport_MouseDown, mouse_wrp(yui.MouseEvent.Kind.Down),e);
+        }
+        protected override void OnMouseUp(MouseEventArgs e)
+        {
+            switch_bet(Viewport_MouseUp, mouse_wrp(yui.MouseEvent.Kind.Up),e);
+        }
+        protected override void OnMouseClick(MouseEventArgs e)
+        {
+            switch_bet(Viewport_MouseMove, mouse_wrp(yui.MouseEvent.Kind.Click),e);
+        }
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            MousePos = T.Inverse(e.Location.Cv());
+            switch_bet(Viewport_MouseMove, mouse_wrp(yui.MouseEvent.Kind.Move),e);
         }
 
-        Func<MouseEventArgs, bool> mouse_wrp(MouseEvent.Kind kind)
+        protected override void OnMouseWheel(MouseEventArgs e)
+        {
+            Viewport_MouseWheel(this, e);
+        }
+
+        Action<MouseEventArgs> mouse_wrp(MouseEvent.Kind kind)
         {
             return (e) =>
             {
-                if (OnMouseEvent == null) return false;
-                return OnMouseEvent(new MouseEvent
+                this.MouseEvent?.Invoke(new MouseEvent
                 {
                     Location = T.Inverse(e.Location.Cv()),
                     Type = kind,
@@ -78,21 +86,17 @@ namespace genshinbot.yui.WindowsForms
             };
         }
 
-        Action<object, T> switch_bet<T>(Action<object, T> own, Func<T, bool> other)
+        void switch_bet<T>(Action<object, T> own, Action<T> other, T e)
         {
-            return (s, e) =>
+            
+            if (ModifierKeys.HasFlag(Keys.Alt))
             {
-
-                if (ModifierKeys.HasFlag(Keys.Alt))
-                {
-                    own(s, e);
-                }
-                else
-                {
-                    var r = other(e);
-                    if (!r) own(s, e);
-                }
-            };
+                own(this, e);
+            }
+            else
+            {
+                other(e);
+            }
         }
 
 
@@ -180,7 +184,8 @@ namespace genshinbot.yui.WindowsForms
         {
 
             lock (drawable)
-                drawable.Remove(r as Drawable);
+                if (!drawable.Remove(r as Drawable))
+                    throw new Exception();
             Invalidate();
 
         }

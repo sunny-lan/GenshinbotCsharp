@@ -47,6 +47,11 @@ namespace genshinbot.yui
         void Delete(Notification n);
     }
 
+    public interface Component
+    {
+        void Delete();
+    }
+
     public interface Rect
     {
         OpenCvSharp.Rect R { get; set; }
@@ -113,15 +118,12 @@ namespace genshinbot.yui
         Line CreateLine();
         Image CreateImage();
 
-        /// <summary>
-        /// Callback should return true if event handled
-        /// If false is returned event is bubbled to parent
-        /// </summary>
-        Func<MouseEvent, bool> OnMouseEvent { get; set; }
+        event Action<MouseEvent> MouseEvent;
 
         void ClearChildren();
         void Delete(object r);
 
+        Point2d? MousePos { get; }
         
     }
 
@@ -163,7 +165,19 @@ namespace genshinbot.yui
     {
         public object SelectedObject { get; set; }
     }
+    public interface Slider
+    {
+        public int V { get; set; }
+        public event Action<int> VChanged;
+        public int Max { get; set; }
+        public int Min { get; set; }
+    
+    }
 
+    public class Flexbox
+    {
+
+    }
     public interface Container
     {
         Viewport CreateViewport();
@@ -174,8 +188,13 @@ namespace genshinbot.yui
         PropertyGrid CreatePropertyGrid();
         Container CreateSubContainer();
 
+        Slider CreateSlider();
+
         void ClearChildren();
         void Delete(object child);
+
+        bool SupportsFlexbox => false;
+        Flexbox Layout { get=>throw new NotImplementedException(); set=>throw new NotImplementedException(); }
 
         Viewport2 GetViewport2() { throw new NotImplementedException(); }
 

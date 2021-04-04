@@ -14,58 +14,14 @@ namespace genshinbot.yui.WindowsForms
             });
         }
 
-        public yui.Button CreateButton()
+        private T add<T>(T c) where T : Control
         {
-            var btn = new Button();
             Invoke((MethodInvoker)delegate
             {
-                btn.AutoSize = true;
-                Controls.Add(btn);
+                Controls.Add(c);
             });
-            return btn;
+            return c;
         }
-
-        public yui.PropertyGrid CreatePropertyGrid()
-        {
-            var pg = new PropertyGrid();
-            Invoke((MethodInvoker)delegate
-            {
-                Controls.Add(pg);
-            });
-            return pg;
-        }
-
-        public yui.Container CreateSubContainer()
-        {
-            var pg = new Container();
-            Invoke((MethodInvoker)delegate
-            {
-                pg.AutoSize = true;
-                Controls.Add(pg);
-            });
-            return pg;
-        }
-
-        public yui.TreeView CreateTreeview()
-        {
-            var t = new TreeView();
-            Invoke((MethodInvoker)delegate
-            {
-                Controls.Add(t);
-            });
-            return t;
-        }
-
-        public yui.Viewport CreateViewport()
-        {
-            var vp = new Viewport();
-            Invoke((MethodInvoker)delegate
-            {
-                Controls.Add(vp);
-            });
-            return vp;
-        }
-
         public void Delete(object btn)
         {
             if (btn is Control c)
@@ -75,5 +31,13 @@ namespace genshinbot.yui.WindowsForms
                 });
             else Debug.Assert(false);
         }
+
+        public yui.Button CreateButton() => add(new Button());
+        public yui.PropertyGrid CreatePropertyGrid() => add(new PropertyGrid());
+        public yui.Slider CreateSlider() => add(new Slider());
+        public yui.Container CreateSubContainer() => add(new Container());
+        public yui.TreeView CreateTreeview() => add(new TreeView());
+        public yui.Viewport CreateViewport() => add(new Viewport());
+
     }
 }
