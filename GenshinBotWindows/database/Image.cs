@@ -9,13 +9,13 @@ namespace genshinbot.database
 {
    public class Image
     {
-        public string Path { get; set; }
+        public string Path { get; init; }
 
         private Lazy<Mat> mat;
         private ImreadModes prevMode;
-
         public Mat Load(ImreadModes mode = ImreadModes.Color)
         {
+            if (!Data.Exists(Path)) return null;
             if(mode != prevMode)
             {
                 prevMode = mode;
@@ -26,6 +26,12 @@ namespace genshinbot.database
                 mat = new Lazy<Mat>(() => Data.Imread(Path, mode));
             }
             return mat.Value;
+        }
+
+        public void Save(Mat m)
+        {
+            mat = new Lazy<Mat>(m);
+            Data.Imwrite(Path, m);
         }
     }
 }

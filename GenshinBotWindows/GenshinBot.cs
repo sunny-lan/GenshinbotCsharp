@@ -118,7 +118,7 @@ namespace genshinbot
         {
             Debug.Assert(Ui == null);
 
-            Ui = yui.WindowsForms.MainForm.make();
+            Ui = yui.windows.MainForm.make();
 
             Load(scriptListUi);
 

@@ -1,11 +1,27 @@
 ﻿using System.Windows.Forms;
 
-namespace genshinbot.yui.WindowsForms
+namespace genshinbot.yui.windows
 {
-    class Container : FlowLayoutPanel, yui.Container
+    class FlowLayoutContainer : FlowLayoutPanel, yui.Container
     {
-        public override bool AutoScroll => true;
-        
+        public FlowLayoutContainer():base()
+        {
+            BorderStyle = BorderStyle.FixedSingle;
+        }
+
+        void yui.Container.SetFlex(Flexbox layout)
+        {
+            AutoScroll = layout.Scroll;
+            WrapContents = layout.Wrap;
+            AutoSize = true;
+            FlowDirection = layout.Direction == Orientation.Horizontal ? FlowDirection.LeftToRight : FlowDirection.TopDown;
+        }
+
+        void yui.Container.SetFlex(object child, Flexbox.Item layout)
+        {
+
+        }
+
         public void ClearChildren()
         {
             Invoke((MethodInvoker)delegate
@@ -18,6 +34,7 @@ namespace genshinbot.yui.WindowsForms
         {
             Invoke((MethodInvoker)delegate
             {
+                
                 Controls.Add(c);
             });
             return c;
@@ -34,8 +51,8 @@ namespace genshinbot.yui.WindowsForms
 
         public yui.Button CreateButton() => add(new Button());
         public yui.PropertyGrid CreatePropertyGrid() => add(new PropertyGrid());
-        public yui.Slider CreateSlider() => add(new Slider());
-        public yui.Container CreateSubContainer() => add(new Container());
+        public yui.Slider CreateSlider() => add(new LabelledSlider());
+        public yui.Container CreateSubContainer() => add(new FlowLayoutContainer());
         public yui.TreeView CreateTreeview() => add(new TreeView());
         public yui.Viewport CreateViewport() => add(new Viewport());
 

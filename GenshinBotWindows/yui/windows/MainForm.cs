@@ -1,15 +1,10 @@
-﻿using genshinbot.data;
+﻿using System;
 using genshinbot.util;
-using OpenCvSharp.Extensions;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace genshinbot.yui.WindowsForms
+namespace genshinbot.yui.windows
 {
     /// <summary>
     /// provides implementation of gui using windows forms
@@ -80,10 +75,6 @@ namespace genshinbot.yui.WindowsForms
             
         }
 
-        public void Popup(string message, string title = "")
-        {
-            MessageBox.Show(message, title);
-        }
 
         public void GiveFocus(yui.Tab t)
         {
@@ -99,6 +90,25 @@ namespace genshinbot.yui.WindowsForms
                     await Task.Delay(50);
                 }
             });
+        }
+
+        public PopupResult Popup(string message, string title = "", PopupType type = PopupType.Message)
+        {
+            MessageBoxButtons btns;
+            switch (type)
+            {
+                case PopupType.Message:btns = MessageBoxButtons.OK;break;
+                case PopupType.Confirm:btns = MessageBoxButtons.OKCancel;break;
+                default:throw new NotSupportedException();
+            }
+            var res=MessageBox.Show(text:message,caption:title,buttons:btns);
+            switch (res)
+            {
+                case DialogResult.OK: return PopupResult.Ok;
+                case DialogResult.Cancel:return PopupResult.Cancel;
+                default: throw new NotSupportedException();
+            }
+
         }
     }
 }

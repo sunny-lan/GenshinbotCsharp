@@ -21,7 +21,7 @@ namespace genshinbot.screens
                 {
                     public Rect Health { get; set; }
                     public Rect Number { get; set; }
-                }
+                }   
 
                 public CharacterTemplate[] Characters { get; set; }
             }
@@ -39,6 +39,15 @@ namespace genshinbot.screens
                 },
             };
             public int arrowRadius { get; internal set; } = 15;
+
+            public class CharacterFilter
+            {
+                public int? NumberSatMax { get; set; }
+                public Scalar? HealthMin { get; set; }
+                public Scalar? HealthMax { get; set; }
+            }
+
+            public CharacterFilter CharFilter { get; set; } = new CharacterFilter();
         }
 
         private GenshinBot b;

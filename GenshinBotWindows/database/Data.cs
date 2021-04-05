@@ -27,7 +27,7 @@ namespace genshinbot
 
                 new database.jsonconverters.Rect2dConverter(),
                 new database.jsonconverters.RectConverter(),
-
+                new database.jsonconverters.ScalarConverter(),
                 
             },
             IgnoreNullValues = true,
@@ -83,6 +83,17 @@ namespace genshinbot
             if (res.Empty())
                 throw new Exception("Read empty image");
             return res;
+        }
+        public static void Imwrite(string name,Mat m, bool createDirs = true)
+        {
+            var path = Get(name); 
+            if (createDirs)
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+            }
+            if (!File.Exists(path))
+                throw new Exception("File doesn't exist " + path);
+            Cv2.ImWrite(path, m);
         }
 
     }

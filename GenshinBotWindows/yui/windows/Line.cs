@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace genshinbot.yui.WindowsForms
+namespace genshinbot.yui.windows
 {
     class Line : Drawable, yui.Line
     {

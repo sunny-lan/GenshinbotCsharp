@@ -4,7 +4,7 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace genshinbot.yui.WindowsForms
+namespace genshinbot.yui.windows
 {
     class ImageDrawable : Drawable,yui.Image
     {
@@ -53,7 +53,7 @@ namespace genshinbot.yui.WindowsForms
 
         public void Invalidate(OpenCvSharp.Rect r)
         {
-            throw new NotImplementedException();
+            parent.Invalidate(r);
         }
 
         public void OnPaint(PaintEventArgs e)

@@ -5,7 +5,7 @@
     <TargetFramework>net5.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <StartupObject></StartupObject>
-    <RootNamespace>genshinbot.windows</RootNamespace>
+    <RootNamespace>genshinbot</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,46 +22,50 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="yui\WindowsForms\Button.cs">
+    <Compile Update="yui\windows\Button.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Update="yui\WindowsForms\Container.cs">
+    <Compile Update="yui\windows\TablePanelContainer.cs" />
+    <Compile Update="yui\windows\FlowLayoutContainer.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Update="yui\WindowsForms\Image.cs">
+    <Compile Update="yui\windows\Image.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Update="yui\WindowsForms\MainForm.cs">
+    <Compile Update="yui\windows\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Update="yui\WindowsForms\MainForm.Designer.cs">
+    <Compile Update="yui\windows\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Update="yui\WindowsForms\PropertyGrid.cs">
+    <Compile Update="yui\windows\PropertyGrid.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Update="yui\WindowsForms\Rect.cs">
+    <Compile Update="yui\windows\Rect.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Update="yui\WindowsForms\Tab.cs">
+    <Compile Update="yui\windows\Tab.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Update="yui\WindowsForms\TreeView.cs">
+    <Compile Update="yui\windows\TreeView.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Update="yui\WindowsForms\TreeView.Designer.cs">
+    <Compile Update="yui\windows\TreeView.Designer.cs">
       <DependentUpon>TreeView.cs</DependentUpon>
     </Compile>
-    <Compile Update="yui\WindowsForms\Viewport.cs">
+    <Compile Update="yui\windows\Viewport.cs">
       <SubType>Component</SubType>
     </Compile>
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="yui\WindowsForms\MainForm.resx">
+    <EmbeddedResource Update="yui\windows\Container - Copy.resx">
+      <DependentUpon>FlowLayoutContainer.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="yui\windows\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Update="yui\WindowsForms\Tab.resx">
+    <EmbeddedResource Update="yui\windows\Tab.resx">
       <DependentUpon>Tab.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>

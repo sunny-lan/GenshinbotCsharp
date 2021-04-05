@@ -2,18 +2,18 @@
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace genshinbot.yui.WindowsForms
+namespace genshinbot.yui.windows
 {
 
     class Tab : TabPage, yui.Tab
     {
-        Container _children;
+        TablePanelContainer _children;
         private string status;
         
 
         public Tab() : base()
         {
-            _children = new Container
+            _children = new TablePanelContainer
             {
                 Dock = DockStyle.Fill
             };
@@ -38,7 +38,6 @@ namespace genshinbot.yui.WindowsForms
         }
         internal Action<string> StatusChanged;
 
-        public Notifications Notifications => throw new System.NotImplementedException();
 
     }
 }

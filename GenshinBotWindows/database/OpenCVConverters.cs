@@ -98,4 +98,28 @@ namespace genshinbot.database.jsonconverters
             }, options);
         }
     }
+
+    class ScalarConverter : JsonConverter<Scalar>
+    {
+       
+        public override Scalar Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            var x = JsonSerializer.Deserialize<double[]>(ref reader, options);
+            if(x.Length==1)return new Scalar(x[0]);
+            if(x.Length==2)return new Scalar(x[0],x[1]);
+            if(x.Length==3)return new Scalar(x[0],x[1],x[2]);
+            if(x.Length==4)return new Scalar(x[0],x[1],x[2],x[3]);
+            throw new Exception();
+        }
+
+        public override void Write(Utf8JsonWriter writer, Scalar value, JsonSerializerOptions options)
+        {
+            JsonSerializer.Serialize<double[]>(writer, new double[] { 
+                value.Val0,
+                value.Val1,
+                value.Val2,
+                value.Val3,
+            }, options) ;
+        }
+    }
 }

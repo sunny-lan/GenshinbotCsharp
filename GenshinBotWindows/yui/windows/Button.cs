@@ -1,6 +1,6 @@
 ﻿using System.Windows.Forms;
 
-namespace genshinbot.yui.WindowsForms
+namespace genshinbot.yui.windows
 {
     class Button : System.Windows.Forms.Button, yui.Button
     {
@@ -13,6 +13,11 @@ namespace genshinbot.yui.WindowsForms
         {
             get => base.Text;
             set => Invoke((MethodInvoker)delegate { Text = value; });
+        }
+
+        public void Delete()
+        {
+           Parent.Controls.Remove(this);
         }
     }
 }

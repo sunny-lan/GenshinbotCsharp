@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace genshinbot.yui.WindowsForms
+namespace genshinbot.yui.windows
 {
 
     interface ViewportComponent
@@ -48,6 +48,14 @@ namespace genshinbot.yui.WindowsForms
         public Point2d? MousePos { get; private set; }
 
         private List<Drawable> drawable = new List<Drawable>();
+
+        internal void Invalidate(OpenCvSharp.Rect r)
+        {
+            var transformed = T.Transform(r.cvt());
+            //TODO not sure if this is less performant
+            Invalidate(transformed.round().Sys());
+        }
+
         protected override bool DoubleBuffered => true;
 
 

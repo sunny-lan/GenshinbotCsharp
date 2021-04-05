@@ -199,6 +199,7 @@ namespace genshinbot
 
         private void cleanupFocus()
         {
+            if(foregroundChangeHook!=null)
             foregroundChangeHook.Stop();
         }
 
@@ -272,6 +273,7 @@ namespace genshinbot
 
         private void cleanupRect()
         {
+            if(locationChangeHook!=null)
             locationChangeHook.Stop();
         }
 

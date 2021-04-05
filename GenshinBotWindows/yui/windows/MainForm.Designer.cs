@@ -1,5 +1,5 @@
 ﻿
-namespace genshinbot.yui.WindowsForms
+namespace genshinbot.yui.windows
 {
     partial class MainForm
     {

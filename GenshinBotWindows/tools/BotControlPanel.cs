@@ -30,11 +30,20 @@ namespace genshinbot.tools
             tab = ui.CreateTab();
             tab.Title = "Control panel";
             var content = tab.Content;
+            content.SetFlex(new yui.Flexbox { Direction = Orientation.Horizontal });
             var scriptList = content.CreateTreeview();
-            var loadUnloadBtn = content.CreateButton();
+            content.SetFlex(scriptList, new Flexbox.Item { Weight = 1 });
+
+            var sidebar = content.CreateSubContainer();
+            content.SetFlex(sidebar, new Flexbox.Item { Weight = 0 });
+            sidebar.SetFlex(new yui.Flexbox { Direction = Orientation.Vertical });
+
+            var loadUnloadBtn = sidebar.CreateButton();
             Action onClick = null;
             loadUnloadBtn.Click += (s, e) => onClick?.Invoke();
             loadUnloadBtn.Enabled = false;
+            var attach = sidebar.CreateButton();
+            attach.Text = "Attach to window";
 
             scriptList.BeginUpdate();
             foreach (var script in scripts)
@@ -74,8 +83,7 @@ namespace genshinbot.tools
             }
             scriptList.EndUpdate();
 
-            var attach = content.CreateButton();
-            attach.Text = "Attach to window";
+           
             attach.Click += (s, e) =>
             {
                 try

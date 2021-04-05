@@ -1,5 +1,4 @@
-﻿using genshinbot.data;
-using genshinbot.yui;
+﻿using genshinbot.yui;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -26,7 +25,7 @@ namespace genshinbot
         /// </summary>
         /// <param name="message"></param>
         /// <param name="title"></param>
-        void Popup(string message, string title = "");
+        PopupResult Popup(string message, string title = "", PopupType type=PopupType.Message);
         void GiveFocus(Tab t);
     }
 }
@@ -36,147 +35,64 @@ namespace genshinbot
 /// </summary>
 namespace genshinbot.yui
 {
-    public interface Notification
+    public enum PopupType
     {
-        string Message { get; set; }
+        Message, Confirm,
     }
-
-    public interface Notifications
+    public enum PopupResult
     {
-        Notification CreateNotification();
-        void Delete(Notification n);
+        Ok,Cancel
     }
-
     public interface Component
     {
         void Delete();
     }
-
-    public interface Rect
-    {
-        OpenCvSharp.Rect R { get; set; }
-    }
-
-    public interface Image
-    {
-        Mat Mat { get; set; }
-        Point TopLeft { get; set; }
-
-        /// <summary>
-        /// Repaint the image without needing to replace the mat
-        /// </summary>
-        void Invalidate();
-        void Invalidate(OpenCvSharp.Rect r);
-    }
-
-    public struct MouseEvent
-    {
-        public enum Kind
-        {
-            Up, Down, Move, Click
-        }
-
-        public Point2d Location;
-        public Kind Type;
-    }
-    public interface DirectGfx
-    {
-        void Rect(Rect r);
-        void Image(Mat m);
-    }
-
-    public interface Viewport2
-    {
-        event EventHandler<DirectGfx> Paint;
-        void Invalidate(Rect region);
-        void Invalidate();
-    }
-
     public enum Orientation
     {
         Horizontal,
         Vertical
     }
 
-    public interface Line
-    {
-        Point A { get; set; }
-        Point B { get; set; }
-    }
-
-    public interface Viewport
-    {
-        Size Size { get; set; }
-
-        /// <summary>
-        /// transformation
-        /// </summary>
-        Transformation T { get; set; }
-        Action<Transformation> OnTChange { get; set; }
-
-        Rect CreateRect();
-        Line CreateLine();
-        Image CreateImage();
-
-        event Action<MouseEvent> MouseEvent;
-
-        void ClearChildren();
-        void Delete(object r);
-
-        Point2d? MousePos { get; }
-        
-    }
-
-    public interface Button
-    {
-        event EventHandler Click;
-        string Text { get; set; }
-
-        bool Enabled { get; set; }
-    }
-
-    public interface TreeView
-    {
-        public interface Node
-        {
-            Node CreateChild();
-            event EventHandler DoubleClick;
-            event EventHandler Selected;
-            event EventHandler Deselected;
-            string Text { get; set; }
-            Scalar Color { get; set; }
-            void Delete(Node child);
-            void ClearChildren();
-            void Invalidate();
-        }
-
-        public Node CreateNode();
-        void Delete(Node child);
-        void ClearChildren();
-
-
-        public void BeginUpdate();
-        public void EndUpdate();
-
-        public void GiveFocus(Node n);
-    }
-
-    public interface PropertyGrid
-    {
-        public object SelectedObject { get; set; }
-    }
-    public interface Slider
-    {
-        public int V { get; set; }
-        public event Action<int> VChanged;
-        public int Max { get; set; }
-        public int Min { get; set; }
-    
-    }
-
+    /// <summary>
+    /// Flexbox model:
+    ///  - Items cannot determine their own size
+    ///  - They can only provide a minimum valid size
+    /// Items are expanded to fit along the secondary axis,
+    /// and fitted based on weight on the primary axis
+    /// 
+    /// The minimum valid size of the flexbox itself is equal to the minimum size required to fit all the items
+    ///  - If wrap is enabled, the minimum size if scaled along the primary axis is the maximum width of a single item
+    ///  - If scroll is enabled 
+    /// </summary>
     public class Flexbox
     {
+        public class Item
+        {
+            /// <summary>
+            /// 0 = AutoSize to contents
+            /// >1 = Fill up rest of space according to weight
+            /// </summary>
+            public int Weight;
+        }
 
+        /// <summary>
+        /// Whether items are listed from left to right or from top to bottom
+        /// </summary>
+        public Orientation Direction = Orientation.Horizontal;
+
+        /// <summary>
+        /// Whether to wrap when not enough space
+        /// </summary>
+        public bool Wrap = false;
+
+        /// <summary>
+        /// Whether to show scroll upon overflow
+        /// If both scroll and wrap are enabled, wrap will happen first, and then scroll
+        /// The scroll will happen in the direction of the wrap
+        ///     For example, if items are placed left to right, the rows will not get longer,
+        ///     It will only scroll to show more rows
+        /// </summary>
+        public bool Scroll = false;
     }
     public interface Container
     {
@@ -194,7 +110,21 @@ namespace genshinbot.yui
         void Delete(object child);
 
         bool SupportsFlexbox => false;
-        Flexbox Layout { get=>throw new NotImplementedException(); set=>throw new NotImplementedException(); }
+
+        /// <summary>
+        /// Should simply ignore unsupported features
+        /// Does not support dynamic layout:
+        ///     - Should not be called more than once
+        /// </summary>
+        void SetFlex(Flexbox layout) { }
+        /// <summary>
+        /// Should not be called more than once per child
+        /// </summary>
+        /// <param name="child"></param>
+        /// <param name="layout"></param>
+        void SetFlex(object child, Flexbox.Item layout) { }
+
+
 
         Viewport2 GetViewport2() { throw new NotImplementedException(); }
 
@@ -212,6 +142,6 @@ namespace genshinbot.yui
         Container Content { get; }
 
         public string Status { get; set; }
-       // Notifications Notifications { get; }
+        // Notifications Notifications { get; }
     }
 }

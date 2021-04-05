@@ -31,7 +31,7 @@ namespace genshinbot.tools
 
         public static void Run()
         {
-            Ui = yui.WindowsForms.MainForm.make();
+            Ui = yui.windows.MainForm.make();
             
         }
     }

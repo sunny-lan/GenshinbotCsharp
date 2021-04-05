@@ -24,12 +24,69 @@ namespace genshinbot.tools.config
             tab = ui.CreateTab();
             tab.Title = "Playing screen";
             var content = tab.Content;
-            var vp = tab.Content.CreateViewport();
-            vp.Size = new Size(500, 500);
+            content.SetFlex(new yui.Flexbox
+            {
+                Direction = yui.Orientation.Horizontal,
+                Scroll=false,
+            });
+
+            var vp = content.CreateViewport();
+            content.SetFlex(vp, new yui.Flexbox.Item { Weight = 1 });
             vp.OnTChange = t => vp.T = t;
+
             var img = vp.CreateImage();
-            var screenshotBtn = content.CreateButton();
+
+            var sidebar = content.CreateSubContainer();
+            content.SetFlex(sidebar, new yui.Flexbox.Item { Weight = 0 });
+            sidebar.SetFlex(new yui.Flexbox
+            {
+                Direction = yui.Orientation.Vertical,
+                Scroll = true,
+                Wrap = false,
+            });
+            var screenshotBtn = sidebar.CreateButton();
             screenshotBtn.Text = "Screenshot";
+            var clearBtn = sidebar.CreateButton();
+            clearBtn.Text = "Clear";
+            var saveBtn = sidebar.CreateButton();
+            saveBtn.Text = "Save";
+            saveBtn.Click += async (s, e) =>
+            {
+                if (ui.Popup("Really save?", "Confirm", yui.PopupType.Confirm) == yui.PopupResult.Ok)
+                {
+                    await Task.Run(() => b.Db.SavePlayingScreenDb());
+                    tab.Status = "Saved";
+                }
+            };
+
+            var numSatMax = sidebar.CreateSlider();
+            numSatMax.Label = "NS";
+            numSatMax.Max = 255;
+            numSatMax.Min = 0;
+
+            yui.Slider[] createSliders(string prefix, Scalar? v, Action<Scalar> onChange)
+            {
+                var sliders = new yui.Slider[3];
+                void onVChange(int _)
+                {
+                    onChange(new Scalar(sliders[0].V, sliders[1].V, sliders[2].V));
+                }
+                yui.Slider createSlider(string suffix, double? v)
+                {
+                    var slider = sidebar.CreateSlider();
+                    slider.Label = prefix + suffix;
+                    slider.Max = 255;
+                    slider.Min = 0;
+                    if (v is double _v) slider.V = (int)_v;
+                    slider.VChanged += onVChange;
+                    return slider;
+                }
+                sliders[0] = createSlider("H", v?.Val0);
+                sliders[1] = createSlider("S", v?.Val1);
+                sliders[2] = createSlider("V", v?.Val2);
+
+                return sliders;
+            }
 
             //only enable button when attached
             screenshotBtn.Enabled = b.W != null;
@@ -106,21 +163,95 @@ namespace genshinbot.tools.config
 
             List<yui.Rect> prevRects = null;
             PlayingScreen.Db.RD activeRD = null;
+            Mat screenshot = null;
+            Mat outputBuf = null;
 
-            var clearBtn = content.CreateButton();
-            clearBtn.Text = "Clear";
+            var healthMinS = createSliders("Hmin", db.CharFilter.HealthMin, h =>
+            {
+                db.CharFilter.HealthMin = h;
+                updateHealthFilterPreview();
+            });
+            var healthMaxS = createSliders("Hmax", db.CharFilter.HealthMax, h =>
+            {
+                db.CharFilter.HealthMax = h;
+                updateHealthFilterPreview();
+            });
+
             clearBtn.Click += (s, e) =>
             {
                 setCharTemplates(null);
             };
 
-            var saveBtn = content.CreateButton();
-            saveBtn.Text = "Save";
-            saveBtn.Click += async(s, e) =>
+            numSatMax.VChanged += sax => 
             {
-                await Task.Run(()=>b.Db.SavePlayingScreenDb());
-                tab.Status = "Saved";
+                db.CharFilter.NumberSatMax = sax;
+                updateNumFilterPreview();
             };
+
+            void updateHealthFilterPreview()
+            {
+                Debug.Assert(activeRD.Characters!=null);
+                for (int i = 0; i < 4; i++)
+                {
+                    var character = activeRD.Characters[i];
+                    var r = character.Health;
+                    Mat src = screenshot[r];
+
+                    if (db.CharFilter.HealthMax is Scalar hMax && db.CharFilter.HealthMin is Scalar hMin)
+                    {
+                        using Mat hsv = src.CvtColor(ColorConversionCodes.BGR2HSV);
+                        using Mat thres = hsv.InRange(hMin, hMax);
+                        using Mat cvt = thres.CvtColor(ColorConversionCodes.GRAY2BGRA);
+                        cvt.CopyTo(outputBuf[r]);
+                    }
+                    else
+                    {
+                        src.CopyTo(outputBuf[r]);
+                    }
+                    img.Invalidate(r);
+                }
+
+            }
+
+            void updateNumFilterPreview()
+            {
+                Debug.Assert(activeRD.Characters != null);
+
+                for (int i = 0; i < 4; i++)
+                {
+                    var character = activeRD.Characters[i];
+                    var r = character.Number;
+                    Mat src = screenshot[r]; 
+
+                    if (db.CharFilter.NumberSatMax is int sMax)
+                    {
+                        using Mat hsv = src.CvtColor(ColorConversionCodes.BGR2HSV);
+
+                        using Mat s = hsv.ExtractChannel(1);
+                        using Mat thres = s.Threshold((double)sMax, 255, ThresholdTypes.BinaryInv);
+                        using Mat cvt = thres.CvtColor(ColorConversionCodes.GRAY2BGRA);
+                        cvt.CopyTo(outputBuf[r]);
+                    }
+                    else
+                    {
+                        src.CopyTo(outputBuf[r]);
+                    }
+                    img.Invalidate(r);
+                }
+
+            }
+
+            bool filterAvail = false;
+            void updateFilterAvail()
+            {
+                bool enable = filterAvail= outputBuf != null && activeRD != null && activeRD.Characters != null;
+                numSatMax.Enabled = enable;
+                for(int i = 0; i < 3; i++)
+                {
+                    healthMaxS[i].Enabled = healthMinS[i].Enabled = enable;
+                }
+
+            }
 
 
             void setCharTemplates(PlayingScreen.Db.RD.CharacterTemplate[] templates)
@@ -133,18 +264,26 @@ namespace genshinbot.tools.config
                     prevRects?.ForEach(r => vp.Delete(r));
                     prevRects?.Clear();
 
+                    //TODO unclear logic
+                    outputBuf = screenshot.Clone();
+                    img.Mat = outputBuf;
+
+
                     askCharacterTemplates().ContinueWith(x => setCharTemplates(x.Result));
                 }
                 else
                 {
+                    numSatMax.Enabled = true;
                     clearBtn.Enabled = true;
                     prevRects = displayCharTemplates(activeRD.Characters);
                 }
+                updateFilterAvail();
             }
 
             void setActiveRD(PlayingScreen.Db.RD rd)
             {
                 activeRD = rd;
+                updateFilterAvail();
                 if (activeRD == null)
                 {
                     clearBtn.Enabled = false;
@@ -155,30 +294,51 @@ namespace genshinbot.tools.config
                 }
             }
 
-            var prevSize = new Size();
+            Size? prevSize = null;
+            void setScreenshot(Mat m)
+            {
+                screenshot = m;
+                if (m == null)
+                {
+                    outputBuf = null;
+                    img.Mat = null;
+                    setActiveRD(null);
+                }
+                else
+                {
+                    outputBuf = screenshot.Clone();
+                    img.Mat = outputBuf;
+
+                    var size = m.Size();
+                    if (size != prevSize)
+                    {
+                        prevSize = size;
+                        if (!db.R.ContainsKey(size))
+                            db.R[size] = new PlayingScreen.Db.RD();
+                        activeRD = db.R[size];
+
+                        setActiveRD(activeRD);
+                    }
+                }
+
+                updateFilterAvail();
+                if (filterAvail)
+                {
+                    updateNumFilterPreview();
+                    updateHealthFilterPreview();
+                }
+
+            }
+
             screenshotBtn.Click += async (s, e) =>
             {
                 screenshotBtn.Enabled = false;
                 var rect = await b.W.GetBoundsAsync();
-                var screenshot = await b.W.ScreenshotAsync(rect);
-                img.Mat = screenshot;
-
-                var size = rect.Size;
-                if (size != prevSize)
-                {
-
-                    prevSize = size;
-                    if (!db.R.ContainsKey(size))
-                        db.R[size] = new PlayingScreen.Db.RD();
-                    activeRD = db.R[size];
-
-                    setActiveRD(activeRD);
-
-                }
+                setScreenshot(await b.W.ScreenshotAsync(rect));
                 screenshotBtn.Enabled = true;
             };
 
-            setActiveRD(null);
+            setScreenshot(null);
 
         }
 
