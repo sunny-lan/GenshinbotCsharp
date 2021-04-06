@@ -30,6 +30,7 @@ namespace genshinbot.tools
             tab = ui.CreateTab();
             tab.Title = "Control panel";
             var content = tab.Content;
+            content.SuspendLayout();
             content.SetFlex(new yui.Flexbox { Direction = Orientation.Horizontal });
             var scriptList = content.CreateTreeview();
             content.SetFlex(scriptList, new Flexbox.Item { Weight = 1 });
@@ -97,6 +98,7 @@ namespace genshinbot.tools
             };
             attach.Enabled = b.W == null;
             b.AttachedWindowChanged += (s, attached) => attach.Enabled = !attached;
+            content.ResumeLayout();
         }
 
         public void Unload(GenshinBot b)

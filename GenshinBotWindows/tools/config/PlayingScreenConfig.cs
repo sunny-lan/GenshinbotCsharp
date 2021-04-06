@@ -1,12 +1,9 @@
-﻿using genshinbot.automation;
+﻿
 using genshinbot.screens;
-using genshinbot;
 using OpenCvSharp;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using static genshinbot.yui.Ext;
 
 namespace genshinbot.tools.config
 {
@@ -64,29 +61,6 @@ namespace genshinbot.tools.config
             numSatMax.Max = 255;
             numSatMax.Min = 0;
 
-            yui.Slider[] createSliders(string prefix, Scalar? v, Action<Scalar> onChange)
-            {
-                var sliders = new yui.Slider[3];
-                void onVChange(int _)
-                {
-                    onChange(new Scalar(sliders[0].V, sliders[1].V, sliders[2].V));
-                }
-                yui.Slider createSlider(string suffix, double? v)
-                {
-                    var slider = sidebar.CreateSlider();
-                    slider.Label = prefix + suffix;
-                    slider.Max = 255;
-                    slider.Min = 0;
-                    if (v is double _v) slider.V = (int)_v;
-                    slider.VChanged += onVChange;
-                    return slider;
-                }
-                sliders[0] = createSlider("H", v?.Val0);
-                sliders[1] = createSlider("S", v?.Val1);
-                sliders[2] = createSlider("V", v?.Val2);
-
-                return sliders;
-            }
 
             //only enable button when attached
             screenshotBtn.Enabled = b.W != null;
@@ -165,13 +139,13 @@ namespace genshinbot.tools.config
             PlayingScreen.Db.RD activeRD = null;
             Mat screenshot = null;
             Mat outputBuf = null;
-
-            var healthMinS = createSliders("Hmin", db.CharFilter.HealthMin, h =>
+            
+            var healthMinS =sidebar.CreateSliders("Hmin", db.CharFilter.HealthMin, h =>
             {
                 db.CharFilter.HealthMin = h;
                 updateHealthFilterPreview();
             });
-            var healthMaxS = createSliders("Hmax", db.CharFilter.HealthMax, h =>
+            var healthMaxS = sidebar.CreateSliders("Hmax", db.CharFilter.HealthMax, h =>
             {
                 db.CharFilter.HealthMax = h;
                 updateHealthFilterPreview();

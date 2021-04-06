@@ -94,8 +94,14 @@ namespace genshinbot.yui
         /// </summary>
         public bool Scroll = false;
     }
+    public interface Expander
+    {
+        string Label { get; set; }
+        Container Content { get; }
+    }
     public interface Container
     {
+        Expander CreateExpander();
         Viewport CreateViewport();
         Button CreateButton();
 
@@ -124,7 +130,8 @@ namespace genshinbot.yui
         /// <param name="layout"></param>
         void SetFlex(object child, Flexbox.Item layout) { }
 
-
+        void SuspendLayout();
+        void ResumeLayout();
 
         Viewport2 GetViewport2() { throw new NotImplementedException(); }
 

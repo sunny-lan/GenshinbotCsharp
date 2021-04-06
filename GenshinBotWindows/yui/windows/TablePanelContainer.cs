@@ -12,6 +12,17 @@ namespace genshinbot.yui.windows
         {
             this.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
         }
+
+        void yui.Container.SuspendLayout()
+        {
+            Invoke((MethodInvoker) base.SuspendLayout);
+        }
+
+        void yui.Container.ResumeLayout()
+        {
+            Invoke((MethodInvoker)base.ResumeLayout);
+        }
+
         void yui.Container.SetFlex(Flexbox layout)
         {
             Invoke((MethodInvoker)delegate {
@@ -28,12 +39,10 @@ namespace genshinbot.yui.windows
             {
 
                 ColumnCount++;
-                ColumnStyles.Add(new ColumnStyle(SizeType.Percent,0));
             }
             else
             {
                 RowCount++;
-                RowStyles.Add(new RowStyle(SizeType.Percent,0));
             }
         }
 
@@ -107,7 +116,7 @@ namespace genshinbot.yui.windows
         {
             Invoke((MethodInvoker)delegate
             {
-                Controls.Clear();
+                foreach (var c in Controls) Delete(c);
             });
         }
 
@@ -116,6 +125,20 @@ namespace genshinbot.yui.windows
             if (btn is Control c)
                 Invoke((MethodInvoker)delegate
                 {
+                    if (flex != null)
+                    {
+                        int idx = Controls.IndexOf(c as Control);
+                        if (flex.Direction == Orientation.Horizontal)
+                        {
+                            ColumnCount--;
+                            ColumnStyles.RemoveAt(idx);
+                        }
+                        else
+                        {
+                            RowCount--;
+                            RowStyles.RemoveAt(idx);
+                        }
+                    }
                     Controls.Remove(c);
                 });
             else Debug.Assert(false);
@@ -128,5 +151,6 @@ namespace genshinbot.yui.windows
         public yui.TreeView CreateTreeview() => add(new TreeView());
         public yui.Viewport CreateViewport() => add(new Viewport());
 
+        public yui.Expander CreateExpander() => add(new Expander());
     }
 }

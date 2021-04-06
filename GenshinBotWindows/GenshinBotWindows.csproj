@@ -9,6 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="yui\windows\Accordion.cs" />
+    <Compile Remove="yui\windows\Accordion.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AvalonEdit" Version="6.1.1" />
     <PackageReference Include="OpenCvSharp4.Windows" Version="4.5.1.20210210" />
     <PackageReference Include="Vanara.PInvoke.Gdi32" Version="3.3.7" />

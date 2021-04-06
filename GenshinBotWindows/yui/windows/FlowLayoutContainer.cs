@@ -55,6 +55,7 @@ namespace genshinbot.yui.windows
         public yui.Container CreateSubContainer() => add(new FlowLayoutContainer());
         public yui.TreeView CreateTreeview() => add(new TreeView());
         public yui.Viewport CreateViewport() => add(new Viewport());
+        public yui.Expander CreateExpander() => add(new Expander());
 
     }
 }
