@@ -1,4 +1,5 @@
-﻿using genshinbot.util;
+﻿using genshinbot.database;
+using genshinbot.util;
 using OpenCvSharp;
 using System;
 using System.Threading.Tasks;
@@ -10,11 +11,36 @@ namespace genshinbot.yui
 {
     public static partial class Ext
     {
-
-        public static yui.Slider[] CreateSliders(this yui.Container o, string prefix, Scalar? v, Action<Scalar> onChange)
+        public static yui.Slider[][] CreateSliders(this yui.Container o, string prefix, ColorRange? v, Action<ColorRange> onChange)
         {
+            o.SuspendLayout();
             var expander = o.CreateExpander();
             expander.Label = prefix;
+            expander.Expanded = false;
+            var sidebar = expander.Content;
+
+            ColorRange r = v ?? new ColorRange(default, default);
+
+            var res=new Slider[][]{
+                sidebar.CreateSliders("Min", v?.Min,x=>{
+                   r.Min=x;
+                    onChange(r);
+                }),
+                sidebar.CreateSliders("Max", v?.Max,x=>{
+                   r.Max=x;
+                    onChange(r);
+                }),
+            };
+            o.ResumeLayout();
+            return res;
+        }
+        //TODO
+        public static yui.Slider[] CreateSliders(this yui.Container o, string prefix, Scalar? v, Action<Scalar> onChange)
+        {
+            o.SuspendLayout();
+            var expander = o.CreateExpander();
+            expander.Label = prefix;
+            expander.Expanded = false;
             var sidebar = expander.Content;
             var sliders = new yui.Slider[3];
             void onVChange(int _)
@@ -24,7 +50,7 @@ namespace genshinbot.yui
             yui.Slider createSlider(string suffix, double? v)
             {
                 var slider = sidebar.CreateSlider();
-                slider.Label =  suffix;
+                slider.Label = suffix;
                 slider.Max = 255;
                 slider.Min = 0;
                 if (v is double _v) slider.V = (int)_v;
@@ -34,7 +60,7 @@ namespace genshinbot.yui
             sliders[0] = createSlider("H", v?.Val0);
             sliders[1] = createSlider("S", v?.Val1);
             sliders[2] = createSlider("V", v?.Val2);
-
+            o.ResumeLayout();
             return sliders;
         }
 

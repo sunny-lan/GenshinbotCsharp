@@ -10,40 +10,35 @@ namespace genshinbot.yui.windows
 {
     class Expander : TableLayoutPanel, yui.Expander
     {
+        bool expanded = true;
         public Expander() : base()
         {
             RowCount = 2;
             AutoSize = true;
+            SuspendLayout();
 
-             label = new Label();
+            label = new Label();
             label.Font = new Font(label.Font, FontStyle.Bold);
             label.TextAlign = ContentAlignment.MiddleLeft;
             label.BackColor = SystemColors.ActiveBorder;
             label.Dock = DockStyle.Fill;
+            label.AutoSize = true;
             Controls.Add(label);
+            RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
-            bool expanded = true;
             _content = new TablePanelContainer();
             _content.AutoSize = true;
             _content.Dock = DockStyle.Fill;
             Controls.Add(_content);
+            RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
             label.Click += delegate
             {
-                expanded = !expanded;
-                if (expanded)
-                {
-                    RowCount = 2;
-                    label.BackColor = SystemColors.ActiveBorder;
-                    Controls.Add(_content);   
-                }
-                else
-                {
-                    RowCount = 1;
-                    label.BackColor = SystemColors.ActiveCaption;
-                    Controls.Remove(_content);
-                }
+                Expanded = !Expanded;
+                
             };
+
+            ResumeLayout();
 
 
         }
@@ -54,7 +49,24 @@ namespace genshinbot.yui.windows
 
         public string Label
         {
-            get => label.Text;set => label.Text=value;
+            get => label.Text; set => label.Text = value;
+        }
+        public bool Expanded
+        {
+            get => expanded; set
+            {
+                expanded = value;
+                if (expanded)
+                {
+                    label.BackColor = SystemColors.ActiveCaption;
+                    RowStyles[1]=(new RowStyle(SizeType.AutoSize));
+                }
+                else
+                {
+                    label.BackColor = SystemColors.ActiveBorder;
+                    RowStyles[1] = (new RowStyle(SizeType.Absolute,0));
+                }
+            }
         }
     }
 }

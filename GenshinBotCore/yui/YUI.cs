@@ -96,6 +96,7 @@ namespace genshinbot.yui
     }
     public interface Expander
     {
+        public bool Expanded { get; set; }
         string Label { get; set; }
         Container Content { get; }
     }

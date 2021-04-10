@@ -16,7 +16,13 @@ namespace genshinbot.yui.windows
         {
             InitializeComponent();
         }
-
+        bool yui.Slider.Enabled
+        {
+            get => trackBar.Enabled; set => Invoke((MethodInvoker)delegate
+            {
+                trackBar.Enabled = value;
+            });
+        }
         public int V
         {
             get => trackBar.Value; set => Invoke((MethodInvoker)delegate

@@ -1,4 +1,5 @@
 ﻿
+using genshinbot.database;
 using genshinbot.screens;
 using OpenCvSharp;
 using System.Collections.Generic;
@@ -21,6 +22,7 @@ namespace genshinbot.tools.config
             tab = ui.CreateTab();
             tab.Title = "Playing screen";
             var content = tab.Content;
+            content.SuspendLayout();
             content.SetFlex(new yui.Flexbox
             {
                 Direction = yui.Orientation.Horizontal,
@@ -47,14 +49,10 @@ namespace genshinbot.tools.config
             clearBtn.Text = "Clear";
             var saveBtn = sidebar.CreateButton();
             saveBtn.Text = "Save";
-            saveBtn.Click += async (s, e) =>
-            {
-                if (ui.Popup("Really save?", "Confirm", yui.PopupType.Confirm) == yui.PopupResult.Ok)
-                {
-                    await Task.Run(() => b.Db.SavePlayingScreenDb());
-                    tab.Status = "Saved";
-                }
-            };
+
+            var refineBtn = sidebar.CreateButton();
+            refineBtn.Text = "Refine";
+
 
             var numSatMax = sidebar.CreateSlider();
             numSatMax.Label = "NS";
@@ -65,28 +63,6 @@ namespace genshinbot.tools.config
             //only enable button when attached
             screenshotBtn.Enabled = b.W != null;
             b.AttachedWindowChanged += (s, attached) => screenshotBtn.Enabled = attached;
-
-
-            List<yui.Rect> displayCharTemplates(PlayingScreen.Db.RD.CharacterTemplate[] templates)
-            {
-                Debug.Assert(templates.Length == 4);
-
-
-                var res = new List<yui.Rect>();
-                for (int i = 0; i < 4; i++)
-                {
-                    var character = templates[i];
-
-                    var health = vp.CreateRect();
-                    health.R = character.Health;
-                    res.Add(health);
-
-                    var num = vp.CreateRect();
-                    num.R = character.Number;
-                    res.Add(num);
-                }
-                return res;
-            }
 
             async Task<PlayingScreen.Db.RD.CharacterTemplate[]> askCharacterTemplates()
             {
@@ -135,32 +111,79 @@ namespace genshinbot.tools.config
                 return res;
             }
 
-            List<yui.Rect> prevRects = null;
+
+            List<yui.Rect> prevRects = new List<yui.Rect>() ;
+            void displayCharTemplates(PlayingScreen.Db.RD.CharacterTemplate[] templates)
+            {
+
+                prevRects.ForEach(r => vp.Delete(r));
+                prevRects.Clear();
+
+                if (templates == null) return;
+                Debug.Assert(templates.Length == 4);
+
+                for (int i = 0; i < 4; i++)
+                {
+                    var character = templates[i];
+
+                    var health = vp.CreateRect();
+                    health.R = character.Health;
+                    prevRects.Add(health);
+
+                    var num = vp.CreateRect();
+                    num.R = character.Number;
+                    prevRects.Add(num);
+                }
+            }
+
+
+            void filterHealth(ColorRange hg, ColorRange hr, Mat src, Mat dst, bool color=true)
+            {
+                using Mat hsv = src.CvtColor(ColorConversionCodes.BGR2HSV);
+                using Mat thres = hsv.InRange(hg);
+                using Mat thres2 = hsv.InRange(hr);
+                if (color)
+                {
+                    Cv2.BitwiseOr(thres, thres2, thres);
+                    using Mat cvt = thres.CvtColor(ColorConversionCodes.GRAY2BGRA);
+                    cvt.CopyTo(dst);
+                }
+                else
+                {
+                    Cv2.BitwiseOr(thres, thres2, dst);
+                }
+            }
+
+            void filterNum(double sMax, Mat src, Mat dst, bool color=true)
+            {
+                using Mat hsv = src.CvtColor(ColorConversionCodes.BGR2HSV);
+
+                using Mat s = hsv.ExtractChannel(1);
+                if (color)
+                {
+                    using Mat thres = s.Threshold(sMax, 255, ThresholdTypes.BinaryInv);
+                    using Mat cvt = thres.CvtColor(ColorConversionCodes.GRAY2BGRA);
+                    cvt.CopyTo(dst);
+                }
+                else
+                {
+                    Cv2.Threshold(s, dst, sMax, 255, ThresholdTypes.BinaryInv);
+                }
+            }
+
+
             PlayingScreen.Db.RD activeRD = null;
             Mat screenshot = null;
             Mat outputBuf = null;
-            
-            var healthMinS =sidebar.CreateSliders("Hmin", db.CharFilter.HealthMin, h =>
-            {
-                db.CharFilter.HealthMin = h;
+
+            var healthGreen = sidebar.CreateSliders("green", db.CharFilter.HealthGreen, x=> {
+                db.CharFilter.HealthGreen = x;
+                updateHealthFilterPreview();
+            }); 
+            var healthRed = sidebar.CreateSliders("red", db.CharFilter.HealthRed, x => {
+                db.CharFilter.HealthRed = x;
                 updateHealthFilterPreview();
             });
-            var healthMaxS = sidebar.CreateSliders("Hmax", db.CharFilter.HealthMax, h =>
-            {
-                db.CharFilter.HealthMax = h;
-                updateHealthFilterPreview();
-            });
-
-            clearBtn.Click += (s, e) =>
-            {
-                setCharTemplates(null);
-            };
-
-            numSatMax.VChanged += sax => 
-            {
-                db.CharFilter.NumberSatMax = sax;
-                updateNumFilterPreview();
-            };
 
             void updateHealthFilterPreview()
             {
@@ -171,12 +194,9 @@ namespace genshinbot.tools.config
                     var r = character.Health;
                     Mat src = screenshot[r];
 
-                    if (db.CharFilter.HealthMax is Scalar hMax && db.CharFilter.HealthMin is Scalar hMin)
+                    if (db.CharFilter.HealthGreen is ColorRange hg && db.CharFilter.HealthRed is ColorRange hr)
                     {
-                        using Mat hsv = src.CvtColor(ColorConversionCodes.BGR2HSV);
-                        using Mat thres = hsv.InRange(hMin, hMax);
-                        using Mat cvt = thres.CvtColor(ColorConversionCodes.GRAY2BGRA);
-                        cvt.CopyTo(outputBuf[r]);
+                        filterHealth(hg,hr, src, outputBuf[r]);
                     }
                     else
                     {
@@ -197,14 +217,11 @@ namespace genshinbot.tools.config
                     var r = character.Number;
                     Mat src = screenshot[r]; 
 
-                    if (db.CharFilter.NumberSatMax is int sMax)
-                    {
-                        using Mat hsv = src.CvtColor(ColorConversionCodes.BGR2HSV);
 
-                        using Mat s = hsv.ExtractChannel(1);
-                        using Mat thres = s.Threshold((double)sMax, 255, ThresholdTypes.BinaryInv);
-                        using Mat cvt = thres.CvtColor(ColorConversionCodes.GRAY2BGRA);
-                        cvt.CopyTo(outputBuf[r]);
+
+                    if (db.CharFilter.NumberSatMax is double sMax )
+                    {
+                        filterNum(sMax, src, outputBuf[r]);
                     }
                     else
                     {
@@ -220,23 +237,25 @@ namespace genshinbot.tools.config
             {
                 bool enable = filterAvail= outputBuf != null && activeRD != null && activeRD.Characters != null;
                 numSatMax.Enabled = enable;
+                for(int j=0;j<2;j++)
                 for(int i = 0; i < 3; i++)
                 {
-                    healthMaxS[i].Enabled = healthMinS[i].Enabled = enable;
+                    healthGreen[j][i].Enabled = healthGreen[j][i].Enabled = enable;
                 }
 
             }
 
-
             void setCharTemplates(PlayingScreen.Db.RD.CharacterTemplate[] templates)
             {
                 Debug.Assert(activeRD != null);
+
                 activeRD.Characters = templates;
+                displayCharTemplates(activeRD.Characters);
+
                 if (activeRD.Characters == null)
                 {
                     clearBtn.Enabled = false;
-                    prevRects?.ForEach(r => vp.Delete(r));
-                    prevRects?.Clear();
+                    refineBtn.Enabled = false;
 
                     //TODO unclear logic
                     outputBuf = screenshot.Clone();
@@ -247,9 +266,9 @@ namespace genshinbot.tools.config
                 }
                 else
                 {
+                    refineBtn.Enabled = true;
                     numSatMax.Enabled = true;
                     clearBtn.Enabled = true;
-                    prevRects = displayCharTemplates(activeRD.Characters);
                 }
                 updateFilterAvail();
             }
@@ -261,6 +280,7 @@ namespace genshinbot.tools.config
                 if (activeRD == null)
                 {
                     clearBtn.Enabled = false;
+                    refineBtn.Enabled = false;
                 }
                 else
                 {
@@ -303,6 +323,57 @@ namespace genshinbot.tools.config
                 }
 
             }
+            
+            ConnectedComponents.Blob findBiggestBlob(Mat src)
+            {
+                var comps = Cv2.ConnectedComponentsEx(src, PixelConnectivity.Connectivity4);
+                ConnectedComponents.Blob res=default;
+                int maxArea = -1;
+                foreach(var blob in comps.Blobs)
+                {
+                    if (blob.Label == 0) continue;
+                    if (blob.Area > maxArea)
+                    {
+                        maxArea = blob.Area;
+                        res = blob;
+                    }
+                }
+                return res;
+            }
+
+            refineBtn.Click += (s, e) =>
+            {
+                var filter = db.CharFilter;
+                for (int i = 0; i < 4; i++)
+                {
+                    var character = activeRD.Characters[i];
+                    if (filter.NumberSatMax is double sMax)
+                    {
+                        var number = character.Number;
+                        using var filtered = new Mat();
+                        filterNum(sMax, screenshot[number], filtered, color:false);
+                        var blob = findBiggestBlob(filtered);
+                        if (blob!=null && blob.Area > db.MinBlobArea)
+                        {
+                            character.Number = blob.Rect+number.TopLeft;
+                        }
+                    }
+
+                    var health = character.Health;
+                    if (db.CharFilter.HealthGreen is ColorRange hg && db.CharFilter.HealthRed is ColorRange hr)
+                    {
+                         var number = character.Health;
+                        using var filtered = new Mat();
+                        filterHealth(hg, hr, screenshot[number], filtered,color:false);
+                        var blob = findBiggestBlob(filtered);
+                        if (blob!=null && blob.Area > db.MinBlobArea)
+                        {
+                            character.Health = blob.Rect+health.TopLeft;
+                        }
+                    }
+                }
+                setCharTemplates(activeRD.Characters);
+            };
 
             screenshotBtn.Click += async (s, e) =>
             {
@@ -312,8 +383,29 @@ namespace genshinbot.tools.config
                 screenshotBtn.Enabled = true;
             };
 
-            setScreenshot(null);
+            clearBtn.Click += (s, e) =>
+            {
+                setCharTemplates(null);
+            };
 
+            numSatMax.VChanged += sax =>
+            {
+                db.CharFilter.NumberSatMax = sax;
+                updateNumFilterPreview();
+            };
+
+
+            saveBtn.Click += async (s, e) =>
+            {
+                if (ui.Popup("Really save?", "Confirm", yui.PopupType.Confirm) == yui.PopupResult.Ok)
+                {
+                    await Task.Run(() => b.Db.SavePlayingScreenDb());
+                    tab.Status = "Saved";
+                }
+            };
+
+            setScreenshot(null);
+            content.ResumeLayout();
         }
 
         public void Unload(GenshinBot b)

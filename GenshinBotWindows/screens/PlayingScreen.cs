@@ -1,4 +1,5 @@
 ﻿using genshinbot;
+using genshinbot.database;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -38,13 +39,13 @@ namespace genshinbot.screens
                     MinimapLoc = new Rect(53, 15, 189, 189),
                 },
             };
-            public int arrowRadius { get; internal set; } = 15;
-
+            public int ArrowRadius { get; internal set; } = 15;
+            public int MinBlobArea { get; set; } = 20;
             public class CharacterFilter
             {
-                public int? NumberSatMax { get; set; }
-                public Scalar? HealthMin { get; set; }
-                public Scalar? HealthMax { get; set; }
+                public double? NumberSatMax { get; set; }
+                public ColorRange? HealthRed{ get; set; }
+                public ColorRange? HealthGreen{ get; set; }
             }
 
             public CharacterFilter CharFilter { get; set; } = new CharacterFilter();
@@ -81,7 +82,7 @@ namespace genshinbot.screens
         {
             var db = b.Db.PlayingScreenDb;
             var miniRect = db.R[b.W.GetSize()].MinimapLoc;
-            return b.W.Screenshot(miniRect.Center().RectAround(new Size(db.arrowRadius * 2, db.arrowRadius * 2)));
+            return b.W.Screenshot(miniRect.Center().RectAround(new Size(db.ArrowRadius * 2, db.ArrowRadius * 2)));
         }
 
         public double GetArrowDirection()
