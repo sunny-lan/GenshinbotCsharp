@@ -50,7 +50,7 @@ namespace genshinbot.database.map
                     Coord=new Point2d(x:1093.4270324707, y:621.195953369141),
                 }
             };
-        public double MaxMinimapScaleDistortion { get; internal set; } = 0.005;
+        public double MaxMinimapScaleDistortion { get; set; } = 0.005;
 
         public struct KnownPoint
         {

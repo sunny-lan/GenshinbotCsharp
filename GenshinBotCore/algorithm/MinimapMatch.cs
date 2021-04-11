@@ -10,16 +10,16 @@ namespace genshinbot.algorithm.MinimapMatch
     public class Settings
     {
         public virtual Mat BigMap { get; set; }
-        public double MinScale { get; internal set; } = 1;
-        public double MaxScale { get; internal set; } = 3;
-        public double ScaleStep { get; internal set; } = 1.3;
+        public double MinScale { get; set; } = 1;
+        public double MaxScale { get; set; } = 3;
+        public double ScaleStep { get; set; } = 1.3;
 
-        public int PlayerArrowRadius { get; internal set; } = 20;
-        public int BigPadding { get; internal set; } = 25;
-        public double MinAcceptableCorrelationResponse { get; internal set; } = 0.2;
-        public double MaxDistanceBeforeTrackerMoves { get; internal set; } = 30;
-        public bool AutoUpdateTrackerWindowPos { get; internal set; } = true;
-        public double MaxDistanceFromApproxToActual { get; internal set; } = 100;
+        public int PlayerArrowRadius { get; set; } = 20;
+        public int BigPadding { get; set; } = 25;
+        public double MinAcceptableCorrelationResponse { get; set; } = 0.15;
+        public double MaxDistanceBeforeTrackerMoves { get; set; } = 30;
+        public bool AutoUpdateTrackerWindowPos { get; set; } = true;
+        public double MaxDistanceFromApproxToActual { get; set; } = 100;
 
 
 

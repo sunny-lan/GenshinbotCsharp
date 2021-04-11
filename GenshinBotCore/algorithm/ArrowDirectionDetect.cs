@@ -12,7 +12,7 @@ namespace genshinbot.algorithm
         class Settings
         {
 
-              public       double Epsilon { get; internal set; } = 2;
+              public       double Epsilon { get; set; } = 2;
 
         }
         Settings db=new Settings ();//TODO

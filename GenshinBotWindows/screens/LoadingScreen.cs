@@ -15,7 +15,7 @@ namespace genshinbot.screens
         {
             public class RD
             {
-                public Rect Patch { get; internal set; } = new Rect(10, 10, 20, 20);
+                public Rect Patch { get; set; } = new Rect(10, 10, 20, 20);
             }
 
             public class Theme

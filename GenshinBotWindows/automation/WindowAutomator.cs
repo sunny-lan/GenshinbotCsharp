@@ -9,10 +9,10 @@ using genshinbot.util;
 using OpenCvSharp;
 using genshinbot.automation;
 using genshinbot.automation.input;
+using System.Windows.Forms;
 
 namespace genshinbot
 {
-
     public class WindowAutomator : IInputSimulator, IWindowAutomator
     {
 
@@ -208,6 +208,7 @@ namespace genshinbot
 
         WinEventHook locationChangeHook;
         private Rect rect;
+        private InputSimulatorStandard.InputSimulator iS;
 
         Rect GetRect()
         {
@@ -299,12 +300,12 @@ namespace genshinbot
 
         private void initInput()
         {
+            iS = new InputSimulatorStandard.InputSimulator();
         }
         public OpenCvSharp.Point2d MousePos()
         {
             WaitForFocus();
-            if (!User32.GetCursorPos(out var pt))
-                throw new Exception();
+            var pt = Cursor.Position;
             if (!User32.ScreenToClient(hWnd, ref pt))
                 throw new Exception();
             return pt.Cv();
@@ -321,6 +322,10 @@ namespace genshinbot
 
         public void MouseMove(OpenCvSharp.Point2d p)
         {
+            WaitForFocus();
+            var oo = p.Round();
+            iS.Mouse.MoveMouseBy(oo.X, oo.Y);
+            return;
             var cur = MousePos();
             MouseTo(cur + p);
 
@@ -358,8 +363,7 @@ namespace genshinbot
                 dy = pp.Y,
                 dwFlags = (uint)User32.MOUSEEVENTF.MOUSEEVENTF_MOVE | (uint)User32.MOUSEEVENTF.MOUSEEVENTF_ABSOLUTE |(uint)User32.MOUSEEVENTF.MOUSEEVENTF_VIRTUALDESK
             });*/
-            if (!User32.SetCursorPos(pp.X, pp.Y))
-                throw new Win32Exception(Marshal.GetLastWin32Error());
+           iS.Mouse.MoveMouseToPositionOnVirtualDesktop(pp.X,pp.Y);
         }
 
         static readonly User32.MOUSEEVENTF[] mouseDownF = {
@@ -389,12 +393,18 @@ namespace genshinbot
 
         public void MouseDown(int btn)
         {
-            MouseButton(btn, true);
+            WaitForFocus();
+            if (btn == 0)
+                iS.Mouse.LeftButtonDown();
+            else throw new NotImplementedException();
         }
 
         public void MouseUp(int btn)
         {
-            MouseButton(btn, false);
+            WaitForFocus();
+            if (btn == 0)
+                iS.Mouse.LeftButtonUp();
+            else throw new NotImplementedException();
         }
 
         public void MouseClick(int btn)
@@ -431,12 +441,14 @@ namespace genshinbot
 
         public void KeyDown(int k)
         {
-            SendKeyEvent(k, true);
+            WaitForFocus();
+            iS.Keyboard.KeyDown((InputSimulatorStandard.Native.VirtualKeyCode)k);
         }
 
         public void KeyUp(int k)
         {
-            SendKeyEvent(k, false);
+            WaitForFocus();
+            iS.Keyboard.KeyUp((InputSimulatorStandard.Native.VirtualKeyCode)k);
         }
 
         public void KeyPress(int k)

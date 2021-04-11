@@ -19,7 +19,7 @@ namespace genshinbot.screens
 
             public class RD
             {
-                public Point2d ActionBtnLoc { get; internal set; }
+                public Point2d ActionBtnLoc { get; set; }
                 public Size ActiveArea { get; set; }
             }
 

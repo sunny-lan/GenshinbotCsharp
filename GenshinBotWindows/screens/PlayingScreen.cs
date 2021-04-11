@@ -40,7 +40,7 @@ namespace genshinbot.screens
                     MinimapLoc = new Rect(53, 15, 189, 189),
                 },
             };
-            public int ArrowRadius { get; internal set; } = 15;
+            public int ArrowRadius { get; set; } = 15;
             public int MinBlobArea { get; set; } = 20;
             public int MinAliveWidth { get; set; } = 10;
             public class CharacterFilter
@@ -207,7 +207,7 @@ namespace genshinbot.screens
             var sMax = db.CharFilter.NumberSatMax.Expect();
 
             var hsv = color.CvtColor(ColorConversionCodes.BGR2HSV);
-            return (hsv.Val1 <= sMax);
+            return (hsv.Val1 > sMax);
 
         }
 

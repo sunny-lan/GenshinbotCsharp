@@ -88,7 +88,6 @@ namespace genshinbot.controllers
             bool approxLocCalculated = false;
 
             var p = b.S<PlayingScreen>();
-            Mat minimap = p.SnapMinimap();
         begin:
 
             //check map to find initial location
@@ -98,6 +97,7 @@ namespace genshinbot.controllers
 
                 approxLocCalculated = true;
             }
+            Mat minimap = p.SnapMinimap();
 
 
 

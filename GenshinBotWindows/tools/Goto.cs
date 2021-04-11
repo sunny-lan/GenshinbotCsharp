@@ -22,9 +22,8 @@ namespace genshinbot.tools
             Cv2.NamedWindow("select", WindowFlags.KeepRatio);
             while (true)
             {
-                Console.WriteLine("Please navigate to map screen");
-                b.S(b.MapScreen);
-                b.MapScreen.Close();
+                Console.WriteLine("Please navigate to play screen");
+                b.S(b.PlayingScreen);
                 Rect zoom;
                 while (true)
                 {

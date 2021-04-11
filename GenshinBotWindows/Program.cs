@@ -13,12 +13,6 @@ namespace genshinbot
         [STAThread]
         static void Main(string[] args)
         {
-            var wnd = new WindowAutomator("*Untitled - Notepad",null);
-            while (true)
-            {
-                wnd.KeyPress((int)automation.input.Keys.M);
-                Thread.Sleep(1000);
-            }
             Screenshot.Init();
             //TestMapLive();
             // tools.CoordChecker.run(args);
