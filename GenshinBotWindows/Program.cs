@@ -31,8 +31,8 @@ namespace genshinbot
             // algorithm.CharacterPaletteRead.Test();
             // yui.WindowsForms.MainForm.Test();
             //experiments.XboxInput.Run();
-            // GenshinBot.generalTest();
-            screens.PlayingScreen.TestRead();
+             GenshinBot.generalTest();
+            //screens.PlayingScreen.TestRead();
         }
 
     }

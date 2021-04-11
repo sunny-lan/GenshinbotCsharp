@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DirectXScreenshot\NativeLibTest.vcxproj" />
     <ProjectReference Include="..\GenshinBotCore\GenshinBotCore.csproj" />
   </ItemGroup>
 
