@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+
 namespace genshinbot.screens
 {
     public class PlayingScreen : Screen
@@ -102,5 +103,62 @@ namespace genshinbot.screens
             }
         }
 
+        Mat thresOut=new Mat(), hrThres=new Mat(), hgThres=new Mat(), hsvHealth=new Mat();
+
+        /// <summary>
+        /// Read health of player from side bar
+        /// </summary>
+        /// <param name="idx"></param>
+        /// <returns></returns>
+        public double ReadSideHealth(int idx)
+        {
+            var db = b.Db.PlayingScreenDb;
+            var r = db.R[b.W.GetSize()];
+            var rect = r.Characters[idx].Health;
+            var src = b.W.Screenshot(rect);
+            var hr = db.CharFilter.HealthRed.Expect();
+            var hg = db.CharFilter.HealthGreen.Expect();
+
+            Cv2.CvtColor(src, hsvHealth, ColorConversionCodes.BGR2HSV);
+
+            //check green health
+            Cv2.InRange(hsvHealth, hg.Min, hg.Max, hgThres); 
+            var blob = Util.FindBiggestBlob(hgThres);
+            if (blob != null )
+            {
+                return blob.Width / (double)rect.Width;
+            }
+
+            //check red health
+            Cv2.InRange(hsvHealth, hr.Min, hr.Max, hrThres);
+            blob = Util.FindBiggestBlob(hrThres);
+            if(blob!=null )
+            {
+                return blob.Width / (double)rect.Width;
+            }
+
+            return 0;
+
+        }
+
+
+        Mat numThres=new Mat(),hsvNum=new Mat(), satNum=new Mat();
+
+        public bool ReadCharSelected(int idx)
+        {
+            var db = b.Db.PlayingScreenDb;
+            var r = db.R[b.W.GetSize()];
+            var rect = r.Characters[idx].Number;
+            var src = b.W.Screenshot(rect);
+            var sMax = db.CharFilter.NumberSatMax.Expect();
+
+            Cv2.CvtColor(src, hsvNum, ColorConversionCodes.BGR2HSV) ;
+            Cv2.ExtractChannel(hsvNum, satNum, 1);
+            Cv2.Threshold(satNum, numThres, sMax, 255, ThresholdTypes.BinaryInv);
+            var blob = Util.FindBiggestBlob(numThres);
+            return (blob.Area??0) < 0.7 * rect.Area();
+
+
+        }
     }
 }

@@ -193,8 +193,8 @@ namespace genshinbot
             if (loadedScripts.Contains(s))
                 throw new Exception("Script already loaded");
 
-            loadedScripts.Add(s);
             s.Load(this);
+            loadedScripts.Add(s);
         }
 
         public void Unload(Script s)

@@ -324,22 +324,7 @@ namespace genshinbot.tools.config
 
             }
             
-            ConnectedComponents.Blob findBiggestBlob(Mat src)
-            {
-                var comps = Cv2.ConnectedComponentsEx(src, PixelConnectivity.Connectivity4);
-                ConnectedComponents.Blob res=default;
-                int maxArea = -1;
-                foreach(var blob in comps.Blobs)
-                {
-                    if (blob.Label == 0) continue;
-                    if (blob.Area > maxArea)
-                    {
-                        maxArea = blob.Area;
-                        res = blob;
-                    }
-                }
-                return res;
-            }
+            
 
             refineBtn.Click += (s, e) =>
             {
@@ -352,7 +337,7 @@ namespace genshinbot.tools.config
                         var number = character.Number;
                         using var filtered = new Mat();
                         filterNum(sMax, screenshot[number], filtered, color:false);
-                        var blob = findBiggestBlob(filtered);
+                        var blob = Util.FindBiggestBlob(filtered);
                         if (blob!=null && blob.Area > db.MinBlobArea)
                         {
                             character.Number = blob.Rect+number.TopLeft;
@@ -365,7 +350,7 @@ namespace genshinbot.tools.config
                          var number = character.Health;
                         using var filtered = new Mat();
                         filterHealth(hg, hr, screenshot[number], filtered,color:false);
-                        var blob = findBiggestBlob(filtered);
+                        var blob = Util.FindBiggestBlob(filtered);
                         if (blob!=null && blob.Area > db.MinBlobArea)
                         {
                             character.Health = blob.Rect+health.TopLeft;

@@ -43,7 +43,7 @@ namespace genshinbot.yui
     {
         Ok,Cancel
     }
-    public interface Component
+    public interface Deletable
     {
         void Delete();
     }
@@ -102,6 +102,7 @@ namespace genshinbot.yui
     }
     public interface Container
     {
+        Label CreateLabel();
         Expander CreateExpander();
         Viewport CreateViewport();
         Button CreateButton();

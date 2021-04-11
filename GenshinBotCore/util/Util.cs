@@ -9,6 +9,22 @@ namespace genshinbot
 {
     public static class Util
     {
+       public static  ConnectedComponents.Blob FindBiggestBlob(Mat src)
+        {
+            var comps = Cv2.ConnectedComponentsEx(src, PixelConnectivity.Connectivity4);
+            ConnectedComponents.Blob res = default;
+            int maxArea = -1;
+            foreach (var blob in comps.Blobs)
+            {
+                if (blob.Label == 0) continue;
+                if (blob.Area > maxArea)
+                {
+                    maxArea = blob.Area;
+                    res = blob;
+                }
+            }
+            return res;
+        }
         public static void Swap<T>(ref T a, ref T b)
         {
             T tmp = a;
@@ -27,6 +43,10 @@ namespace genshinbot
             r.Top = Math.Min(initial.Y, final.Y);
             r.Height = Math.Max(initial.Y, final.Y) - r.Top;
             return r;
+        }
+        public static int Area(this Rect r)
+        {
+            return r.Width * r.Height;
         }
         public static Point RandomWithin(this Rect r)
         {

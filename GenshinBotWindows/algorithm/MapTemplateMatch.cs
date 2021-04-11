@@ -80,6 +80,7 @@ namespace genshinbot.algorithm
 
                 Cv2.CvtColor(orig, orig, ColorConversionCodes.BGR2HSV);
 
+                //TODO use CV.ExtractChannel
                 Sat = orig.ExtractChannel(1);//s
                 Cv2.Threshold(Sat, Filter, 15, 255, ThresholdTypes.BinaryInv);
 
@@ -91,6 +92,7 @@ namespace genshinbot.algorithm
 
                 //3. calculate image used for masking (alpha channel)
                 using var origAlpha = Cv2.ImRead(pathAlpha, ImreadModes.Unchanged);
+                //TODO use CV.ExtractChannel
                 UnweightedMask = origAlpha[Stats.Rect].ExtractChannel(3);
                 UnweightedMask.ConvertTo(Mask, MatType.CV_32F);
 
@@ -146,6 +148,7 @@ namespace genshinbot.algorithm
 
             Cv2.CvtColor(buf, hsv, ColorConversionCodes.BGR2HSV);
 
+            //TODO use CV.ExtractChannel
             using var sat = hsv.ExtractChannel(1);
             Cv2.Threshold(sat, filter, 15, 255, ThresholdTypes.BinaryInv);
 

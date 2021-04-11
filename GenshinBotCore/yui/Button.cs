@@ -5,7 +5,7 @@
 /// </summary>
 namespace genshinbot.yui
 {
-    public interface Button:Component
+    public interface Button:Deletable
     {
         event EventHandler Click;
         string Text { get; set; }

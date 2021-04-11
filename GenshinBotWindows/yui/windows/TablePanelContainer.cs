@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace genshinbot.yui.windows
 {
-    class TablePanelContainer : TableLayoutPanel, yui.Container
+    class TablePanelContainer : TableLayoutPanel, BaseContainerImpl
     {
         private Flexbox flex;
         bool yui.Container.SupportsFlexbox => true;
@@ -86,7 +86,7 @@ namespace genshinbot.yui.windows
                 }
             }
         }
-        private T add<T>(T c) where T : Control
+        public T add<T>(T c) where T : Control
         {
             Invoke((MethodInvoker)delegate
             {
@@ -144,13 +144,5 @@ namespace genshinbot.yui.windows
             else Debug.Assert(false);
         }
 
-        public yui.Button CreateButton() => add(new Button());
-        public yui.PropertyGrid CreatePropertyGrid() => add(new PropertyGrid());
-        public yui.Slider CreateSlider() => add(new LabelledSlider());
-        public yui.Container CreateSubContainer() => add(new TablePanelContainer());
-        public yui.TreeView CreateTreeview() => add(new TreeView());
-        public yui.Viewport CreateViewport() => add(new Viewport());
-
-        public yui.Expander CreateExpander() => add(new Expander());
     }
 }

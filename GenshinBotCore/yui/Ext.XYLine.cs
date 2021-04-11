@@ -32,7 +32,7 @@ namespace genshinbot.yui
     /// <summary>
     /// A line which is locked to a single X or Y value
     /// </summary>
-    public class XYLine : yui.Component
+    public class XYLine : yui.Deletable
     {
         private Line _line;
         private Orientation orientation;

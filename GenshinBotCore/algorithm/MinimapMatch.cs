@@ -174,6 +174,7 @@ namespace genshinbot.algorithm.MinimapMatch
             double amplify = 1;
 
             using var hsv = orig.CvtColor(ColorConversionCodes.BGR2HSV);
+            //TODO use CV.ExtractChannel
             using var s = hsv.ExtractChannel(1);
             using var v = hsv.ExtractChannel(2);
 

@@ -29,6 +29,7 @@ namespace genshinbot.algorithm
         public double GetAngle(Mat img)
         {
             using var hsv=img.CvtColor(ColorConversionCodes.BGR2HSV);
+            //TODO use CV.ExtractChannel
             using var s = hsv.ExtractChannel(1);
             using var v = hsv.ExtractChannel(2);
             Cv2.Threshold(s, s_thres, thresh: 220, maxval: 255, type: ThresholdTypes.Binary);

@@ -14,6 +14,7 @@ namespace genshinbot.tools
     {
         HashSet<Script> scripts = new HashSet<Script> {
             new genshinbot.tools.config.PlayingScreenConfig(),
+            new genshinbot.tools.PlayerScreenTest(),
         };
 
         Tab tab;
@@ -71,13 +72,21 @@ namespace genshinbot.tools
                         {
                             b.Unload(script);
                             loaded = false;
+                            update(loaded);
                         }
                         else
                         {
-                            b.Load(script);
-                            loaded = true;
+                            try
+                            {
+                                b.Load(script);
+                                loaded = true;
+                                update(loaded);
+                            }
+                            catch(Exception e)
+                            {
+                                ui.Popup(e.ToString(),"Failed to load script");
+                            }
                         }
-                        update(loaded);
                         loadUnloadBtn.Enabled = true;
                     };
                 };

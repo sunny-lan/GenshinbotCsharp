@@ -4,7 +4,7 @@ using System.Text;
 
 namespace genshinbot.yui
 {
-    public class KoolRect:yui.Rect,yui.Component
+    public class KoolRect:yui.Rect,yui.Deletable
     {
         private Viewport vp;
         private XYLine top, bottom, left, right;
