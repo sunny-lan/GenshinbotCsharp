@@ -42,6 +42,7 @@ namespace genshinbot.screens
             };
             public int ArrowRadius { get; internal set; } = 15;
             public int MinBlobArea { get; set; } = 20;
+            public int MinAliveWidth { get; set; } = 10;
             public class CharacterFilter
             {
                 public double? NumberSatMax { get; set; }
@@ -103,8 +104,30 @@ namespace genshinbot.screens
             }
         }
 
-        Mat thresOut=new Mat(), hrThres=new Mat(), hgThres=new Mat(), hsvHealth=new Mat();
+        Mat hsv1 = new Mat(), rthes1=new Mat(), gthes1 = new Mat();
+        public bool ReadSideAlive(int idx)
+        {
+            var db = b.Db.PlayingScreenDb;
+            var r = db.R[b.W.GetSize()];
+            var rect = r.Characters[idx].Health;
+            var hr = db.CharFilter.HealthRed.Expect();
+            var hg = db.CharFilter.HealthGreen.Expect();
 
+            rect.Width = db.MinAliveWidth;
+            var src = b.W.Screenshot(rect);
+
+            Cv2.CvtColor(src, hsv1, ColorConversionCodes.BGR2HSV);
+            Cv2.InRange(hsv1, hg.Min, hg.Max, gthes1);
+            var count = Cv2.CountNonZero(gthes1);
+            if (count > 0.5 * rect.Area()) return true;
+
+            Cv2.InRange(hsv1, hr.Min, hr.Max, rthes1);
+            count = Cv2.CountNonZero(gthes1);
+            if (count > 0.5 * rect.Area()) return true;
+            return false;
+        }
+
+        Mat hrThres = new Mat(), hgThres = new Mat(), hsvHealth = new Mat();
         /// <summary>
         /// Read health of player from side bar
         /// </summary>
@@ -140,7 +163,37 @@ namespace genshinbot.screens
             return 0;
 
         }
+        public double ReadSideHealth1(int idx)
+        {
+            var db = b.Db.PlayingScreenDb;
+            var r = db.R[b.W.GetSize()];
+            var rect = r.Characters[idx].Health;
+            var my = (rect.Top + rect.Bottom) / 2;
 
+            var hr = db.CharFilter.HealthRed.Expect();
+            var hg = db.CharFilter.HealthGreen.Expect();
+
+
+            int lo = rect.Left, hi = rect.Right;
+            while (lo < hi)
+            {
+                int mx = (lo + hi) / 2;
+                Scalar pixel = b.W.GetPixelColor(mx, my);
+                Scalar hsv = pixel.CvtColor(ColorConversionCodes.BGR2HSV);
+
+                if (hr.Contains(hsv) || hg.Contains(hsv))
+                {
+                    lo = mx+1;
+                }
+                else
+                {
+                    hi = mx;
+                }
+            }
+
+            return lo;
+
+        }
 
         Mat numThres=new Mat(),hsvNum=new Mat(), satNum=new Mat();
 
@@ -149,16 +202,26 @@ namespace genshinbot.screens
             var db = b.Db.PlayingScreenDb;
             var r = db.R[b.W.GetSize()];
             var rect = r.Characters[idx].Number;
-            var src = b.W.Screenshot(rect);
+            var pos = rect.Center().Round();
+            var color = b.W.GetPixelColor(pos.X, pos.Y);
             var sMax = db.CharFilter.NumberSatMax.Expect();
 
-            Cv2.CvtColor(src, hsvNum, ColorConversionCodes.BGR2HSV) ;
-            Cv2.ExtractChannel(hsvNum, satNum, 1);
-            Cv2.Threshold(satNum, numThres, sMax, 255, ThresholdTypes.BinaryInv);
-            var blob = Util.FindBiggestBlob(numThres);
-            return (blob.Area??0) < 0.7 * rect.Area();
+            var hsv = color.CvtColor(ColorConversionCodes.BGR2HSV);
+            return (hsv.Val1 <= sMax);
 
+        }
 
+        public static void TestRead()
+        {
+            GenshinBot b = new GenshinBot();
+            b.InitDb();
+            b.InitScreens();
+            b.AttachWindow();
+            
+            while (true)
+            {
+                System.Diagnostics.Debug.WriteLine(b.PlayingScreen.ReadCharSelected(0));
+            }
         }
     }
 }

@@ -29,11 +29,17 @@ namespace genshinbot.tools
                 Scroll = false,
                 Wrap = false,
             });
-            var btn = content.CreateButton();
-            btn.Text = "Check sidebar";
+            var btnContainer = content.CreateSubContainer(); 
+            btnContainer.SetFlex(new yui.Flexbox
+            {
+                Direction = yui.Orientation.Horizontal,
+                Scroll = false,
+                Wrap = false,
+            });
 
             var health = new yui.Label[4];
             var num = new yui.Label[4];
+            var alive = new yui.Label[4];
             for (int i = 0; i < 4; i++)
             {
                 var row = content.CreateSubContainer();
@@ -52,42 +58,55 @@ namespace genshinbot.tools
                 row.SetFlex(health[i], new yui.Flexbox.Item { Weight = 1 });
                 num[i] = row.CreateLabel();
                 row.SetFlex(health[i], new yui.Flexbox.Item { Weight = 1 });
+                alive[i] = row.CreateLabel();
+                row.SetFlex(health[i], new yui.Flexbox.Item { Weight = 1 });
             }
 
             var playingScreen = b.PlayingScreen;
 
-            bool running = false;
-
-            void pollStatus()
+          
+            void makePoller(string text, Action<int> fn)
             {
-                while (running)
+                bool running = false;
+
+                void pollStatus()
                 {
-                    for (int i = 0; i < 4; i++)
+                    while (running)
                     {
-                        health[i].Text = playingScreen.ReadSideHealth(i).ToString();
-                        // num[i].Text = playingScreen.ReadCharSelected(i).ToString();
+                        for (int i = 0; i < 4; i++)
+                        {
+                            fn(i);
+                        }
                     }
                 }
+
+                var btn = btnContainer.CreateButton();
+                btn.Text =$"start {text}";
+                btnContainer.SetFlex(btn, new yui.Flexbox.Item { Weight = 1 });
+
+                Task poller = null;
+                btn.Click += async (s, e) =>
+               {
+                   btn.Enabled = false;
+                   if (running)
+                   {
+                       running = false;
+                       await poller;
+                       btn.Text = $"start {text}";
+                   }
+                   else
+                   {
+                       btn.Text = $"stop {text}";
+                       running = true;
+                       poller = Task.Run(pollStatus);
+                   }
+                   btn.Enabled = true;
+               };
             }
 
-            Task poller = null;
-            btn.Click += async (s, e) =>
-           {
-               btn.Enabled = false;
-               if (running)
-               {
-                   running = false;
-                   await poller;
-                   btn.Text = "start";
-               }
-               else
-               {
-                   btn.Text = "Stop";
-                   running = true;
-                   poller = Task.Run(pollStatus);
-               }
-               btn.Enabled = true;
-           };
+            makePoller("health", i=> health[i].Text = playingScreen.ReadSideHealth1(i).ToString());
+            makePoller("num", i=> num[i].Text = playingScreen.ReadCharSelected(i).ToString());
+            makePoller("alive", i=> alive[i].Text = playingScreen.ReadSideAlive(i).ToString());
         }
 
         public void Unload(GenshinBot b)

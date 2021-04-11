@@ -105,6 +105,7 @@ namespace genshinbot
 
 
             hTmpDC.SelectObject(img.HBitmap);
+            lock(hDesktopDC)
             if (!Gdi32.BitBlt(hTmpDC, dst.X, dst.Y,sz.Width, sz.Height, hDesktopDC,
                src.X, src.Y, Gdi32.RasterOperationMode.SRCCOPY
                 ) || !Gdi32.GdiFlush())

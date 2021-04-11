@@ -9,7 +9,24 @@ namespace genshinbot
 {
     public static class Util
     {
-       public static  ConnectedComponents.Blob FindBiggestBlob(Mat src)
+        private static Mat conv_output = new Mat();
+        private static Mat conv_input = new Mat(new Size(1, 1), MatType.CV_8UC3);
+        public static Scalar CvtColor(this Scalar s, ColorConversionCodes code)
+        {
+            conv_input.SetTo(s);
+            Cv2.CvtColor(conv_input, conv_output, code);
+            var thing = conv_output.Get<Vec3b>(0);
+            return thing.Cvt();
+        }
+        public static Scalar Cvt(this Vec3f v)
+        {
+            return new Scalar(v.Item0, v.Item1, v.Item2);
+        }
+        public static Scalar Cvt(this Vec3b v)
+        {
+            return new Scalar(v.Item0, v.Item1, v.Item2);
+        }
+        public static  ConnectedComponents.Blob FindBiggestBlob(Mat src)
         {
             var comps = Cv2.ConnectedComponentsEx(src, PixelConnectivity.Connectivity4);
             ConnectedComponents.Blob res = default;
