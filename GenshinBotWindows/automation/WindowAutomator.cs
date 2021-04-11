@@ -117,12 +117,7 @@ namespace genshinbot
 
         public Scalar GetPixelColor(int x, int y)
         {
-            WaitForFocus();
-
-            var p = new System.Drawing.Point(x, y);
-
-            User32.ClientToScreen(hWnd, ref p);
-            return genshinbot.Screenshot.GetPixelColor(p.X, p.Y);
+            return Screenshot(new Rect(x, y, 1, 1)).Get<Vec3b>(0, 0).Cvt();
         }
 
         #endregion
@@ -405,6 +400,7 @@ namespace genshinbot
         public void MouseClick(int btn)
         {
             MouseDown(btn);
+            Thread.Sleep(100);
             MouseUp(btn);
         }
 
@@ -413,9 +409,11 @@ namespace genshinbot
         public void SendInput(User32.INPUT input)
         {
             WaitForFocus();
-            User32.SendInput(1, new User32.INPUT[] {
+            if(User32.SendInput(1, new User32.INPUT[] {
                input
-            }, Marshal.SizeOf<User32.INPUT>());
+            }, Marshal.SizeOf<User32.INPUT>()) == 0){
+                throw Kernel32.GetLastError().GetException();
+            }
         }
 
         public void SendKeyEvent(int k, bool down)
@@ -444,6 +442,7 @@ namespace genshinbot
         public void KeyPress(int k)
         {
             KeyDown(k);
+            Thread.Sleep(100);
             KeyUp(k);
         }
 

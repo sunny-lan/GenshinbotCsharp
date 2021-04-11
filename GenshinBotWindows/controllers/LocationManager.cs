@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace genshinbot.controllers
 {
@@ -160,6 +161,7 @@ namespace genshinbot.controllers
             var p = b.S<PlayingScreen>();
 
 
+
             while (true)
             {
                 if (curPos.DistanceTo(dstPos) <= accuracy)
@@ -167,6 +169,12 @@ namespace genshinbot.controllers
                     b.K.KeyUp(input.GenshinKeys.Forward);
                     b.M.Stop();
                     return;
+                }
+
+                while (p.IsDisabled())
+                {
+                    b.W.KeyPress((int)automation.input.Keys.Space);
+                    Thread.Sleep(100);
                 }
 
                 b.K.KeyPress(input.GenshinKeys.Forward);

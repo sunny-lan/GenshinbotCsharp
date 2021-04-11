@@ -17,7 +17,7 @@ namespace genshinbot.screens
         {
             public class RD
             {
-                public Rect MinimapLoc { get; internal set; }
+                public Rect MinimapLoc { get;  set; }
 
                 public class CharacterTemplate
                 {
@@ -211,6 +211,18 @@ namespace genshinbot.screens
 
         }
 
+        public bool IsDisabled()
+        {
+            for(int i = 0; i < 4; i++)
+            {
+                if (!ReadCharSelected(i) && ReadSideHealth(i)>0.1)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         public static void TestRead()
         {
             GenshinBot b = new GenshinBot();
@@ -220,7 +232,8 @@ namespace genshinbot.screens
             
             while (true)
             {
-                System.Diagnostics.Debug.WriteLine(b.PlayingScreen.ReadCharSelected(0));
+                //System.Diagnostics.Debug.WriteLine(b.PlayingScreen.ReadCharSelected(0));
+                System.Diagnostics.Debug.WriteLine(b.W.GetPixelColor(100,100));
             }
         }
     }

@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenshinBotWindows", "Genshi
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Data", "Data\Data.shproj", "{E3293B05-89D6-4167-B728-B021E35D6926}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectXScreenshot", "DirectXScreenshot\NativeLibTest.vcxproj", "{FEF9FA12-6853-4CF8-B17E-747EF383054B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectXScreenshot", "DirectXScreenshot\DirectXScreenshot.vcxproj", "{FEF9FA12-6853-4CF8-B17E-747EF383054B}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution

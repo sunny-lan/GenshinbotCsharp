@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Vanara.PInvoke;
 
 namespace genshinbot.tools
 {
@@ -11,7 +12,12 @@ namespace genshinbot.tools
     {
         public static void Run()
         {
+            Kernel32.AllocConsole();
             GenshinBot b = new GenshinBot();
+            b.InitDb();
+            b.AttachWindow();
+            b.InitScreens();
+            b.InitControllers();
             Mat big = b.Db.MapDb.BigMap.Load();
             Cv2.NamedWindow("select", WindowFlags.KeepRatio);
             while (true)

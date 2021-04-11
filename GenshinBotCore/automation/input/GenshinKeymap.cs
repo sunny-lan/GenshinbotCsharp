@@ -1,5 +1,4 @@
 ﻿using genshinbot.automation.input;
-using genshinbot.Core.automation.input;
 using System;
 using System.Collections.Generic;
 

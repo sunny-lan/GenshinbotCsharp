@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace genshinbot.Core.automation.input
+namespace genshinbot.automation.input
 {
         public enum Keys
         {
