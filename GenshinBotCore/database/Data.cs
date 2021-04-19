@@ -13,7 +13,7 @@ namespace genshinbot
 
 
 
-    static class Data
+    public static class Data
     {
 
         private static JsonSerializerOptions options = new JsonSerializerOptions()

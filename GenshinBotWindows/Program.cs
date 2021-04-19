@@ -27,12 +27,12 @@ namespace genshinbot
             // algorithm.MinimapMatch.ScaleMatcher.test();
             //controllers.LocationManager.Testwalkto();
             //screens.PlayingScreen.test();
-              tools.Goto.Run();
+             // tools.Goto.Run();
             //screens.MapScreen.Test();
             // algorithm.CharacterPaletteRead.Test();
             // yui.WindowsForms.MainForm.Test();
             //experiments.XboxInput.Run();
-            //GenshinBot.generalTest();
+            GenshinBot.generalTest();
             //screens.PlayingScreen.TestRead();
         }
 

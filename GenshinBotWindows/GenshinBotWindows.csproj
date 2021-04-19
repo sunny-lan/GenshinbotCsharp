@@ -79,6 +79,7 @@
   <ItemGroup>
     <Folder Include="automation\input\" />
     <Folder Include="badui\" />
+    <Folder Include="database\map\" />
   </ItemGroup>
 
   <Import Project="..\Data\Data.projitems" Label="Shared" />

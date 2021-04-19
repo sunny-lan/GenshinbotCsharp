@@ -9,7 +9,7 @@ namespace genshinbot.database
 {
    public class Image
     {
-        public string Path { get; init; }
+        public string Path { get; set; }
 
         private Lazy<Mat> mat;
         private ImreadModes prevMode;
