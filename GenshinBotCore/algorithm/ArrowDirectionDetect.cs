@@ -1,4 +1,5 @@
-﻿using OpenCvSharp;
+﻿using genshinbot.database;
+using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,42 +8,42 @@ using System.Threading.Tasks;
 
 namespace genshinbot.algorithm
 {
-   public class ArrowDirectionDetect
+    public class ArrowDirectionDetect
     {
         class Settings
         {
 
-              public       double Epsilon { get; set; } = 2;
+            public double Epsilon { get; set; } = 2;
+            public ColorRange ArrowColor { get; set; } = new ColorRange(
+                new Scalar(250, 220, 0),
+                new Scalar(256, 256, 10)
+            );
 
         }
-        Settings db=new Settings ();//TODO
+        Settings db = new Settings();//TODO
 
         Mat s_thres = new Mat();
-        private Mat v_thres=new Mat();
+        private Mat v_thres = new Mat();
+        Mat filtered = new Mat();
 
         ~ArrowDirectionDetect()
         {
             s_thres.Dispose();
             v_thres.Dispose();
+            filtered.Dispose();
         }
-        
+
         public double GetAngle(Mat img)
         {
-            using var hsv=img.CvtColor(ColorConversionCodes.BGR2HSV);
-            //TODO use CV.ExtractChannel
-            using var s = hsv.ExtractChannel(1);
-            using var v = hsv.ExtractChannel(2);
-            Cv2.Threshold(s, s_thres, thresh: 220, maxval: 255, type: ThresholdTypes.Binary);
-            Cv2.Threshold(v, v_thres, thresh: 240, maxval: 255, type: ThresholdTypes.Binary);
-            Cv2.BitwiseAnd(s_thres, v_thres, s_thres);
+            Cv2.InRange(img, db.ArrowColor.Min, db.ArrowColor.Max, filtered);
 
             //TODO optimize by using Mat
-            var contours = Cv2.FindContoursAsArray(s_thres, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
+            var contours = Cv2.FindContoursAsArray(filtered, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
             double mx = -1;
-            double? angle=null;
+            double? angle = null;
             foreach (var contour in contours)
             {
-                var approx=Cv2.ApproxPolyDP(contour, db.Epsilon, true);
+                var approx = Cv2.ApproxPolyDP(contour, db.Epsilon, true);
                 var area = Cv2.ContourArea(approx);
 
                 //find the front point of the arrow
@@ -70,7 +71,7 @@ namespace genshinbot.algorithm
                         //by adding the vectors from each side, their sideways components cancel
                         //and we get the vector in the direction of the arrow
                         var direction = a + b;
-                        angle= Math.Atan2(direction.Y, direction.X);
+                        angle = Math.Atan2(direction.Y, direction.X);
                     }
                 }
             }
