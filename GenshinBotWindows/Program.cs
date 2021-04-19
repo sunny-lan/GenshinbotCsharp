@@ -2,6 +2,7 @@
 
 using System;
 using System.Threading;
+using Vanara.PInvoke;
 
 namespace genshinbot
 {
@@ -13,6 +14,7 @@ namespace genshinbot
         [STAThread]
         static void Main(string[] args)
         {
+            Kernel32.AllocConsole();
             Screenshot.Init();
             //TestMapLive();
             // tools.CoordChecker.run(args);
@@ -27,13 +29,14 @@ namespace genshinbot
             // algorithm.MinimapMatch.ScaleMatcher.test();
             //controllers.LocationManager.Testwalkto();
             //screens.PlayingScreen.test();
-             // tools.Goto.Run();
+            // tools.Goto.Run();
             //screens.MapScreen.Test();
             // algorithm.CharacterPaletteRead.Test();
             // yui.WindowsForms.MainForm.Test();
             //experiments.XboxInput.Run();
-            GenshinBot.generalTest();
+            //GenshinBot.generalTest();
             //screens.PlayingScreen.TestRead();
+            algorithm.ArrowDirectionDetect.Test();
         }
 
     }

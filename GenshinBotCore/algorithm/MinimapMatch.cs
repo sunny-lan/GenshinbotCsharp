@@ -309,7 +309,7 @@ namespace genshinbot.algorithm.MinimapMatch
                 }
 
                 //TODO fails when walking over water
-                Debug.Assert(Math.Abs(angle) < 2); //for now expect angle is 0
+                Dbg.Assert(Math.Abs(angle) < 2); //for now expect angle is 0
 
                 var actualScale = s * scale;
 
@@ -319,7 +319,7 @@ namespace genshinbot.algorithm.MinimapMatch
                 if (xy1 is Point2d xy)
                 {
                     //We expect the position returned to be close to the approx position
-                    Debug.Assert(xy.DistanceTo(approxPos) < db.MaxDistanceFromApproxToActual);
+                    Dbg.Assert(xy.DistanceTo(approxPos) < db.MaxDistanceFromApproxToActual);
                     matcher = testMatcher;
                     return xy;
                 }

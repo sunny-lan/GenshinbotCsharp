@@ -70,7 +70,7 @@ namespace genshinbot.tools
                         var p = lr.ToPoint(f.Coordinates).Round();
                         if (p.X > 0 && p.Y > 0 && p.X < r.Width && p.Y < r.Height)
                         {
-                            Debug.img.PutText("f:" + i, p,
+                            Dbg.img.PutText("f:" + i, p,
                                 HersheyFonts.HersheyPlain, fontScale: 1, color: Scalar.Red, thickness: 2);
                         }
                     }
@@ -92,11 +92,11 @@ namespace genshinbot.tools
                     else
                     {
                         int idx = features.IndexOf(match.B);
-                        Debug.img.PutText("m:" + idx, match.A.BoundingBox.TopLeft, HersheyFonts.HersheyPlain,
+                        Dbg.img.PutText("m:" + idx, match.A.BoundingBox.TopLeft, HersheyFonts.HersheyPlain,
                             fontScale: 1, color: Scalar.Cyan, thickness: 2);
                     }
                 }
-                Debug.show();
+                Dbg.show();
                 if (added)
                     Data.WriteJson(path, db);
 

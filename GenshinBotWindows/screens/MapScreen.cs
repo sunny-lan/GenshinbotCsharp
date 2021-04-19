@@ -108,7 +108,7 @@ namespace genshinbot.screens
         public void TeleportTo(Feature teleporter)
         {
             var db = b.Db.MapScreenDb;
-            Debug.Assert(teleporter.Type == FeatureType.Teleporter);
+            Dbg.Assert(teleporter.Type == FeatureType.Teleporter);
             var p = ShowOnScreen(teleporter.Coordinates);
             b.W.MouseTo(p);
             b.W.MouseClick(0);

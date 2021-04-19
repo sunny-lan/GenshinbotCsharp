@@ -100,8 +100,8 @@ namespace genshinbot
        /// </summary>
         public static void Take( Buffer img, Size sz, Point src, Point dst)
         {
-            Debug.Assert(dst.X >= 0 && dst.Y >= 0);
-            Debug.Assert(dst.X+sz.Width <=img.Mat.Width && dst.Y+sz.Height <=img.Mat.Height);
+            Dbg.Assert(dst.X >= 0 && dst.Y >= 0);
+            Dbg.Assert(dst.X+sz.Width <=img.Mat.Width && dst.Y+sz.Height <=img.Mat.Height);
 
 
             hTmpDC.SelectObject(img.HBitmap);

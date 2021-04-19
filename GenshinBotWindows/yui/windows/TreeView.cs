@@ -102,7 +102,7 @@ namespace genshinbot.yui.windows
             }
             else
             {
-                Debug.Assert(false);
+                Dbg.Assert(false);
             }
         }
 
@@ -125,7 +125,7 @@ namespace genshinbot.yui.windows
             }
             else
             {
-                Debug.Assert(false);
+                Dbg.Assert(false);
             }
         }
 

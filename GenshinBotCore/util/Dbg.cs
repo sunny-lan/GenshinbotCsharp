@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace genshinbot
 {
-    public class Debug
+    public class Dbg
     {
         public static Mat img
         {
@@ -28,7 +28,7 @@ namespace genshinbot
         public static int key = -1;
         private static object waitInit = new object();
         private static bool inited = false;
-        static Debug()
+        static Dbg()
         {
            /* Task.Run(() =>
             {

@@ -13,9 +13,9 @@ namespace genshinbot.tools.config
         yui.Tab tab;
         public void Load(GenshinBot b)
         {
-            Debug.Assert(tab == null);
-            Debug.Assert(b.Ui != null);
-            Debug.Assert(b.Db != null);
+            Dbg.Assert(tab == null);
+            Dbg.Assert(b.Ui != null);
+            Dbg.Assert(b.Db != null);
 
             var ui = b.Ui;
             var db = b.Db.PlayingScreenDb;
@@ -120,7 +120,7 @@ namespace genshinbot.tools.config
                 prevRects.Clear();
 
                 if (templates == null) return;
-                Debug.Assert(templates.Length == 4);
+                Dbg.Assert(templates.Length == 4);
 
                 for (int i = 0; i < 4; i++)
                 {
@@ -187,7 +187,7 @@ namespace genshinbot.tools.config
 
             void updateHealthFilterPreview()
             {
-                Debug.Assert(activeRD.Characters!=null);
+                Dbg.Assert(activeRD.Characters!=null);
                 for (int i = 0; i < 4; i++)
                 {
                     var character = activeRD.Characters[i];
@@ -209,7 +209,7 @@ namespace genshinbot.tools.config
 
             void updateNumFilterPreview()
             {
-                Debug.Assert(activeRD.Characters != null);
+                Dbg.Assert(activeRD.Characters != null);
 
                 for (int i = 0; i < 4; i++)
                 {
@@ -247,7 +247,7 @@ namespace genshinbot.tools.config
 
             void setCharTemplates(PlayingScreen.Db.RD.CharacterTemplate[] templates)
             {
-                Debug.Assert(activeRD != null);
+                Dbg.Assert(activeRD != null);
 
                 activeRD.Characters = templates;
                 displayCharTemplates(activeRD.Characters);
@@ -395,7 +395,7 @@ namespace genshinbot.tools.config
 
         public void Unload(GenshinBot b)
         {
-            Debug.Assert(tab != null);
+            Dbg.Assert(tab != null);
             b.Ui.RemoveTab(tab);
             tab = null;
         }

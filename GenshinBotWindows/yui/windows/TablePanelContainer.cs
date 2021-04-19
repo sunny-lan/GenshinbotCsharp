@@ -31,7 +31,7 @@ namespace genshinbot.yui.windows
         }
         void _setFlex(Flexbox layout)
         {
-            Debug.Assert(Controls.Count == 0, "Cannot set flex after controls added");
+            Dbg.Assert(Controls.Count == 0, "Cannot set flex after controls added");
             this.flex = layout;
             //Debug.Assert(!layout.Wrap, "Wrap not supported");
             AutoScroll = flex.Scroll;
@@ -56,7 +56,7 @@ namespace genshinbot.yui.windows
         void _setFlex(object child, Flexbox.Item layout)
         {
             //TODO totalWeight is wrong if setflex called twice
-            Debug.Assert(flex != null);
+            Dbg.Assert(flex != null);
 
             int idx = Controls.IndexOf(child as Control);
 
@@ -141,7 +141,7 @@ namespace genshinbot.yui.windows
                     }
                     Controls.Remove(c);
                 });
-            else Debug.Assert(false);
+            else Dbg.Assert(false);
         }
 
     }

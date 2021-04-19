@@ -54,14 +54,14 @@ namespace genshinbot.controllers
         public void CalculateCoord2Minimap()
         {
             var db = this.b.Db.MapDb;
-            Debug.Assert(db.KnownMinimapCoords.Count >= 2, "At least 2 points required");
+            Dbg.Assert(db.KnownMinimapCoords.Count >= 2, "At least 2 points required");
             var a = db.KnownMinimapCoords[0];
             var b = db.KnownMinimapCoords[1];
             var deltaCoord = a.Coord - b.Coord;
             var deltaMini = a.Minimap - b.Minimap;
             double scaleX = deltaMini.X / deltaCoord.X;
             double scaleY = deltaMini.Y / deltaCoord.Y;
-            Debug.Assert(Math.Abs(scaleY - scaleX) < db.MaxMinimapScaleDistortion, "Calculated scaling is non uniform");
+            Dbg.Assert(Math.Abs(scaleY - scaleX) < db.MaxMinimapScaleDistortion, "Calculated scaling is non uniform");
             double scale = (scaleX + scaleY) / 2.0;
             db.Coord2Minimap = new data.Transformation
             {
@@ -73,7 +73,7 @@ namespace genshinbot.controllers
 
         public void TeleportTo(Feature waypoint)
         {
-            Debug.Assert(waypoint.Type == FeatureType.Teleporter);
+            Dbg.Assert(waypoint.Type == FeatureType.Teleporter);
             var m = b.S<screens.MapScreen>();
             m.TeleportTo(waypoint);
             approxPos = waypoint.Coordinates;

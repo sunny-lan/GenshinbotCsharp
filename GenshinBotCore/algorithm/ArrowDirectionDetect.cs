@@ -71,12 +71,25 @@ namespace genshinbot.algorithm
                         //by adding the vectors from each side, their sideways components cancel
                         //and we get the vector in the direction of the arrow
                         var direction = a + b;
-                        angle = Math.Atan2(direction.Y, direction.X);
+                        angle = Math.Atan2(y:direction.Y, x:direction.X);
                     }
                 }
             }
 
             return angle.Expect("Angle unable to be found");
+        }
+
+        public static void Test()
+        {
+            var detect = new ArrowDirectionDetect();
+            var img = Data.Imread("test/bad arrow.png");
+            var angle = Math.PI/2- detect.GetAngle(img);
+            Console.WriteLine(angle);
+            var line = Util.Vec(angle,100).Round();
+            var center = img.Center().Round();
+            img.Line(center, center+line, color:Scalar.Red);
+            Cv2.ImShow("arrow", img);
+            Cv2.WaitKey();
         }
     }
 }

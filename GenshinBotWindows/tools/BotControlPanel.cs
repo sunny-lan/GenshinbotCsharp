@@ -23,9 +23,9 @@ namespace genshinbot.tools
 
         public void Load(GenshinBot b)
         {
-            Debug.Assert(tab == null);
-            Debug.Assert(b.Ui != null);
-            Debug.Assert(b.Db != null);
+            Dbg.Assert(tab == null);
+            Dbg.Assert(b.Ui != null);
+            Dbg.Assert(b.Db != null);
 
             var ui = b.Ui;
             tab = ui.CreateTab();
@@ -112,7 +112,7 @@ namespace genshinbot.tools
 
         public void Unload(GenshinBot b)
         {
-            Debug.Assert(tab != null);
+            Dbg.Assert(tab != null);
             b.Ui.RemoveTab(tab);
             tab = null;
         }

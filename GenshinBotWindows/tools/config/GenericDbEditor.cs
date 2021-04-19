@@ -135,7 +135,7 @@ namespace genshinbot.yui.tools
                             nd.Text = sz.ToString() + " ";
                             var sub = d[sz];
                             var ret = processor.process(sub, nd, x => d[sz] = x, processor);
-                            Debug.Assert(ret);
+                            Dbg.Assert(ret);
                         }
                         this.e.pg.EndUpdate();
                     };
@@ -236,7 +236,7 @@ namespace genshinbot.yui.tools
 
         public bool process(object o, TreeView.Node nd, Action<object> onChange, Processor processor)
         {
-            Debug.Assert(processor == this);
+            Dbg.Assert(processor == this);
 
             foreach (var p in processors)
             {

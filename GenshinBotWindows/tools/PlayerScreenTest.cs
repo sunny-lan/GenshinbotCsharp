@@ -14,11 +14,11 @@ namespace genshinbot.tools
 
         public void Load(GenshinBot b)
         {
-            Debug.Assert(tab == null);
-            Debug.Assert(b.Ui != null);
-            Debug.Assert(b.Db != null);
-            Debug.Assert(b.W != null);
-            Debug.Assert(b.PlayingScreen != null);
+            Dbg.Assert(tab == null);
+            Dbg.Assert(b.Ui != null);
+            Dbg.Assert(b.Db != null);
+            Dbg.Assert(b.W != null);
+            Dbg.Assert(b.PlayingScreen != null);
 
             tab = b.Ui.CreateTab();
             tab.Title = "Player screen test";
@@ -111,7 +111,7 @@ namespace genshinbot.tools
 
         public void Unload(GenshinBot b)
         {
-            Debug.Assert(tab != null);
+            Dbg.Assert(tab != null);
             b.Ui.RemoveTab(tab);
             tab = null;
         }

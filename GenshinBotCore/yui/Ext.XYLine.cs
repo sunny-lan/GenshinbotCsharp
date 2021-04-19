@@ -135,12 +135,12 @@ namespace genshinbot.yui
         {
             get
             {
-                Debug.Assert(orientation == Orientation.Horizontal);
+                Dbg.Assert(orientation == Orientation.Horizontal);
                 return V;
             }
             set
             {
-                Debug.Assert(orientation == Orientation.Horizontal);
+                Dbg.Assert(orientation == Orientation.Horizontal);
                 V = value;
             }
         }
@@ -148,12 +148,12 @@ namespace genshinbot.yui
         {
             get
             {
-                Debug.Assert(orientation == Orientation.Vertical);
+                Dbg.Assert(orientation == Orientation.Vertical);
                 return V;
             }
             set
             {
-                Debug.Assert(orientation == Orientation.Vertical);
+                Dbg.Assert(orientation == Orientation.Vertical);
                 V = value;
             }
         }

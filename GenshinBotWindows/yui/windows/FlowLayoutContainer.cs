@@ -46,7 +46,7 @@ namespace genshinbot.yui.windows
                 {
                     Controls.Remove(c);
                 });
-            else Debug.Assert(false);
+            else Dbg.Assert(false);
         }
     }
 }
