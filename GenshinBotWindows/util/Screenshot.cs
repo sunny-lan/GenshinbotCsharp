@@ -8,6 +8,7 @@ namespace genshinbot
     using System.Runtime.InteropServices;
     using System.ComponentModel;
     using OpenCvSharp;
+    using System.Diagnostics;
 
     class Screenshot
     {
@@ -100,8 +101,8 @@ namespace genshinbot
        /// </summary>
         public static void Take( Buffer img, Size sz, Point src, Point dst)
         {
-            Dbg.Assert(dst.X >= 0 && dst.Y >= 0);
-            Dbg.Assert(dst.X+sz.Width <=img.Mat.Width && dst.Y+sz.Height <=img.Mat.Height);
+            Debug.Assert(dst.X >= 0 && dst.Y >= 0);
+            Debug.Assert(dst.X+sz.Width <=img.Mat.Width && dst.Y+sz.Height <=img.Mat.Height);
 
 
             hTmpDC.SelectObject(img.HBitmap);

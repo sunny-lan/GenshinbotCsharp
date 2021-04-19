@@ -3,6 +3,7 @@ using genshinbot.automation;
 using genshinbot.util;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -34,7 +35,7 @@ namespace genshinbot
 
         public void InitDb()
         {
-            Dbg.Assert(Db == null);
+            Debug.Assert(Db == null);
 
             Db = new Database();
             Console.WriteLine("Database load finish");
@@ -97,8 +98,8 @@ namespace genshinbot
         bool screensInit = false;
         public void InitScreens()
         {
-            Dbg.Assert(!screensInit);
-            Dbg.Assert(Db != null);
+            Debug.Assert(!screensInit);
+            Debug.Assert(Db != null);
 
             PlayingScreen = new screens.PlayingScreen(this);
             MapScreen = new screens.MapScreen(this);
@@ -116,7 +117,7 @@ namespace genshinbot
         genshinbot.tools.BotControlPanel scriptListUi = new genshinbot.tools.BotControlPanel();
         public void InitUi()
         {
-            Dbg.Assert(Ui == null);
+            Debug.Assert(Ui == null);
 
             Ui = yui.windows.MainForm.make();
 
@@ -136,8 +137,8 @@ namespace genshinbot
         public event EventHandler<bool> AttachedWindowChanged;
         public void AttachWindow()
         {
-            Dbg.Assert(Db != null);
-            Dbg.Assert(W == null);
+            Debug.Assert(Db != null);
+            Debug.Assert(W == null);
 
             Console.WriteLine("Attaching to window");
 
@@ -158,9 +159,9 @@ namespace genshinbot
 
         public void InitControllers()
         {
-            Dbg.Assert(LocationManager == null);
-            Dbg.Assert(Db != null);
-            Dbg.Assert(screensInit);
+            Debug.Assert(LocationManager == null);
+            Debug.Assert(Db != null);
+            Debug.Assert(screensInit);
 
 
             LocationManager = new controllers.LocationManager(this);

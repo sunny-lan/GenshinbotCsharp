@@ -1,5 +1,6 @@
 ﻿using OpenCvSharp;
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 /// <summary>
@@ -135,12 +136,12 @@ namespace genshinbot.yui
         {
             get
             {
-                Dbg.Assert(orientation == Orientation.Horizontal);
+                Debug.Assert(orientation == Orientation.Horizontal);
                 return V;
             }
             set
             {
-                Dbg.Assert(orientation == Orientation.Horizontal);
+                Debug.Assert(orientation == Orientation.Horizontal);
                 V = value;
             }
         }
@@ -148,12 +149,12 @@ namespace genshinbot.yui
         {
             get
             {
-                Dbg.Assert(orientation == Orientation.Vertical);
+                Debug.Assert(orientation == Orientation.Vertical);
                 return V;
             }
             set
             {
-                Dbg.Assert(orientation == Orientation.Vertical);
+                Debug.Assert(orientation == Orientation.Vertical);
                 V = value;
             }
         }

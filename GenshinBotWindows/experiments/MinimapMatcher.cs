@@ -2,6 +2,7 @@
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -181,11 +182,11 @@ namespace genshinbot.algorithm.experiments
             trans = default;
             foreach (var angle1 in new double[] { angle,-(180-angle)})
             {
-                // Debug.show("rea"+angle1, sube);
+                // Cv2.ImShow("rea"+angle1, sube);
                 var subFixed = testfilter(sub1.Resize(default, fx: scale * 1.3, fy: scale * 1.3, InterpolationFlags.Linear), 255 / 15.0, 2, no: true);
                 subFixed = rotate(subFixed, angle1, 1, out _);
                 var ctr = subFixed.Center();
-             //   Debug.show("rea" + angle1, subFixed);
+             //   Cv2.ImShow("rea" + angle1, subFixed);
                 subFixed = subFixed.CopyMakeBorder(0,
                     Max(whole.Height, subFixed.Height) - subFixed.Height, 0,
                      Max(whole.Width, subFixed.Width) - subFixed.Width, BorderTypes.Constant, Scalar.All(0));
@@ -193,14 +194,14 @@ namespace genshinbot.algorithm.experiments
                     Max(whole.Height, subFixed.Height) - whole.Height, 0,
                      Max(whole.Width, subFixed.Width) - whole.Width, BorderTypes.Constant, Scalar.All(0));
                 
-                Dbg.show("rea" + angle1, subFixed);
+                Cv2.ImShow("rea" + angle1, subFixed);
                 trans = Cv2.PhaseCorrelate(whole, subFixed,new Mat(), out var response1);
                 Console.WriteLine("a=" + angle1 + " s=" + scale + " t=" + trans + " r=" + response1);
 
                 var center_trans = ctr - trans;
                 var ans = whole1.Clone();
                 ans.Circle(center_trans.Round(), 2, Scalar.Red, 2);
-                Dbg.show("f"+angle1,ans);
+                Cv2.ImShow("f"+angle1,ans);
             }
         }
         static Mat rotate(Mat src, double angle, double scale, out Mat matrix)
@@ -226,7 +227,7 @@ namespace genshinbot.algorithm.experiments
                 g.WaitForFocus();
                 var sub1 = g.Screenshot(minimap1);
                 sub1 = sub1.Resize(default, fx: 1.1, fy: 1.1, InterpolationFlags.Lanczos4);
-                Dbg.show("re", sub1);
+                Cv2.ImShow("re", sub1);
                 Test(whole2, sub1, out var angle, out var scale, out var trans,1);
             }
         }

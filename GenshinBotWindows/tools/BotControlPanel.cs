@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace genshinbot.tools
 {
@@ -23,9 +24,9 @@ namespace genshinbot.tools
 
         public void Load(GenshinBot b)
         {
-            Dbg.Assert(tab == null);
-            Dbg.Assert(b.Ui != null);
-            Dbg.Assert(b.Db != null);
+            Debug.Assert(tab == null);
+            Debug.Assert(b.Ui != null);
+            Debug.Assert(b.Db != null);
 
             var ui = b.Ui;
             tab = ui.CreateTab();
@@ -112,7 +113,7 @@ namespace genshinbot.tools
 
         public void Unload(GenshinBot b)
         {
-            Dbg.Assert(tab != null);
+            Debug.Assert(tab != null);
             b.Ui.RemoveTab(tab);
             tab = null;
         }

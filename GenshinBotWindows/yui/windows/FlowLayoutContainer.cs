@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using System.Diagnostics;
+using System.Windows.Forms;
 
 namespace genshinbot.yui.windows
 {
@@ -46,7 +47,7 @@ namespace genshinbot.yui.windows
                 {
                     Controls.Remove(c);
                 });
-            else Dbg.Assert(false);
+            else Debug.Assert(false);
         }
     }
 }

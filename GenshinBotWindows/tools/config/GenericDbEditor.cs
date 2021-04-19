@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,7 +26,7 @@ namespace genshinbot.yui.tools
 
                 string ToString(T v);
             }
-            Dictionary<Type, I<object>> pp;
+            Dictionary<Type, I<object>> pp=null;
             public bool process(object o, TreeView.Node nd, Action<object> onChange, Processor processor)
             {
                 var t = o.GetType();
@@ -135,7 +136,7 @@ namespace genshinbot.yui.tools
                             nd.Text = sz.ToString() + " ";
                             var sub = d[sz];
                             var ret = processor.process(sub, nd, x => d[sz] = x, processor);
-                            Dbg.Assert(ret);
+                            Debug.Assert(ret);
                         }
                         this.e.pg.EndUpdate();
                     };
@@ -236,7 +237,7 @@ namespace genshinbot.yui.tools
 
         public bool process(object o, TreeView.Node nd, Action<object> onChange, Processor processor)
         {
-            Dbg.Assert(processor == this);
+            Debug.Assert(processor == this);
 
             foreach (var p in processors)
             {

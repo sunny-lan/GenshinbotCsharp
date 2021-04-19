@@ -2,6 +2,7 @@
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -17,6 +18,8 @@ namespace genshinbot.tools
         const string path = "map/db.json";
         public static void run(string[] args)
         {
+            Mat dbg=new Mat();
+
             Console.WriteLine("clear old (y/n)?");
             var c = Console.ReadKey();
 
@@ -70,7 +73,7 @@ namespace genshinbot.tools
                         var p = lr.ToPoint(f.Coordinates).Round();
                         if (p.X > 0 && p.Y > 0 && p.X < r.Width && p.Y < r.Height)
                         {
-                            Dbg.img.PutText("f:" + i, p,
+                            dbg.PutText("f:" + i, p,
                                 HersheyFonts.HersheyPlain, fontScale: 1, color: Scalar.Red, thickness: 2);
                         }
                     }
@@ -92,11 +95,12 @@ namespace genshinbot.tools
                     else
                     {
                         int idx = features.IndexOf(match.B);
-                        Dbg.img.PutText("m:" + idx, match.A.BoundingBox.TopLeft, HersheyFonts.HersheyPlain,
+                        dbg.PutText("m:" + idx, match.A.BoundingBox.TopLeft, HersheyFonts.HersheyPlain,
                             fontScale: 1, color: Scalar.Cyan, thickness: 2);
                     }
                 }
-                Dbg.show();
+                Cv2.ImShow("dbg",dbg);
+                Cv2.WaitKey(1);
                 if (added)
                     Data.WriteJson(path, db);
 

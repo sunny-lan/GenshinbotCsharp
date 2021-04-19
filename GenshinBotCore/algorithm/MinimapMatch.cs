@@ -1,6 +1,7 @@
 ﻿using OpenCvSharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -309,7 +310,7 @@ namespace genshinbot.algorithm.MinimapMatch
                 }
 
                 //TODO fails when walking over water
-                Dbg.Assert(Math.Abs(angle) < 2); //for now expect angle is 0
+                Debug.Assert(Math.Abs(angle) < 2); //for now expect angle is 0
 
                 var actualScale = s * scale;
 
@@ -319,7 +320,7 @@ namespace genshinbot.algorithm.MinimapMatch
                 if (xy1 is Point2d xy)
                 {
                     //We expect the position returned to be close to the approx position
-                    Dbg.Assert(xy.DistanceTo(approxPos) < db.MaxDistanceFromApproxToActual);
+                    Debug.Assert(xy.DistanceTo(approxPos) < db.MaxDistanceFromApproxToActual);
                     matcher = testMatcher;
                     return xy;
                 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,11 +15,11 @@ namespace genshinbot.tools
 
         public void Load(GenshinBot b)
         {
-            Dbg.Assert(tab == null);
-            Dbg.Assert(b.Ui != null);
-            Dbg.Assert(b.Db != null);
-            Dbg.Assert(b.W != null);
-            Dbg.Assert(b.PlayingScreen != null);
+            Debug.Assert(tab == null);
+            Debug.Assert(b.Ui != null);
+            Debug.Assert(b.Db != null);
+            Debug.Assert(b.W != null);
+            Debug.Assert(b.PlayingScreen != null);
 
             tab = b.Ui.CreateTab();
             tab.Title = "Player screen test";
@@ -111,7 +112,7 @@ namespace genshinbot.tools
 
         public void Unload(GenshinBot b)
         {
-            Dbg.Assert(tab != null);
+            Debug.Assert(tab != null);
             b.Ui.RemoveTab(tab);
             tab = null;
         }

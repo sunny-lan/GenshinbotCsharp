@@ -3,6 +3,7 @@ using genshinbot.database;
 using genshinbot.screens;
 using OpenCvSharp;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using static genshinbot.yui.Ext;
 
@@ -13,9 +14,9 @@ namespace genshinbot.tools.config
         yui.Tab tab;
         public void Load(GenshinBot b)
         {
-            Dbg.Assert(tab == null);
-            Dbg.Assert(b.Ui != null);
-            Dbg.Assert(b.Db != null);
+            Debug.Assert(tab == null);
+            Debug.Assert(b.Ui != null);
+            Debug.Assert(b.Db != null);
 
             var ui = b.Ui;
             var db = b.Db.PlayingScreenDb;
@@ -120,7 +121,7 @@ namespace genshinbot.tools.config
                 prevRects.Clear();
 
                 if (templates == null) return;
-                Dbg.Assert(templates.Length == 4);
+                Debug.Assert(templates.Length == 4);
 
                 for (int i = 0; i < 4; i++)
                 {
@@ -187,7 +188,7 @@ namespace genshinbot.tools.config
 
             void updateHealthFilterPreview()
             {
-                Dbg.Assert(activeRD.Characters!=null);
+                Debug.Assert(activeRD.Characters!=null);
                 for (int i = 0; i < 4; i++)
                 {
                     var character = activeRD.Characters[i];
@@ -209,7 +210,7 @@ namespace genshinbot.tools.config
 
             void updateNumFilterPreview()
             {
-                Dbg.Assert(activeRD.Characters != null);
+                Debug.Assert(activeRD.Characters != null);
 
                 for (int i = 0; i < 4; i++)
                 {
@@ -247,7 +248,7 @@ namespace genshinbot.tools.config
 
             void setCharTemplates(PlayingScreen.Db.RD.CharacterTemplate[] templates)
             {
-                Dbg.Assert(activeRD != null);
+                Debug.Assert(activeRD != null);
 
                 activeRD.Characters = templates;
                 displayCharTemplates(activeRD.Characters);
@@ -395,7 +396,7 @@ namespace genshinbot.tools.config
 
         public void Unload(GenshinBot b)
         {
-            Dbg.Assert(tab != null);
+            Debug.Assert(tab != null);
             b.Ui.RemoveTab(tab);
             tab = null;
         }

@@ -3,6 +3,7 @@ using genshinbot.util;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace genshinbot.yui.windows
 {
@@ -45,7 +46,7 @@ namespace genshinbot.yui.windows
         {
             if (tab is TabPage pg)
                 Invoke((MethodInvoker)delegate { tabs.TabPages.Remove(pg); });
-            else Dbg.Assert(false);
+            else Debug.Assert(false);
         }
 
         Tab lastSelected;
@@ -64,7 +65,7 @@ namespace genshinbot.yui.windows
                     lastSelected.StatusChanged = null;
                 lastSelected = tab;
             }
-            else Dbg.Assert(false);
+            else Debug.Assert(false);
 
         }
 

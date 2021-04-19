@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using static System.Math;
+using System.Diagnostics;
 
 namespace genshinbot.screens
 {
@@ -108,7 +109,7 @@ namespace genshinbot.screens
         public void TeleportTo(Feature teleporter)
         {
             var db = b.Db.MapScreenDb;
-            Dbg.Assert(teleporter.Type == FeatureType.Teleporter);
+            Debug.Assert(teleporter.Type == FeatureType.Teleporter);
             var p = ShowOnScreen(teleporter.Coordinates);
             b.W.MouseTo(p);
             b.W.MouseClick(0);
