@@ -1,4 +1,5 @@
 ﻿using genshinbot.database;
+using genshinbot.diag;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -25,6 +26,7 @@ namespace genshinbot.algorithm
         Mat s_thres = new Mat();
         private Mat v_thres = new Mat();
         Mat filtered = new Mat();
+        public DbgMat Dbg { get; private set; } = new DbgMat();
 
         ~ArrowDirectionDetect()
         {
@@ -35,6 +37,7 @@ namespace genshinbot.algorithm
 
         public double GetAngle(Mat img)
         {
+            Dbg.Image(img);
             Cv2.InRange(img, db.ArrowColor.Min, db.ArrowColor.Max, filtered);
 
             //TODO optimize by using Mat
@@ -54,6 +57,8 @@ namespace genshinbot.algorithm
                     var prev = approx[(idx - 1 + n) % n];
                     var next = approx[(idx + 1) % n];
 
+                    Dbg.Circle(point, 2, Scalar.Red);
+
                     //get vectors from prev->cur and next->cur
                     var a = (Point2d)(point - prev);
                     var b = (Point2d)(point - next);
@@ -71,7 +76,9 @@ namespace genshinbot.algorithm
                         //by adding the vectors from each side, their sideways components cancel
                         //and we get the vector in the direction of the arrow
                         var direction = a + b;
-                        angle = Math.Atan2(y:direction.Y, x:direction.X);
+                        angle = Math.Atan2(y: direction.Y, x: direction.X);
+                        Dbg.Line(point, (point + direction * 10).Round(), Scalar.Red);
+                        Dbg.Flush(true);
                     }
                 }
             }
@@ -82,14 +89,10 @@ namespace genshinbot.algorithm
         public static void Test()
         {
             var detect = new ArrowDirectionDetect();
+            detect.Dbg.Enabled = true;
             var img = Data.Imread("test/bad arrow.png");
-            var angle = Math.PI/2- detect.GetAngle(img);
+            var angle = detect.GetAngle(img);
             Console.WriteLine(angle);
-            var line = Util.Vec(angle,100).Round();
-            var center = img.Center().Round();
-            img.Line(center, center+line, color:Scalar.Red);
-            Cv2.ImShow("arrow", img);
-            Cv2.WaitKey();
         }
     }
 }

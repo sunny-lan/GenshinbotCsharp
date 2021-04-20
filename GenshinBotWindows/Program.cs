@@ -36,7 +36,8 @@ namespace genshinbot
             //experiments.XboxInput.Run();
             //GenshinBot.generalTest();
             //screens.PlayingScreen.TestRead();
-            algorithm.ArrowDirectionDetect.Test();
+            // algorithm.ArrowDirectionDetect.Test();
+            stream.Poller.Test();
         }
 
     }
