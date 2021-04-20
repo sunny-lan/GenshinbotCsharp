@@ -63,15 +63,16 @@ namespace genshinbot.stream
 
         private async Task pollLoop()
         {
+            await semaphore.WaitAsync();
             while (running)
             {
-                //Fire a new poll task when both the delay and the semaphore are done
-                await Task.WhenAll(Task.Delay(Interval), semaphore.WaitAsync());
                 _ = Task.Run(() =>
                 {
                     Update(poll());
                     semaphore.Release();
                 });
+                //Fire a new poll task when both the delay and the semaphore are done
+                await Task.WhenAll(Task.Delay(Interval), semaphore.WaitAsync());
             }
         }
 
