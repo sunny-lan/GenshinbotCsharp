@@ -1,17 +1,31 @@
-﻿using System;
+﻿using genshinbot.stream;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
 namespace genshinbot
 {
+    namespace stream
+    {
+
+        public interface Subscriber : IDisposable { }
+        public interface IStream<T>
+        {
+
+            T Value { get; }
+
+            Subscriber Listen(Action<T> callback);
+        }
+    }
+
     /// <summary>
     /// Represents a stream of data which can be subscribed to.
     /// Keeps track of the # of subscribers, and disables the stream if # is 0
     /// Behavior on enabled/disabled is dependent on type of stream
     /// </summary>
     /// <typeparam name="T">Type of data</typeparam>
-    public class Stream<T>
+    public class Stream<T> : IStream<T>
     {
         private int subCount = 0;
 
@@ -67,8 +81,6 @@ namespace genshinbot
                 Debug.Assert(subs.Remove(value), "Subscriber not in list");
             }
         }
-
-        public interface Subscriber : IDisposable { }
 
         class _Subscriber : Subscriber
         {
