@@ -79,6 +79,7 @@ namespace genshinbot
             {
                 this.parent = parent;
                 this.handler = handler;
+                handler(parent.Value);
                 parent.Change += handler;
             }
 

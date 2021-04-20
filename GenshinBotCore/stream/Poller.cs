@@ -57,7 +57,7 @@ namespace genshinbot.stream
             {
                 running = false;
                 //TODO this could take a while depending on MaxInFlight
-                poller.Wait();
+                poller?.Wait();
             }
         }
 
@@ -142,16 +142,19 @@ namespace genshinbot.stream
             int i = 0;
             var stream = new Poller<int>(() =>
             {
+                Console.WriteLine("poll");
                 Thread.Sleep(1000);
                 return i++;
             });
             stream.Interval = 100;
             stream.MaxInFlight = 3;
-
+            Console.WriteLine("poll should begin after");
             using (var listener = stream.Listen(x => Console.WriteLine(x)))
             {
                 Thread.Sleep(5000);
             }
+            Console.WriteLine("no poll should be");
+            Thread.Sleep(2000);
         }
         public static void Test()
         {
