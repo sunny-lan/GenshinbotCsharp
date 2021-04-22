@@ -16,13 +16,13 @@ namespace genshinbot.automation.screenshot.directx
         public static void Run()
         {
             using var factory = new Factory1();
-            foreach(var adapter in factory.Adapters1)
+            foreach (var adapter in factory.Adapters1)
             {
                 Console.WriteLine(adapter.Description.Description);
                 Console.WriteLine("-----");
             }
             using var adapter1 = factory.Adapters[0];
-            foreach(var output in adapter1.Outputs)
+            foreach (var output in adapter1.Outputs)
             {
                 Console.WriteLine(output.Description.DeviceName);
                 Console.WriteLine("-----");
@@ -31,9 +31,9 @@ namespace genshinbot.automation.screenshot.directx
 
             var flags = DeviceCreationFlags.BgraSupport; // for D2D cooperation
             flags |= DeviceCreationFlags.VideoSupport;
-            #if DEBUG
-                flags |= DeviceCreationFlags.Debug;
-            #endif
+#if DEBUG
+            flags |= DeviceCreationFlags.Debug;
+#endif
 
             using var device = new SharpDX.Direct3D11.Device(adapter1, flags);
             using (var mt = device.QueryInterface<DeviceMultithread>())
@@ -41,46 +41,56 @@ namespace genshinbot.automation.screenshot.directx
                 mt.SetMultithreadProtected(new RawBool(true));
             }
             using var duplication = output1.DuplicateOutput(device);
-
-            SharpDX.DXGI.Resource frame;
-            OutputDuplicateFrameInformation frameInfo;
-            do {
-                var result = duplication.TryAcquireNextFrame(1000, out frameInfo, out frame);
-                result.CheckError();
-                if (frameInfo.LastPresentTime != 0) break;
-                duplication.ReleaseFrame();
-            } while (true);
-
             var desc = duplication.Description.ModeDescription;
 
             Texture2DDescription description = new Texture2DDescription
             {
-                Width=desc.Width,
-                Height=desc.Height,
-                Format=desc.Format,
-                ArraySize=1,
-                BindFlags=BindFlags.None,
-                SampleDescription=new SampleDescription { Count=1, Quality=0,},
+                Width = desc.Width,
+                Height = desc.Height,
+                Format = desc.Format,
+                ArraySize = 1,
+                BindFlags = BindFlags.None,
+                SampleDescription = new SampleDescription { Count = 1, Quality = 0, },
 
-                MipLevels=1,
-                CpuAccessFlags=CpuAccessFlags.Read,
-                Usage=ResourceUsage.Staging,
+                MipLevels = 1,
+                CpuAccessFlags = CpuAccessFlags.Read,
+                Usage = ResourceUsage.Staging,
 
             };
-            var ctx = device.ImmediateContext;
+            SharpDX.DXGI.Resource frame;
+            OutputDuplicateFrameInformation frameInfo;
+            using var dstTex = new Texture2D(device, description);
+            using var ctx = device.ImmediateContext;
 
-            var srcTex = frame.QueryInterface<Texture2D>();
-            var dstTex = new Texture2D(device, description);
-            ctx.CopyResource(srcTex, dstTex);
-            var sub= SharpDX.Direct3D11.Resource.CalculateSubResourceIndex(0, 0, 0);
-            var mapped = ctx.MapSubresource(dstTex, 0, MapMode.Read, SharpDX.Direct3D11.MapFlags.None);
-           // ctx.UnmapSubresource(dstTex, 0);
+            do
+            {
+                var result = duplication.TryAcquireNextFrame(10000, out frameInfo, out frame);
+                if (result.Code != SharpDX.DXGI.ResultCode.AccessLost.Code)
+                {
+                    result.CheckError();
+                    if (frameInfo.LastPresentTime != 0)
+                    {
 
 
-            var img = new Mat(desc.Height, desc.Width, MatType.CV_8UC4, mapped.DataPointer, mapped.RowPitch);
 
-            Cv2.ImShow("a", img);
-            Cv2.WaitKey();
+                        using var srcTex = frame.QueryInterface<Texture2D>();
+                        ctx.CopyResource(srcTex, dstTex);
+                        // var sub= SharpDX.Direct3D11.Resource.CalculateSubResourceIndex(0, 0, 0);
+                        var mapped = ctx.MapSubresource(dstTex, 0, MapMode.Read, SharpDX.Direct3D11.MapFlags.None);
+
+
+                        using var img = new Mat(desc.Height, desc.Width, MatType.CV_8UC4, mapped.DataPointer, mapped.RowPitch);
+
+                        Cv2.ImShow("a", img);
+                        Cv2.WaitKey(1);
+                        ctx.UnmapSubresource(dstTex, 0);
+
+                    }
+                    frame.Dispose();
+
+                    duplication.ReleaseFrame();
+                }
+            } while (true);
 
         }
     }
