@@ -107,7 +107,10 @@ namespace genshinbot
             ~_Subscriber()
             {
                 if (!disposed)
+                {
                     Dispose();
+                    Debug.WriteLine("warning: Subscriber not disposed");
+                }
             }
         }
 

@@ -15,7 +15,7 @@ namespace genshinbot
         static void Main(string[] args)
         {
             Kernel32.AllocConsole();
-            Screenshot.Init();
+            //Screenshot.Init();
             //TestMapLive();
             // tools.CoordChecker.run(args);
             //TestMap();
@@ -38,7 +38,8 @@ namespace genshinbot
             //screens.PlayingScreen.TestRead();
             // algorithm.ArrowDirectionDetect.Test();
             //stream.Poller.Test();
-            automation.screenshot.directx.Test.Run();
+           //automation.screenshot.directx.Test.Run();
+            automation.screenshot.gdi.run();
             Console.ReadLine();
         }
 
