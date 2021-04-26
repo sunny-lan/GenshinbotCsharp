@@ -11,7 +11,7 @@ using Vanara.PInvoke;
 
 namespace genshinbot.automation.screenshot
 {
-    class gdi
+    class Test
     {
         public static void run()
         {
@@ -48,11 +48,13 @@ namespace genshinbot.automation.screenshot
             //
             //Rect sub = new Rect(51, 15, 178, 178);
             Rect[] regions = {
-                //new Rect(100,100,300,100) ,
-               /* new Rect(100,100,100,100),
+                new Rect(100,100,500,100) 
+             /*   new Rect(100,100,100,100),
                 new Rect(200,100,100,100),
-               new Rect(300,100,100,100)*/
-               new Rect(0,0,1600,900)
+               new Rect(300,100,100,100),
+               new Rect(400,100,100,100),
+               new Rect(500,100,100,100)*/
+              // new Rect(0,0,1600,900)
             };
 
             Stopwatch timer = new Stopwatch();

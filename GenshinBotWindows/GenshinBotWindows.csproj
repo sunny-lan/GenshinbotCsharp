@@ -19,6 +19,7 @@
     <PackageReference Include="OpenCvSharp4.Windows" Version="4.5.2.20210404" />
     <PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" />
     <PackageReference Include="SharpDX.DXGI" Version="4.2.0" />
+    <PackageReference Include="System.Reactive" Version="5.0.0" />
     <PackageReference Include="Vanara.PInvoke.Gdi32" Version="3.3.8" />
     <PackageReference Include="Vanara.PInvoke.Kernel32" Version="3.3.8" />
     <PackageReference Include="Vanara.PInvoke.SHCore" Version="3.3.8" />

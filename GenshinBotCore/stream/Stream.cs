@@ -10,12 +10,13 @@ namespace genshinbot
     {
 
         public interface Subscription : IDisposable { }
-        public interface ValueStream<T>
+        public interface ValueStream<T> 
         {
 
             T Value { get; }
 
             Subscription Listen(Action<T> callback);
+
         }
     }
 
@@ -25,7 +26,7 @@ namespace genshinbot
     /// Behavior on enabled/disabled is dependent on type of stream
     /// </summary>
     /// <typeparam name="T">Type of data</typeparam>
-    public class Stream<T> : ValueStream<T>
+    public class Stream<T> : ValueStream<T>, IObservable<T>
     {
         private int subCount = 0;
 
@@ -91,7 +92,7 @@ namespace genshinbot
             {
                 this.parent = parent;
                 this.handler = handler;
-                handler(parent.Value);
+               // handler(parent.Value);
                 parent.Change += handler;
             }
 
@@ -122,6 +123,11 @@ namespace genshinbot
         public Subscription Listen(Action<T> callback)
         {
             return new _Subscriber(this, callback);
+        }
+
+        public IDisposable Subscribe(IObserver<T> observer)
+        {
+            return Listen(observer.OnNext);
         }
     }
 }

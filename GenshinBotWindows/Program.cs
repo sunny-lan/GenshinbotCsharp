@@ -1,5 +1,6 @@
 ﻿
 
+using genshinbot.diag;
 using System;
 using System.Threading;
 using Vanara.PInvoke;
@@ -14,8 +15,9 @@ namespace genshinbot
         [STAThread]
         static void Main(string[] args)
         {
+            TaskExceptionCatcher.Do ();
             Kernel32.AllocConsole();
-            //Screenshot.Init();
+            //   Screenshot.Init();
             //TestMapLive();
             // tools.CoordChecker.run(args);
             //TestMap();
@@ -37,10 +39,13 @@ namespace genshinbot
             //GenshinBot.generalTest();
             //screens.PlayingScreen.TestRead();
             // algorithm.ArrowDirectionDetect.Test();
-            //stream.Poller.Test();
-           //automation.screenshot.directx.Test.Run();
-            automation.screenshot.gdi.run();
+            //stream.Poller.Test1();
+            //  automation.screenshot.directx.Test.Run();
+            // automation.screenshot.gdi.run();
+            automation.screenshot.gdi.GDIStream.Test2();
+            Console.WriteLine("Program ended. Press enter to exit");
             Console.ReadLine();
+            CvThread.Stop();
         }
 
     }

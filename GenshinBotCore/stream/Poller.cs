@@ -37,7 +37,8 @@ namespace genshinbot.stream
         {
             get => maxInFlight; set
             {
-                Debug.Assert(value >= maxInFlight, "MaxInFlight cannot be decreased!");
+                if (value == maxInFlight) return;
+                Debug.Assert(value > maxInFlight, "MaxInFlight cannot be decreased!");
                 semaphore.Release(value - maxInFlight);
                 maxInFlight = value;
             }
@@ -73,8 +74,18 @@ namespace genshinbot.stream
             {
                 _ = Task.Run(() =>
                 {
-                    Update(poll());
-                    semaphore.Release();
+                    try
+                    {
+                        Update(poll());
+                    }catch(Exception e)
+                    {
+                        //TODO
+                        Debug.Fail(e.ToString());
+                    }
+                    finally
+                    {
+                        semaphore.Release();
+                    }
                 });
                 //Fire a new poll task when both the delay and the semaphore are done
                 await Task.WhenAll(Task.Delay(Interval), semaphore.WaitAsync());

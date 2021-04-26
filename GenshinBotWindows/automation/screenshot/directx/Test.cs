@@ -61,10 +61,18 @@ namespace genshinbot.automation.screenshot.directx
                 Usage = ResourceUsage.Staging,
 
             };
-         //   Rect sub = new Rect(51, 15, 178, 178);
-            Rect sub = new Rect(00, 0, 1600, 900);
-          //  description.Width = sub.Width;
-          //  description.Height = sub.Height;
+            //   Rect sub = new Rect(51, 15, 178, 178);
+            Rect[] regions = {
+                new Rect(100,100,500,100) 
+             /*   new Rect(100,100,100,100),
+                new Rect(200,100,100,100),
+               new Rect(300,100,100,100),
+               new Rect(400,100,100,100),
+               new Rect(500,100,100,100)*/
+              // new Rect(0,0,1600,900)
+            };
+            //  description.Width = sub.Width;
+            //  description.Height = sub.Height;
 
             SharpDX.DXGI.Resource frame;
             OutputDuplicateFrameInformation frameInfo;
@@ -102,6 +110,7 @@ namespace genshinbot.automation.screenshot.directx
 
                         using var srcTex = frame.QueryInterface<Texture2D>();
                        // ctx.CopyResource(srcTex, dstTex);
+                       foreach (var sub in regions)
                        ctx.CopySubresourceRegion(srcTex, 0,
                             new ResourceRegion(left: sub.Left, right: sub.Right, top: sub.Top, bottom: sub.Bottom,
                             front: 0, back: 1),

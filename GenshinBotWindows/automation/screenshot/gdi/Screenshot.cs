@@ -10,6 +10,8 @@ namespace genshinbot
     using OpenCvSharp;
     using System.Diagnostics;
 
+
+
     class Screenshot
     {
 
