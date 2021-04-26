@@ -47,10 +47,7 @@ namespace genshinbot.automation.screenshot.gdi
             //TODO support changing desktop sizes
             CreateBuffer(SystemInformation.VirtualScreen.Width, SystemInformation.VirtualScreen.Height);
 
-            poller = new stream.Poller<Mat>(Poll, buf)
-            {
-                MaxInFlight = 1,
-            };
+            poller = new stream.Poller<Mat>(Poll);
         }
 
 
@@ -103,6 +100,7 @@ namespace genshinbot.automation.screenshot.gdi
                         Kernel32.GetLastError().ThrowIfFailed("failed performing BitBlt");
                 }
             }
+
             if (!Gdi32.GdiFlush())
                 Kernel32.GetLastError().ThrowIfFailed("failed performing GdiFlush");
 

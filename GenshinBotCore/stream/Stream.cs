@@ -10,7 +10,7 @@ namespace genshinbot
     {
 
         public interface Subscription : IDisposable { }
-        public interface ValueStream<T> 
+        public interface ValueStream<T> :IObservable<T>
         {
 
             T Value { get; }
@@ -64,24 +64,10 @@ namespace genshinbot
         {
             Value = newVal;
             foreach (var sub in subs)
-                sub(newVal);
+                sub.OnNext(newVal);
         }
 
-        private ISet<Action<T>> subs = new HashSet<Action<T>>();
-
-        event Action<T> Change
-        {
-            add
-            {
-                Subscribers++;
-                Debug.Assert(subs.Add(value), "Subscriber added twice");
-            }
-            remove
-            {
-                Subscribers--;
-                Debug.Assert(subs.Remove(value), "Subscriber not in list");
-            }
-        }
+        private ISet<IObserver<T>> subs = new HashSet<IObserver<T>>();
 
         class _Subscriber : Subscription
         {
@@ -93,7 +79,7 @@ namespace genshinbot
                 this.parent = parent;
                 this.handler = handler;
                // handler(parent.Value);
-                parent.Change += handler;
+               // parent.Change += handler;
             }
 
             private bool disposed = false;
@@ -102,7 +88,7 @@ namespace genshinbot
             {
                 Debug.Assert(!disposed, "Subscriber disposed twice");
                 disposed = true;
-                parent.Change -= handler;
+             //   parent.Change -= handler;
             }
 
             ~_Subscriber()
@@ -127,7 +113,7 @@ namespace genshinbot
 
         public IDisposable Subscribe(IObserver<T> observer)
         {
-            return Listen(observer.OnNext);
+            throw new NotImplementedException();
         }
     }
 }

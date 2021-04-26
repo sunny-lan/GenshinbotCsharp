@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,19 +14,21 @@ namespace genshinbot.stream
     /// Polls the value of a function and outputs it into a stream
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class Poller<T> : Stream<T>
+    public class Poller<T> : IObservable<T>
     {
+        private Subject<T> subject;
+        private IObservable<T> obsSubj;
         Func<T> poll;
-        public Poller(Func<T> poll) : base(poll())
+        public Poller(Func<T> poll)
         {
             this.poll = poll;
-        }
-        public Poller(Func<T> poll, T init) : base(init)
-        {
-            this.poll = poll;
+             subject = new Subject<T>();
+            //dummy observable to enable/disable
+            var obs = Observable.FromEvent<T>(h => enableChanged(true), h => enableChanged(false));
+            obsSubj = Observable.Merge(obs, subject);
+            
         }
 
-        public override Action<bool> EnableChanged => enableChanged;
         private bool running = false;
         private Task poller;
 
@@ -76,11 +81,11 @@ namespace genshinbot.stream
                 {
                     try
                     {
-                        Update(poll());
-                    }catch(Exception e)
+                        subject.OnNext(poll());
+                    }
+                    catch (Exception e)
                     {
-                        //TODO
-                        Debug.Fail(e.ToString());
+                        subject.OnError(e);
                     }
                     finally
                     {
@@ -92,6 +97,10 @@ namespace genshinbot.stream
             }
         }
 
+        public IDisposable Subscribe(IObserver<T> observer)
+        {
+            return obsSubj.Subscribe(observer);
+        }
     }
 
     public static class Poller
@@ -109,7 +118,7 @@ namespace genshinbot.stream
             });
 
 
-            using (var listener = stream.Listen(x => Console.WriteLine(x)))
+            using (stream.Subscribe(x => Console.WriteLine(x)))
             {
                 Thread.Sleep(10000);
             }
@@ -126,7 +135,7 @@ namespace genshinbot.stream
             });
             stream.Interval = 500;
 
-            using (var listener = stream.Listen(x => Console.WriteLine(x)))
+            using ( stream.Subscribe(x => Console.WriteLine(x)))
             {
                 Thread.Sleep(5000);
             }
@@ -144,7 +153,7 @@ namespace genshinbot.stream
             });
             stream.MaxInFlight = 2;
 
-            using (var listener = stream.Listen(x => Console.WriteLine(x)))
+            using ( stream.Subscribe(x => Console.WriteLine(x)))
             {
                 Thread.Sleep(5000);
             }
@@ -163,12 +172,12 @@ namespace genshinbot.stream
             });
             stream.Interval = 100;
             stream.MaxInFlight = 3;
-            using (var listener = stream.Listen(x => Console.WriteLine(x)))
+            using ( stream.Subscribe(x => Console.WriteLine(x)))
             {
                 Thread.Sleep(5000);
             }
         }
-        
+
         /// <summary>
         /// check if poll starts and stops properly
         /// </summary>
@@ -184,7 +193,7 @@ namespace genshinbot.stream
             stream.MaxInFlight = 3;
 
             Console.WriteLine("poll should begin after");
-            using (var listener = stream.Listen(x => Console.WriteLine(x)))
+            using (stream.Subscribe(x => Console.WriteLine(x)))
             {
                 Thread.Sleep(5000);
             }
@@ -192,7 +201,7 @@ namespace genshinbot.stream
             Thread.Sleep(2000);
 
             Console.WriteLine("poll should begin after");
-            using (var listener = stream.Listen(x => Console.WriteLine(x)))
+            using ( stream.Subscribe(x => Console.WriteLine(x)))
             {
                 Thread.Sleep(5000);
             }
