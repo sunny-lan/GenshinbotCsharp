@@ -8,28 +8,42 @@ using System.Threading.Tasks;
 
 namespace genshinbot.diag
 {
-   public class CvThread
+    public class CvThread
     {
         static bool running;
-        static ConcurrentQueue<Action> run=new ConcurrentQueue<Action>();
+        static ConcurrentQueue<Action> run = new ConcurrentQueue<Action>();
         private static Task tsk;
+        static ConcurrentDictionary<string, Mat> updates = new ConcurrentDictionary<string, Mat>();
+
+        public static double MaxFps = 24;
 
         public static void Run()
         {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             while (running)
             {
+                foreach (var entry in updates)
+                {
+                    Cv2.ImShow(entry.Key, entry.Value);
+                }
+                updates.Clear();
+
                 while (!run.IsEmpty)
                 {
                     Debug.Assert(run.TryDequeue(out var action));
                     action();
                 }
-                Cv2.WaitKey(1);
+
+                var msPerFrame = 1000 / MaxFps;
+                Cv2.WaitKey((int)Math.Max(1, msPerFrame - sw.ElapsedMilliseconds));
+                sw.Restart();
             }
         }
 
         public static void ImShow(string name, Mat m)
         {
-            Invoke(() => Cv2.ImShow(name, m));
+            updates[name] = m;
         }
 
         public static void Invoke(Action a)
@@ -48,7 +62,7 @@ namespace genshinbot.diag
         {
             running = true;
             tsk = Task.Run(Run);
-           
+
         }
     }
 }
