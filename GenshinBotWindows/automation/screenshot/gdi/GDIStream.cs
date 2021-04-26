@@ -16,7 +16,8 @@ using Vanara.PInvoke;
 
 namespace genshinbot.automation.screenshot.gdi
 {
-    class GDIStream
+
+    class GDIStream : ScreenshotObservable
     {
         private Gdi32.SafeHDC hDesktopDC;
         private Gdi32.SafeHDC hTmpDC;
@@ -47,7 +48,7 @@ namespace genshinbot.automation.screenshot.gdi
             //TODO support changing desktop sizes
             CreateBuffer(SystemInformation.VirtualScreen.Width, SystemInformation.VirtualScreen.Height);
 
-            poller = new stream.Poller<Mat>(Poll);
+            poller = new reactive.Poller<Mat>(Poll);
         }
 
 
@@ -91,7 +92,7 @@ namespace genshinbot.automation.screenshot.gdi
             }
             else
             {
-              //  Console.WriteLine("refresh");
+                //  Console.WriteLine("refresh");
                 foreach (var region in listeningRects)
                 {
                     if (!Gdi32.BitBlt(hTmpDC, region.X, region.Y, region.Width, region.Height, hDesktopDC,
@@ -106,7 +107,7 @@ namespace genshinbot.automation.screenshot.gdi
 
             return buf;
         }
-        stream.Poller<Mat> poller;
+        reactive.Poller<Mat> poller;
 
         /// <summary>
         /// min number of distinct rects before switching modes
@@ -122,7 +123,7 @@ namespace genshinbot.automation.screenshot.gdi
         /// <summary>
         /// list of rects which are currently being watched
         /// </summary>
-        ICollection<Rect> listeningRects=>thing.Keys;
+        ICollection<Rect> listeningRects => thing.Keys;
         ConcurrentDictionary<Rect, Unit> thing = new ConcurrentDictionary<Rect, Unit>();
 
         /// <summary>
@@ -139,7 +140,7 @@ namespace genshinbot.automation.screenshot.gdi
                 bounds = bounds?.Union(x) ?? x;
         }
 
-        IObservable<Mat> Watch(Rect r)
+        public IObservable<Mat> Watch(Rect r)
         {
             if (!cache.ContainsKey(r))
             {
@@ -153,7 +154,7 @@ namespace genshinbot.automation.screenshot.gdi
                     Debug.Assert(thing.Remove(r, out var _));
                     RecalculateStrategy();
                 });
-                cache[r] = Observable.Merge(boundsCalcer, poller.Select(m=>m[r]));
+                cache[r] = Observable.Merge(boundsCalcer, poller.Select(m => m[r]));
 
             }
             return cache[r];
@@ -165,24 +166,27 @@ namespace genshinbot.automation.screenshot.gdi
             var poll = strm.Watch(new Rect(0, 0, 1600, 900));
             Console.WriteLine("b:");
             Console.ReadLine();//ds
-            int fps=0;
+            int fps = 0;
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            using ( poll.Subscribe(m=> {
-               CvThread.ImShow("a", m);
+            using (poll.Subscribe(m =>
+            {
+                CvThread.ImShow("a", m);
                 //    Console.WriteLine("frame");
                 fps++;
                 if (sw.ElapsedMilliseconds >= 1000)
                 {
-                    Console.WriteLine("Fps: "+fps);
+                    Console.WriteLine("Fps: " + fps);
                     fps = 0;
                     sw.Restart();
                 }
             }))
-            using (strm.Watch(new Rect(300, 100, 100, 100)).Subscribe(Observer.Create<Mat>(m => {
-                CvThread.ImShow("b", m); 
+            using (strm.Watch(new Rect(300, 100, 100, 100)).Subscribe(Observer.Create<Mat>(m =>
+            {
+                CvThread.ImShow("b", m);
             })))
-            using (strm.Watch(new Rect(300, 300, 100, 100)).Subscribe(Observer.Create<Mat>(m => {
+            using (strm.Watch(new Rect(300, 300, 100, 100)).Subscribe(Observer.Create<Mat>(m =>
+            {
                 CvThread.ImShow("c", m);
             })))
             {

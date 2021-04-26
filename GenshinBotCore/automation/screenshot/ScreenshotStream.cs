@@ -1,4 +1,4 @@
-﻿using genshinbot.stream;
+﻿using genshinbot.reactive;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;

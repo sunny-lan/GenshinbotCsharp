@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace genshinbot.stream
+namespace genshinbot.reactive
 {
     /// <summary>
     /// Polls the value of a function and outputs it into a stream
