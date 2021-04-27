@@ -104,6 +104,7 @@ namespace genshinbot.automation.windows
                 .DistinctUntilChanged()
                 .Replay(1);
             Size = s_tmp;
+            Bounds = Size.Select(x => x.Bounds());
             disposeList.Add(s_tmp.Connect());
 
             clientAreaFocused = clientAreaStream
@@ -130,6 +131,7 @@ namespace genshinbot.automation.windows
         #region Rect
 
         public IObservable<Size> Size { get; private init; }
+        public IObservable<Rect> Bounds { get; private init; }
 
         private WinEventHook locationChangeHook;
 
@@ -311,7 +313,7 @@ namespace genshinbot.automation.windows
         class ScreenshotAdapter : ScreenshotObservable
         {
             WindowAutomator2 parent;
-            private GDIStream gdi;
+            private ScreenshotObservable gdi;
 
             public ScreenshotAdapter(WindowAutomator2 parent)
             {
@@ -321,13 +323,12 @@ namespace genshinbot.automation.windows
 
             public IObservable<Mat> Watch(Rect r)
             {
-                return parent.clientAreaFocused
-                    .Select(clientArea =>
+                var mappedRectStream = parent.clientAreaFocused
+                    .Select(_ =>DPIAware.Use(DPIAware.DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE, () =>
                     {
-                        Rect actual = new Rect(parent.clientToScreen(r.TopLeft), r.Size);
-                        return gdi.Watch(actual);
-                    })
-                    .Switch();
+                        return new Rect(parent.clientToScreen(r.TopLeft), r.Size);
+                    }));
+                return gdi.Watch(mappedRectStream);
             }
         }
         #endregion
@@ -392,10 +393,20 @@ namespace genshinbot.automation.windows
 
         }
 
-        public static  void Test3()
+        public static void Test3()
         {
-            var w = new WindowAutomator2("*Untitled - Notepad", null);
-            using (w.Screen.Watch(new Rect(10,10,100,100)).Subscribe(m =>
+            IWindowAutomator2 w = new WindowAutomator2("*Untitled - Notepad", null);
+            /*Console.WriteLine("fixed");
+           using (w.Screen.Watch(new Rect(10, 10, 100, 100)).Subscribe(m =>
+               {
+                   CvThread.ImShow("m", m);
+               }))
+            {
+                Console.ReadLine();
+            }*/
+
+            Console.WriteLine("follow screen sz");
+            using (w.Screen.Watch(w.Bounds).Subscribe(m =>
             {
                 CvThread.ImShow("m", m);
             }))

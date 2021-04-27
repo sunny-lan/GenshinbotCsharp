@@ -27,6 +27,12 @@ namespace genshinbot.automation
         IObservable<Size> Size { get; }
 
         /// <summary>
+        /// The bounds of the window
+        /// Recommended to override for performance
+        /// </summary>
+        IObservable<Rect> Bounds => Size.Select(s => s.Bounds());
+
+        /// <summary>
         /// Try to focus the window
         /// </summary>
         void TryFocus();
