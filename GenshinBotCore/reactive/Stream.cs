@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace genshinbot
 {
@@ -28,6 +29,18 @@ namespace genshinbot
         }
         public static class ObservableValue
         {
+            public static Task<T> Get<T>(this IObservable<T> o)
+            {
+                TaskCompletionSource<T> taskCompletionSource = new TaskCompletionSource<T>();
+                IDisposable thing  = o.Subscribe(
+                    onNext: taskCompletionSource.SetResult,
+                    onCompleted: taskCompletionSource.SetCanceled,
+                    onError:taskCompletionSource.SetException
+                );
+                taskCompletionSource.Task.ContinueWith(t => thing.Dispose());
+                return taskCompletionSource.Task;
+            }
+
             public static IObservableValue<Ret> CalculateFrom<Ret, Param1, Param2>(
                 IObservableValue<Param1> a, IObservableValue<Param2> b,
                 Func<Param1, Param2, Ret> combine

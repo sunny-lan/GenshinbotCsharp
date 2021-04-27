@@ -55,15 +55,17 @@ namespace genshinbot.automation.windows
 
             locationChangeHook = new WinEventHook(processOfInterest: pid);
 
-            var rawLocationStream = locationChangeHook
-                    .MergeNotification(closed)
-                    .Where(e => e.hwnd == hWnd && e.idObject == User32.ObjectIdentifiers.OBJID_WINDOW)
-                    .Select(e => GetRectDirect());
+            var rawClientAreaStream = locationChangeHook
+                .MergeNotification(closed)
+                .Where(e => e.hwnd == hWnd && e.idObject == User32.ObjectIdentifiers.OBJID_WINDOW)
+                .Select(e => GetRectDirect());
 
-            var locationStream = Observable
+            clientAreaStream = Observable
                 .Return(GetRectDirect())
-                .Concat(rawLocationStream)
-                    .DistinctUntilChanged();
+                .Concat(rawClientAreaStream)
+                .DistinctUntilChanged()
+                .Replay(1);
+            disposeList.Add(clientAreaStream.Connect());
 
 
             foregroundChangeHook = new WinEventHook(
@@ -82,14 +84,21 @@ namespace genshinbot.automation.windows
                 .DistinctUntilChanged();
 
 
-            var f = Observable
-                .CombineLatest(foregroundStream, locationStream, 
-                    (fore, location) => fore && location.Width > 0 && location.Height > 0)
+            var f_tmp = Observable
+                .CombineLatest(foregroundStream, clientAreaStream,
+                    (foreground, clientArea) => foreground && clientArea.Width > 0 && clientArea.Height > 0)
                 .DistinctUntilChanged()
                 .Replay(1);
-            Focused = f;
-            disposeList.Add(f.Connect());
+            Focused = f_tmp;
+            disposeList.Add(f_tmp.Connect());
 
+            var s_tmp = clientAreaStream
+                .Select(r => r.Size)
+                .Where(s => s.Width > 0 && s.Height > 0)
+                .DistinctUntilChanged()
+                .Replay(1); 
+            Size = s_tmp;
+            disposeList.Add(s_tmp.Connect());
 
             foregroundChangeHook.Start();
             locationChangeHook.Start();
@@ -110,7 +119,7 @@ namespace genshinbot.automation.windows
 
         #region Rect
 
-        public IObservable<Size> Size => throw new NotImplementedException();
+        public IObservable<Size> Size { get; private init; }
 
         private WinEventHook locationChangeHook;
 
@@ -135,6 +144,8 @@ namespace genshinbot.automation.windows
             return r.Cv();
         }
 
+        private IConnectableObservable<Rect> clientAreaStream;
+
 
         #endregion
 
@@ -154,12 +165,21 @@ namespace genshinbot.automation.windows
         public static void Test()
         {
             var w = new WindowAutomator2("*Untitled - Notepad", null);
-            using (w.Focused.Subscribe(x =>
-            Console.WriteLine(x)))
-            //using (w.Bounds.Subscribe(r => Console.WriteLine(r)))
+            using (w.Focused.Subscribe(x => Console.WriteLine(x)))
+            using (w.Size.Subscribe(r => Console.WriteLine(r)))
             {
+                for (int i = 0; i < 5;i++)
+                {
+                    Console.ReadLine();
+                    var t = w.Size.Get();
+                    t.Wait();
+                    Console.WriteLine($" get={t.Result}");
+                    using (w.Size.Subscribe(r => Console.WriteLine($" ss={r}"))) { }
+                    using (w.Focused.Subscribe(r => Console.WriteLine($" ff={r}"))) { }
+                }
                 Console.ReadLine();
             }
+
         }
         #endregion
     }
