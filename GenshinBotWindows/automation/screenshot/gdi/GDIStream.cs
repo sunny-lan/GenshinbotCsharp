@@ -33,10 +33,6 @@ namespace genshinbot.automation.screenshot.gdi
 
         public GDIStream()
         {
-            var r = SHCore.SetProcessDpiAwareness(SHCore.PROCESS_DPI_AWARENESS.PROCESS_PER_MONITOR_DPI_AWARE);
-            if (r != HRESULT.S_OK)
-                throw r.GetException("failed to set dpi awareness to per monitor aware. this is required for multimonitor screenshots");
-
             hDesktopDC = User32.GetDC(IntPtr.Zero);
             if (hDesktopDC.IsInvalid)
             {

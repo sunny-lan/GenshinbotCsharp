@@ -71,6 +71,30 @@ namespace genshinbot
                 }
             }
 
+            public static async Task<T> LockWhile<T>(this IObservable<bool> o, Func<Task<T>> t, TimeSpan? timeout = null)
+            {
+                await o.WaitTrue(timeout);
+
+                var taskCompletionSource = new TaskCompletionSource<T>();
+
+                using (o.Subscribe(
+                    onNext: x =>
+                    {
+                        if (!x)
+                            taskCompletionSource.SetException(
+                                new Exception("stream became false while running task"));
+                    },
+                    onCompleted: () => taskCompletionSource.SetException(
+                        new Exception("stream ended while running task")),
+                    onError: e => taskCompletionSource.SetException(
+                        new Exception("error happened in stream while running task", e))
+                ))
+                {
+                    var tt = await Task.WhenAny(t(), taskCompletionSource.Task);
+                    return await tt;
+                }
+            }
+
             public static Task<T> Get<T>(this IObservable<T> o)
             {
                 TaskCompletionSource<T> taskCompletionSource = new TaskCompletionSource<T>();

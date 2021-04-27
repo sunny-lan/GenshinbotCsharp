@@ -3,6 +3,7 @@
 using genshinbot.diag;
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using Vanara.PInvoke;
 
 namespace genshinbot
@@ -13,7 +14,7 @@ namespace genshinbot
 
 
         [STAThread]
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             //TaskExceptionCatcher.Do ();
             Kernel32.AllocConsole();
@@ -43,7 +44,7 @@ namespace genshinbot
             //  automation.screenshot.directx.Test.Run();
             // automation.screenshot.gdi.run();
             // automation.screenshot.gdi.GDIStream.Test2();
-            automation.windows.WindowAutomator2.Test2().Wait();
+            await automation.windows.WindowAutomator2.Test2();
             Console.WriteLine("Program ended. Press enter to exit");
             Console.ReadLine();
             CvThread.Stop();

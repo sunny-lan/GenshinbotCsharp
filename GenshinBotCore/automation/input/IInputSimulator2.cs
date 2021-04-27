@@ -5,9 +5,24 @@ namespace genshinbot.automation.input
 {
     public interface IMouseSimulator2
     {
-
+        /// <summary>
+        /// Return mouse pixel position
+        /// </summary>
+        /// <returns></returns>
         Task<Point2d> MousePos();
+
+        /// <summary>
+        /// Send a mouse delta pixels (regardless of position)
+        /// </summary>
+        /// <param name="d"></param>
+        /// <returns></returns>
         Task MouseMove(Point2d d);
+
+        /// <summary>
+        /// Set mouse position to absolute pixel location
+        /// </summary>
+        /// <param name="p"></param>
+        /// <returns></returns>
         Task MouseTo(Point2d p);
 
         Task MouseDown(MouseBtn btn) => MouseButton(btn, true);
@@ -32,7 +47,6 @@ namespace genshinbot.automation.input
         async Task KeyPress(Keys k)
         {
             await KeyDown(k);
-            await Task.Delay(10);
             await KeyUp(k);
         }
     }

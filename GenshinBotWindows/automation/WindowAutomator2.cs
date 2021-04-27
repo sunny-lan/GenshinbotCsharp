@@ -26,7 +26,7 @@ namespace genshinbot.automation.windows
         private HWND hWnd;
         private uint pid, thread;
 
-        
+
 
         public IKeySimulator2 Keys => iS;
 
@@ -101,11 +101,11 @@ namespace genshinbot.automation.windows
                 .Select(r => r.Size)
                 .Where(s => s.Width > 0 && s.Height > 0)
                 .DistinctUntilChanged()
-                .Replay(1); 
+                .Replay(1);
             Size = s_tmp;
             disposeList.Add(s_tmp.Connect());
 
-            Screen = new screenshot.gdi.GDIStream();
+            //   Screen = new screenshot.gdi.GDIStream();
             iS = new InputSim(this);
 
         }
@@ -174,9 +174,9 @@ namespace genshinbot.automation.windows
         class InputSim : IMouseSimulator2, IKeySimulator2
         {
             private InputSimulatorStandard.InputSimulator iS;
-            IWindowAutomator2 parent;
+            WindowAutomator2 parent;
 
-            internal InputSim(IWindowAutomator2 parent)
+            internal InputSim(WindowAutomator2 parent)
             {
 
                 iS = new InputSimulatorStandard.InputSimulator();
@@ -189,7 +189,7 @@ namespace genshinbot.automation.windows
 
             }
 
-             
+
 
 
             public Task Key(input.Keys k, bool down)
@@ -205,27 +205,88 @@ namespace genshinbot.automation.windows
                         iS.Keyboard.KeyUp((InputSimulatorStandard.Native.VirtualKeyCode)k);
                     }
                 }
-                return parent.Focused.LockWhile(()=>Task.Run(_Key));
+                return parent.Focused.LockWhile(() => Task.Run(_Key));
             }
 
             public Task MouseButton(MouseBtn btn, bool down)
             {
-                throw new NotImplementedException();
+                void _mouse()
+                {
+                    if (down)
+                    {
+                        if (btn == MouseBtn.Left) iS.Mouse.LeftButtonDown();
+                        else if (btn == MouseBtn.Right) iS.Mouse.RightButtonDown();
+                        else iS.Mouse.MiddleButtonDown();
+                    }
+                    else
+                    {
+                        if (btn == MouseBtn.Left) iS.Mouse.LeftButtonUp();
+                        else if (btn == MouseBtn.Right) iS.Mouse.RightButtonUp();
+                        else iS.Mouse.MiddleButtonUp();
+                    }
+                }
+                return parent.Focused.LockWhile(() => Task.Run(_mouse));
             }
 
             public Task MouseMove(Point2d d)
             {
-                throw new NotImplementedException();
+                void _mouse()
+                {
+                    DPIAware.Use(DPIAware.DPI_AWARENESS_CONTEXT_UNAWARE, () =>
+                    {
+                        var oo = d.Round();
+                        iS.Mouse.MoveMouseBy(oo.X, oo.Y);
+                    });
+                }
+                return parent.Focused.LockWhile(() => Task.Run(_mouse));
+
             }
 
             public Task<Point2d> MousePos()
             {
-                throw new NotImplementedException();
+                Point2d _mouse()
+                {
+                    return DPIAware.Use(DPIAware.DPI_AWARENESS_CONTEXT_UNAWARE, () =>
+                    {
+                        var pt = Cursor.Position;
+                        if (!User32.ScreenToClient(parent.hWnd, ref pt))
+                            throw new Exception();
+                        return pt.Cv();
+                    });
+                }
+                return parent.Focused.LockWhile(() => Task.Run(_mouse));
+            }
+
+            void cvtPixelToMouse(ref System.Drawing.Point p)
+            {
+                // User32.GetClientRect(User32.GetDesktopWindow(), out var desktop);
+                p.X = 65536 * p.X / SystemInformation.VirtualScreen.Width;
+                p.Y = 65536 * p.Y / SystemInformation.VirtualScreen.Height;
             }
 
             public Task MouseTo(Point2d p)
             {
-                throw new NotImplementedException();
+                void _MouseTo()
+                {
+                    var pp = new System.Drawing.Point((int)Math.Round(p.X), (int)Math.Round(p.Y));
+                    DPIAware.Use(DPIAware.DPI_AWARENESS_CONTEXT_UNAWARE, () =>
+                    {
+                        if (!User32.ClientToScreen(parent.hWnd, ref pp))
+                            throw new Exception();
+
+                        cvtPixelToMouse(ref pp);
+
+                        /*SendMouseInput(new User32.MOUSEINPUT
+                        {
+                            dx = pp.X,
+                            dy = pp.Y,
+                            dwFlags = (uint)User32.MOUSEEVENTF.MOUSEEVENTF_MOVE | (uint)User32.MOUSEEVENTF.MOUSEEVENTF_ABSOLUTE |(uint)User32.MOUSEEVENTF.MOUSEEVENTF_VIRTUALDESK
+                        });*/
+                        iS.Mouse.MoveMouseToPositionOnVirtualDesktop(pp.X, pp.Y);
+                    });
+                }
+
+                return parent.Focused.LockWhile(() => Task.Run(_MouseTo));
             }
         }
         #endregion
@@ -237,7 +298,7 @@ namespace genshinbot.automation.windows
             using (w.Focused.Subscribe(x => Console.WriteLine(x)))
             using (w.Size.Subscribe(r => Console.WriteLine(r)))
             {
-                for (int i = 0; i < 3;i++)
+                for (int i = 0; i < 3; i++)
                 {
                     Console.ReadLine();
                     var t = w.Size.Get();
@@ -253,7 +314,7 @@ namespace genshinbot.automation.windows
             {
                 (w as IWindowAutomator2).WaitForFocus(TimeSpan.FromMilliseconds(100)).Wait();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine($"caught {e}");
             }
@@ -271,13 +332,19 @@ namespace genshinbot.automation.windows
             {
                 using (w.Focused.Subscribe(x => Console.WriteLine($"focused={x}")))
                 {
-                    for (int i = 0; i < 10; i++)
+                    /*for (int i = 0; i < 10; i++)
                     {
-                        Console.WriteLine("trigger key");
                         await w.Keys.KeyPress(input.Keys.A);
                         await Task.Delay(100);
 
+                    }*/
+                    var sz = await w.Size.Get();
+                    Console.WriteLine($"sz={sz}");
+                    for (int i = 0; i < 100000; i++)
+                    {
+                        await w.Mouse.MouseTo(sz.Bounds().RandomWithin());
                     }
+                    await w.Mouse.MouseTo(sz.Bounds().BottomRight);
                 }
                 Console.ReadLine();
             }

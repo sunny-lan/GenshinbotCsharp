@@ -12,6 +12,10 @@ namespace genshinbot
 {
     public static class Util
     {
+        public static Rect Bounds(this Size sz, Point? topleft=null)
+        {
+            return new Rect(topleft ?? Util.Origin, sz);
+        }
         /// <summary>
         /// Returns an observable which publishes unit.default everytime a new element is recieved.
         /// </summary>
