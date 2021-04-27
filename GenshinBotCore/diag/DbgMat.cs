@@ -1,6 +1,7 @@
 ﻿using OpenCvSharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Text;
 
@@ -9,29 +10,41 @@ namespace genshinbot.diag
     /// <summary>
     /// Provides a way for other classes to display debug images but allow debug to be disabled when unneeded
     /// </summary>
-    public class DbgMat : IObservable<Mat>
+    public class DbgMat : IObservable<Mat>, IDisposable
     {
-        private Mat img= new Mat();
-        public string DbgWindowName;
-        private IObservable<Mat> thing;
+        private static HashSet<DbgMat> all = new HashSet<DbgMat>();
+        public static IReadOnlyCollection<DbgMat> All => all;
         static int ctr = 0;
         static string genName()
         {
             return "dbg" + ctr++;
         }
+
+        public string Name;
+        private Mat img = new Mat();
+        private IObservable<Mat> thing;
         public IDisposable Show()
         {
-            return this.Subscribe(x => Cv2.ImShow(DbgWindowName, x));
+            return this.Subscribe(x => CvThread.ImShow(Name, x));
         }
         public DbgMat()
         {
-            DbgWindowName = genName();
+            Name = genName();
             thing = Observable.FromEvent<Mat>(x => OnDebugImg += x, x => OnDebugImg -= x).Replay(1);
+            Debug.Assert(all.Add(this), "this is impposeible to happen");
         }
-
+        bool disposed = false;
+        public void Dispose()
+        {
+            Debug.Assert(!disposed);
+            disposed = true;
+            Debug.Assert(all.Remove(this));
+            img.Dispose();
+        }
         ~DbgMat()
         {
-            img.Dispose();
+            if (disposed) return;
+            Dispose();
         }
 
         private event Action<Mat> OnDebugImg;
@@ -77,5 +90,6 @@ namespace genshinbot.diag
         {
             return thing.Subscribe(observer);
         }
+
     }
 }
