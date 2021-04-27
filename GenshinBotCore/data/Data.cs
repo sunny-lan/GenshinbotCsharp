@@ -8,27 +8,27 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace genshinbot
+namespace genshinbot.data
 {
 
 
 
-    public static class Data
+    public static partial class Data
     {
 
         private static JsonSerializerOptions options = new JsonSerializerOptions()
         {
             Converters =
             {
-                new database.jsonconverters.Point2dConverter(),
-                new database.jsonconverters.PointConverter(),
+                new jsonconverters.Point2dConverter(),
+                new jsonconverters.PointConverter(),
 
-                new database.jsonconverters.RDConverterFactory(),
+                new jsonconverters.RDConverterFactory(),
 
-                new database.jsonconverters.Rect2dConverter(),
-                new database.jsonconverters.RectConverter(),
-                new database.jsonconverters.ScalarConverter(),
-                
+                new jsonconverters.Rect2dConverter(),
+                new jsonconverters.RectConverter(),
+                new jsonconverters.ScalarConverter(),
+
             },
             IgnoreNullValues = true,
         };
@@ -47,7 +47,7 @@ namespace genshinbot
             return File.ReadAllText(Get(name));
         }
 
-        public static void Write(string name, string value, bool createDirs=true)
+        public static void Write(string name, string value, bool createDirs = true)
         {
             var path = Get(name);
             if (createDirs)
@@ -71,7 +71,7 @@ namespace genshinbot
         }
         public static void WriteJson<T>(string name, T data)
         {
-            Write(name, JsonSerializer.Serialize<T>(data, options));
+            Write(name, JsonSerializer.Serialize(data, options));
         }
 
         public static Mat Imread(string name, ImreadModes mode = ImreadModes.Color)
@@ -84,9 +84,9 @@ namespace genshinbot
                 throw new Exception("Read empty image");
             return res;
         }
-        public static void Imwrite(string name,Mat m, bool createDirs = true)
+        public static void Imwrite(string name, Mat m, bool createDirs = true)
         {
-            var path = Get(name); 
+            var path = Get(name);
             if (createDirs)
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(path));

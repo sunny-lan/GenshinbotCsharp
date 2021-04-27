@@ -1,4 +1,4 @@
-﻿using genshinbot.database.map;
+﻿using genshinbot.data.map;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;

@@ -1,5 +1,6 @@
 ﻿
 using genshinbot.automation;
+using genshinbot.data;
 using genshinbot.util;
 using System;
 using System.Collections.Generic;
@@ -15,11 +16,10 @@ namespace genshinbot
         #region Database
         public class Database
         {
-            private Lazy<database.map.MapDb> mapDb = new Lazy<database.map.MapDb>(
-                () => Data.ReadJson("map/db.json", database.map.MapDb.Default()));
-            public database.map.MapDb MapDb => mapDb.Value;
+            private Lazy<data.map.MapDb> mapDb = new Lazy<data.map.MapDb>(
+                () => Data.ReadJson("map/db.json", data.map.MapDb.Default()));
+            public data.map.MapDb MapDb => mapDb.Value;
             public screens.LoadingScreen.Db LoadingScreenDb { get; } = new screens.LoadingScreen.Db();
-            public screens.MapScreen.Db MapScreenDb { get; } = new screens.MapScreen.Db();
         }
 
         public Database Db;

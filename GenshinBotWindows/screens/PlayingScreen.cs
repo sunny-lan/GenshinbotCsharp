@@ -1,7 +1,6 @@
-﻿using genshinbot;
-using genshinbot.automation;
+﻿using genshinbot.automation;
 using genshinbot.automation.input;
-using genshinbot.database;
+using genshinbot.data;
 using genshinbot.util;
 using OpenCvSharp;
 using System;
@@ -57,7 +56,7 @@ namespace genshinbot.screens
             public CharacterFilter CharFilter { get; set; } = new CharacterFilter();
         }
 
-        private BotInterface b;
+        private BotIO b;
         private Lazy<Db> _db = new Lazy<Db>(
             () => Data.ReadJson("screens/PlayingScreen.json", new Db()));
         public Db db => _db.Value;
@@ -66,13 +65,14 @@ namespace genshinbot.screens
         public IObservable<Mat> Arrow { get; private init; }
         public IObservable<double> ArrowDirection { get; private init; }
 
-        public PlayingScreen(BotInterface b)
+        public PlayingScreen(BotIO b)
         {
             this.b = b;
             rd = b.W.Size.Select(sz => db.R[sz]);
             Minimap = b.W.Screen.Watch(rd.Select(r => r.MinimapLoc));
             Arrow = b.W.Screen.Watch(
                 rd.Select(r => r.MinimapLoc.Center().RectAround(new Size(db.ArrowRadius * 2, db.ArrowRadius * 2))));
+            //TODO handle errors
             ArrowDirection = Arrow.Select(arrow => arrowDirectionAlg.GetAngle(arrow));
         }
 
@@ -90,7 +90,7 @@ namespace genshinbot.screens
 
         public static void test()
         {
-            BotInterface b = TestingRig.Make();
+            BotIO b = TestingRig.Make();
             var p = new PlayingScreen(b);
             using (p.ArrowDirection.Subscribe(
                 onNext: x => Console.WriteLine($"angle={x}")

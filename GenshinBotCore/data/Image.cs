@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace genshinbot.database
+namespace genshinbot.data
 {
-   public class Image
+    public class Image
     {
         public string Path { get; set; }
 

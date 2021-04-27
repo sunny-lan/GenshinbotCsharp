@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace genshinbot.database.map
+namespace genshinbot.data.map
 {
     public class MapDb
     {

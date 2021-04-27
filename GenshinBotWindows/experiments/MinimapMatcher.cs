@@ -1,4 +1,5 @@
 ﻿using genshinbot.automation;
+using genshinbot.data;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;

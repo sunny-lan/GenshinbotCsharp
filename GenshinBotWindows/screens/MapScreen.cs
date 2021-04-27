@@ -1,5 +1,5 @@
 ﻿using genshinbot.screens;
-using genshinbot.database.map;
+using genshinbot.data.map;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -38,6 +38,8 @@ namespace genshinbot.screens
                 }
             };
         }
+
+        private Db db=new Db();
 
         private GenshinBot b;
 
@@ -108,7 +110,6 @@ namespace genshinbot.screens
 
         public void TeleportTo(Feature teleporter)
         {
-            var db = b.Db.MapScreenDb;
             Debug.Assert(teleporter.Type == FeatureType.Teleporter);
             var p = ShowOnScreen(teleporter.Coordinates);
             b.W.MouseTo(p);
@@ -129,7 +130,6 @@ namespace genshinbot.screens
         /// <returns></returns>
         public Point2d ShowOnScreen(Point2d coord)
         {
-            var db = b.Db.MapScreenDb;
             while (true)
             {
                 UpdateScreenshot();

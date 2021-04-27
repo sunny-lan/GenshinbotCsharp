@@ -6,7 +6,10 @@ using System.Text;
 
 namespace genshinbot
 {
-    public interface BotInterface
+    /// <summary>
+    /// Represents standard I/O interface to game
+    /// </summary>
+    public interface BotIO
     {
         /// <summary>
         /// Raw interface to window automiation

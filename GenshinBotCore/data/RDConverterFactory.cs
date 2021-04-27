@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace genshinbot.database.jsonconverters
+namespace genshinbot.data.jsonconverters
 {
     public class RDConverterFactory : JsonConverterFactory
     {

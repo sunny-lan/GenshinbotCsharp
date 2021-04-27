@@ -1,6 +1,6 @@
 ﻿using genshinbot.screens;
 using genshinbot.data;
-using genshinbot.database.map;
+using genshinbot.data.map;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;

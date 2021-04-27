@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace genshinbot.database
+namespace genshinbot.data
 {
     public struct ColorRange
     {

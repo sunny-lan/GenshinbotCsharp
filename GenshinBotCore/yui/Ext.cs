@@ -1,4 +1,4 @@
-﻿using genshinbot.database;
+﻿using genshinbot.data;
 using genshinbot.util;
 using OpenCvSharp;
 using System;

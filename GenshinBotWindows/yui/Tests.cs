@@ -1,4 +1,5 @@
-﻿using OpenCvSharp;
+﻿using genshinbot.data;
+using OpenCvSharp;
 using System;
 using System.Threading.Tasks;
 

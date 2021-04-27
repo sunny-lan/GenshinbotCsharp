@@ -10,11 +10,11 @@ namespace genshinbot.util
 {
     class TestingRig
     {
-        class Bb : BotInterface
+        class Bb : BotIO
         {
             public IWindowAutomator2 W { get; set; }
         }
-        public static BotInterface Make()
+        public static BotIO Make()
         {
             return new Bb
             {
