@@ -9,11 +9,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using static System.Math;
 using System.Diagnostics;
+using genshinbot.data;
+using genshinbot.automation.input;
+using System.Reactive.Linq;
+using genshinbot.util;
 
 namespace genshinbot.screens
 {
 
-    public class MapScreen 
+    public class MapScreen
     {
         public class Db
         {
@@ -39,88 +43,66 @@ namespace genshinbot.screens
             };
         }
 
-        private Db db=new Db();
+        private Db db = new Db();
 
-        private GenshinBot b;
+        private BotIO b;
 
-        public Mat Map;
+        algorithm.MapLocationMatch locationMatch;
+        algorithm.MapTemplateMatch templateMatch;
 
-        public MapScreen(GenshinBot b)
+        public IObservable<Mat> Screen { get; private init; }
+        public IObservable<List<algorithm.MapTemplateMatch.Result>> Features { get; private init; }
+        public IObservable<algorithm.MapLocationMatch.Result> Location { get; private init; }
+
+        public MapScreen(BotIO b)
         {
             this.b = b;
 
-            initLocator();
+            locationMatch = new algorithm.MapLocationMatch(Data.MapDb.Features);
+            templateMatch = new algorithm.MapTemplateMatch();
 
+            Screen = b.W.Screen.Watch(b.W.Bounds);
+            Features = Screen.Select(map => templateMatch.FindTeleporters(map).ToList());
+            Location = Observable.CombineLatest(Features, b.W.Size, (features, size) =>
+            {
+                return locationMatch.FindLocation2(features, size, ExpectUnknown);
+            });
         }
 
-        public void Close()
+        public async Task Close()
         {
-            b.K.KeyPress(input.GenshinKeys.Map);
-            Thread.Sleep(2000);//TODO
+            await b.K.KeyPress(Keys.Escape);
+            await Task.Delay(2000);//TODO
             //switch screen
-        }
-
-        public bool CheckActive()
-        {
-            throw new NotImplementedException();
-        }
-
-
-        algorithm.MapLocationMatch LocationMatch;
-        algorithm.MapTemplateMatch TemplateMatch;
-
-        private void initLocator()
-        {
-            LocationMatch = new algorithm.MapLocationMatch(b.Db.MapDb.Features);
-            TemplateMatch = new algorithm.MapTemplateMatch();
         }
 
         public void AddFeature(Feature f)
         {
-            b.Db.MapDb.Features.Add(f);
-            LocationMatch.AddFeature(f);
+            Data.MapDb.Features.Add(f);
+            locationMatch.AddFeature(f);
         }
 
-        private List<algorithm.MapTemplateMatch.Result> features;
-        private algorithm.MapLocationMatch.Result location;
 
-        public void UpdateScreenshot()
-        {
-            Map = b.W.Screenshot(b.W.GetBounds());
-
-            features = null;
-            location = null;
-        }
-
-        public List<algorithm.MapTemplateMatch.Result> GetFeatures()
-        {
-            if (features == null)
-                features = TemplateMatch.FindTeleporters(Map).ToList();
-            return features;
-        }
 
         public bool ExpectUnknown = true;
 
-        public algorithm.MapLocationMatch.Result GetLocation()
-        {
-            if (location == null)
-                location = LocationMatch.FindLocation2(GetFeatures(), b.W.GetSize(), ExpectUnknown);
-            return location;
-        }
 
-        public void TeleportTo(Feature teleporter)
+        public async Task TeleportTo(Feature teleporter)
         {
+            //TODO 
+            throw new NotImplementedException();
+            /*
             Debug.Assert(teleporter.Type == FeatureType.Teleporter);
             var p = ShowOnScreen(teleporter.Coordinates);
-            b.W.MouseTo(p);
-            b.W.MouseClick(0);
-            Thread.Sleep(1000);
-            b.W.MouseTo(db.R[b.W.GetSize()].ActionBtnLoc);
-            b.W.MouseClick(0);
+            await b.M.MouseTo(p);
+            await b.M.MouseClick(0);
+            await Task.Delay(1000);
+            await b.M.MouseTo(db.R[b.W.Size.Get()].ActionBtnLoc);
+            await b.M.MouseClick(0);
            //TODO b.SWait(b.LoadingScreen);
-            b.LoadingScreen.WaitTillDone();
+            //TODO b.LoadingScreen.WaitTillDone();
             Thread.Sleep(1000);
-           // b.S(b.PlayingScreen);
+           // b.S(b.PlayingScreen);*/
         }
 
         /// <summary>
@@ -129,7 +111,9 @@ namespace genshinbot.screens
         /// <param name="coord"></param>
         /// <returns></returns>
         public Point2d ShowOnScreen(Point2d coord)
-        {
+        {//TODO 
+            throw new NotImplementedException();
+            /*
             while (true)
             {
                 UpdateScreenshot();
@@ -162,24 +146,34 @@ namespace genshinbot.screens
                 Thread.Sleep(10);
 
             }
+            */
         }
 
-      /*  public static void Test()
-        {
-            GenshinBot b = new GenshinBot();
-                Console.ReadKey();
-            var m=b.S(b.MapScreen);
-            Random rng = new Random();
-            var f = b.Db.MapDb.Features;
-            while (true)
-            {
-                m.TeleportTo(f[rng.Next(f.Count)]);
-                Console.WriteLine("done");
-                var p = b.S<PlayingScreen>();
-                p.OpenMap();
+        /*  public static void Test()
+          {
+              GenshinBot b = new GenshinBot();
+                  Console.ReadKey();
+              var m=b.S(b.MapScreen);
+              Random rng = new Random();
+              var f = b.Db.MapDb.Features;
+              while (true)
+              {
+                  m.TeleportTo(f[rng.Next(f.Count)]);
+                  Console.WriteLine("done");
+                  var p = b.S<PlayingScreen>();
+                  p.OpenMap();
 
+              }
+          }*/
+        public static void Test2()
+        {
+            var rig = TestingRig.Make();
+            var screen = new MapScreen(rig);
+            using (screen.Location.Subscribe(x => Console.WriteLine($"t={x.Translation} s={x.Scale}")))
+            {
+                Console.ReadLine();
             }
-        }*/
+        }
 
     }
 }

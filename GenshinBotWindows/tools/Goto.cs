@@ -1,4 +1,5 @@
-﻿using OpenCvSharp;
+﻿using genshinbot.data;
+using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +19,7 @@ namespace genshinbot.tools
             b.AttachWindow();
             b.InitScreens();
             b.InitControllers();
-            Mat big = b.Db.MapDb.BigMap.Load();
+            Mat big = Data.MapDb.BigMap.Load();
             Cv2.NamedWindow("select", WindowFlags.KeepRatio);
             while (true)
             {
@@ -36,7 +37,7 @@ namespace genshinbot.tools
                         Rect dst = Cv2.SelectROI("select", zoomed);
                         if (dst.Size.Width == 0 || dst.Size.Height == 0) break;
 
-                        var d2 = b.Db.MapDb.Coord2Minimap.Expect().Inverse(dst.Center()+zoom.TopLeft);
+                        var d2 = Data.MapDb.Coord2Minimap.Expect().Inverse(dst.Center()+zoom.TopLeft);
 
                         b.W.TryFocus();
                      //TODO   b.LocationManager.WalkTo(d2, dst.Width);

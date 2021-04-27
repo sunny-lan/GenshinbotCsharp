@@ -20,7 +20,7 @@ namespace genshinbot.controllers
         class MinimapMatchSettingsAdapter: algorithm.MinimapMatch.Settings
         {
             public GenshinBot b;
-            public override Mat BigMap { get => b.Db.MapDb.BigMap.Load(); set => throw new NotImplementedException(); }
+            public override Mat BigMap { get => Data.MapDb.BigMap.Load(); set => throw new NotImplementedException(); }
         }
 
         public LocationManager(GenshinBot b)
@@ -29,7 +29,7 @@ namespace genshinbot.controllers
             this.m = new algorithm.MinimapMatch.ScaleMatcher(new MinimapMatchSettingsAdapter { b = b });
 
             //if we don't know transformation, we can get it using knownpoints
-            if (b.Db.MapDb.Coord2Minimap == null)
+            if (Data.MapDb.Coord2Minimap == null)
                 CalculateCoord2Minimap();
         }
 
@@ -39,7 +39,10 @@ namespace genshinbot.controllers
 
         public Point2d GetLocationFromMap()
         {
-            b.PlayingScreen.OpenMap();//TODO
+            //TODO 
+            throw new NotImplementedException();
+            
+           /* b.PlayingScreen.OpenMap();//TODO
 
             var m = b.MapScreen;// b.S<screens.MapScreen>();
 
@@ -49,12 +52,12 @@ namespace genshinbot.controllers
 
             m.Close();
 
-            return approxPos;
+            return approxPos;*/
         }
 
         public void CalculateCoord2Minimap()
         {
-            var db = this.b.Db.MapDb;
+            var db = Data.MapDb;
             Debug.Assert(db.KnownMinimapCoords.Count >= 2, "At least 2 points required");
             var a = db.KnownMinimapCoords[0];
             var b = db.KnownMinimapCoords[1];
@@ -83,7 +86,7 @@ namespace genshinbot.controllers
 
         /*   public Point2d DeduceLocation()
          {
-             var db = this.b.Db.MapDb;
+             var db = this.Data.MapDb;
              if (db.Coord2Minimap == null)
                  throw new Exception("Missing setting");
              bool approxLocCalculated = false;

@@ -16,9 +16,6 @@ namespace genshinbot
         #region Database
         public class Database
         {
-            private Lazy<data.map.MapDb> mapDb = new Lazy<data.map.MapDb>(
-                () => Data.ReadJson("map/db.json", data.map.MapDb.Default()));
-            public data.map.MapDb MapDb => mapDb.Value;
             public screens.LoadingScreen.Db LoadingScreenDb { get; } = new screens.LoadingScreen.Db();
         }
 
@@ -47,7 +44,7 @@ namespace genshinbot
             Debug.Assert(Db != null);
 
            //TODO PlayingScreen = new screens.PlayingScreen(this);
-            MapScreen = new screens.MapScreen(this);
+            //TODO MapScreen = new screens.MapScreen(this);
             LoadingScreen = new screens.LoadingScreen(this);
 
             Console.WriteLine("Screens initialized");
