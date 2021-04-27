@@ -31,7 +31,7 @@ namespace genshinbot.automation.windows
 
         public IMouseSimulator Mouse => throw new NotImplementedException();
 
-        public ScreenshotObservable Screen => throw new NotImplementedException();
+        public ScreenshotObservable Screen { get; private init; }
 
         public void TryFocus()
         {
@@ -100,15 +100,17 @@ namespace genshinbot.automation.windows
             Size = s_tmp;
             disposeList.Add(s_tmp.Connect());
 
+            Screen = new screenshot.gdi.GDIStream();
+
+
             foregroundChangeHook.Start();
             locationChangeHook.Start();
         }
 
         ~WindowAutomator2()
         {
-            #region Focus
             foregroundChangeHook.Stop();
-            #endregion
+            locationChangeHook.Stop();
 
             closed.OnCompleted();
 
@@ -168,7 +170,7 @@ namespace genshinbot.automation.windows
             using (w.Focused.Subscribe(x => Console.WriteLine(x)))
             using (w.Size.Subscribe(r => Console.WriteLine(r)))
             {
-                for (int i = 0; i < 5;i++)
+                for (int i = 0; i < 3;i++)
                 {
                     Console.ReadLine();
                     var t = w.Size.Get();
@@ -179,6 +181,18 @@ namespace genshinbot.automation.windows
                 }
                 Console.ReadLine();
             }
+            Console.WriteLine("waiting for focus, timeout=100");
+            try
+            {
+                (w as IWindowAutomator2).WaitForFocus(TimeSpan.FromMilliseconds(100)).Wait();
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine($"caught {e}");
+            }
+            Console.ReadLine();
+            Console.WriteLine("waiting for focus");
+            (w as IWindowAutomator2).WaitForFocus().Wait();
 
         }
         #endregion
