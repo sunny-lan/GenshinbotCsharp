@@ -14,10 +14,14 @@ using genshinbot.automation.input;
 using System.Reactive.Linq;
 using genshinbot.util;
 using System.Reactive;
+using OneOf;
 
 namespace genshinbot.screens
 {
 
+    using LocationResult = OneOf<
+        algorithm.MapLocationMatch.Result,
+        algorithm.MapLocationMatch.NoSolutionException>;
     public class MapScreen
     {
         public class Db
@@ -53,7 +57,7 @@ namespace genshinbot.screens
 
         public IObservable<Mat> Screen { get; private init; }
         public IObservable<List<algorithm.MapTemplateMatch.Result>> Features { get; private init; }
-        public IObservable<Notification< algorithm.MapLocationMatch.Result>> Location { get; private init; }
+        public IObservable<LocationResult> Location { get; private init; }
 
         public MapScreen(BotIO b)
         {
@@ -66,9 +70,18 @@ namespace genshinbot.screens
             Features = Screen.Select(map => templateMatch.FindTeleporters(map).ToList());
             Location = Observable.CombineLatest(Features, b.W.Size, (features, size) =>
             {
-                return locationMatch.FindLocation2(features, size, ExpectUnknown);
-            }).Materialize();
-            
+                LocationResult res;
+                try
+                {
+                    res = locationMatch.FindLocation2(features, size, ExpectUnknown);
+                }
+                catch (algorithm.MapLocationMatch.NoSolutionException e)
+                {
+                    res = e;
+                }
+                return res;
+            });
+
         }
 
         public async Task Close()
@@ -171,20 +184,10 @@ namespace genshinbot.screens
         {
             var rig = rig1.Make();
             var screen = new MapScreen(rig);
-            using (screen.Location.Subscribe(x => {
-                if (x.HasValue)
-                {
-                    Console.WriteLine($"v={x}");
-                }
-                else if(x.Exception is Exception e)
-                {
-                    throw e;
-                }
-                else
-                {
-                    Debug.Fail("unhandled");
-                }
-            }))
+            using (screen.Location.Subscribe(x =>x.Switch(
+                result=>Console.WriteLine($"t={result.Translation} s={result.Scale}"),
+                error=>Console.WriteLine($"err={error}")
+            )))
             {
                 Console.ReadLine();
             }
