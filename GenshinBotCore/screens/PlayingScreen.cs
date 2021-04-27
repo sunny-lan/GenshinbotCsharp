@@ -88,9 +88,9 @@ namespace genshinbot.screens
 
 
 
-        public static void test()
+        public static void test(ITestingRig rig)
         {
-            BotIO b = TestingRig.Make();
+            BotIO b = rig.Make();
             var p = new PlayingScreen(b);
             using (p.ArrowDirection.Subscribe(
                 onNext: x => Console.WriteLine($"angle={x}")

@@ -13,6 +13,7 @@ using genshinbot.data;
 using genshinbot.automation.input;
 using System.Reactive.Linq;
 using genshinbot.util;
+using System.Reactive;
 
 namespace genshinbot.screens
 {
@@ -52,7 +53,7 @@ namespace genshinbot.screens
 
         public IObservable<Mat> Screen { get; private init; }
         public IObservable<List<algorithm.MapTemplateMatch.Result>> Features { get; private init; }
-        public IObservable<algorithm.MapLocationMatch.Result> Location { get; private init; }
+        public IObservable<Notification< algorithm.MapLocationMatch.Result>> Location { get; private init; }
 
         public MapScreen(BotIO b)
         {
@@ -66,7 +67,8 @@ namespace genshinbot.screens
             Location = Observable.CombineLatest(Features, b.W.Size, (features, size) =>
             {
                 return locationMatch.FindLocation2(features, size, ExpectUnknown);
-            });
+            }).Materialize();
+            
         }
 
         public async Task Close()
@@ -165,11 +167,24 @@ namespace genshinbot.screens
 
               }
           }*/
-        public static void Test2()
+        public static void Test2(ITestingRig rig1)
         {
-            var rig = TestingRig.Make();
+            var rig = rig1.Make();
             var screen = new MapScreen(rig);
-            using (screen.Location.Subscribe(x => Console.WriteLine($"t={x.Translation} s={x.Scale}")))
+            using (screen.Location.Subscribe(x => {
+                if (x.HasValue)
+                {
+                    Console.WriteLine($"v={x}");
+                }
+                else if(x.Exception is Exception e)
+                {
+                    throw e;
+                }
+                else
+                {
+                    Debug.Fail("unhandled");
+                }
+            }))
             {
                 Console.ReadLine();
             }

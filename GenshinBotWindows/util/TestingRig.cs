@@ -8,17 +8,17 @@ using System.Threading.Tasks;
 
 namespace genshinbot.util
 {
-    class TestingRig
+    class TestingRig : ITestingRig
     {
         class Bb : BotIO
         {
             public IWindowAutomator2 W { get; set; }
         }
-        public static BotIO Make()
+        public BotIO Make()
         {
             return new Bb
             {
-                W=new WindowAutomator2("Genshin Impact", "UnityWndClass")
+                W = new WindowAutomator2("Genshin Impact", "UnityWndClass")
             };
         }
     }

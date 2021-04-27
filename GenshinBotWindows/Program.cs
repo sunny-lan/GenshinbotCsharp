@@ -2,6 +2,7 @@
 
 using genshinbot.automation;
 using genshinbot.diag;
+using genshinbot.util;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,6 +21,7 @@ namespace genshinbot
             DPIAware.Set(SHCore.PROCESS_DPI_AWARENESS.PROCESS_PER_MONITOR_DPI_AWARE);
             //TaskExceptionCatcher.Do ();
             Kernel32.AllocConsole();
+            var rig = new TestingRig();
             //   Screenshot.Init();
             //TestMapLive();
             // tools.CoordChecker.run(args);
@@ -49,7 +51,7 @@ namespace genshinbot
             //     await automation.windows.WindowAutomator2.Test2();
             //   automation.windows.WindowAutomator2.Test3();
             //screens.PlayingScreen.test();
-            screens.MapScreen.Test2();
+            screens.MapScreen.Test2(rig);
             Console.WriteLine("Program ended. Press enter to exit");
             Console.ReadLine();
             CvThread.Stop();
