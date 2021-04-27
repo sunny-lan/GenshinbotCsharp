@@ -13,7 +13,7 @@ using System.Diagnostics;
 namespace genshinbot.screens
 {
 
-    public class MapScreen : Screen
+    public class MapScreen 
     {
         public class Db
         {
@@ -55,7 +55,7 @@ namespace genshinbot.screens
         {
             b.K.KeyPress(input.GenshinKeys.Map);
             Thread.Sleep(2000);//TODO
-            b.S(b.PlayingScreen);
+            //switch screen
         }
 
         public bool CheckActive()
@@ -116,10 +116,10 @@ namespace genshinbot.screens
             Thread.Sleep(1000);
             b.W.MouseTo(db.R[b.W.GetSize()].ActionBtnLoc);
             b.W.MouseClick(0);
-            b.SWait(b.LoadingScreen);
+           //TODO b.SWait(b.LoadingScreen);
             b.LoadingScreen.WaitTillDone();
             Thread.Sleep(1000);
-            b.S(b.PlayingScreen);
+           // b.S(b.PlayingScreen);
         }
 
         /// <summary>
@@ -164,7 +164,7 @@ namespace genshinbot.screens
             }
         }
 
-        public static void Test()
+      /*  public static void Test()
         {
             GenshinBot b = new GenshinBot();
                 Console.ReadKey();
@@ -179,7 +179,7 @@ namespace genshinbot.screens
                 p.OpenMap();
 
             }
-        }
+        }*/
 
     }
 }

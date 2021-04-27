@@ -11,6 +11,10 @@
     <PackageReference Include="System.Text.Json" Version="5.0.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="screens\" />
+  </ItemGroup>
+
   <Import Project="..\Data\Data.projitems" Label="Shared" />
 
 </Project>

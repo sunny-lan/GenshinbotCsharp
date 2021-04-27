@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace genshinbot.screens
 {
-    public class PlayingScreen:Screen
+    public class PlayingScreen
     {
         public class Db
         {

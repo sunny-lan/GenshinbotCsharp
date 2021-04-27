@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace genshinbot.screens
 {
 
-    public class LoadingScreen : Screen
+    public class LoadingScreen 
     {
         public class Db
         {

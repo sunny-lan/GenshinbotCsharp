@@ -23,7 +23,7 @@ namespace genshinbot.tools
             while (true)
             {
                 Console.WriteLine("Please navigate to play screen");
-                b.S(b.PlayingScreen);
+                //b.S(b.PlayingScreen);
                 Rect zoom;
                 while (true)
                 {

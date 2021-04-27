@@ -39,9 +39,9 @@ namespace genshinbot.controllers
 
         public Point2d GetLocationFromMap()
         {
-            b.PlayingScreen.OpenMap();
+            b.PlayingScreen.OpenMap();//TODO
 
-            var m = b.S<screens.MapScreen>();
+            var m = b.MapScreen;// b.S<screens.MapScreen>();
 
             m.UpdateScreenshot();
             var screenCenter = b.W.GetBounds().Center();
@@ -75,7 +75,7 @@ namespace genshinbot.controllers
         public void TeleportTo(Feature waypoint)
         {
             Debug.Assert(waypoint.Type == FeatureType.Teleporter);
-            var m = b.S<screens.MapScreen>();
+            var m = b.MapScreen; //b.S<screens.MapScreen>();
             m.TeleportTo(waypoint);
             approxPos = waypoint.Coordinates;
             pt = null;

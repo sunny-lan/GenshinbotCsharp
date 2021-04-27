@@ -36,55 +36,9 @@ namespace genshinbot
 
         #region Screens
 
-        public Screen ActiveScreen;
         public screens.PlayingScreen PlayingScreen;
         public screens.MapScreen MapScreen;
         public screens.LoadingScreen LoadingScreen;
-
-        public bool SIs<T>() where T : Screen
-        {
-            return ActiveScreen is T;
-        }
-
-        /// <summary>
-        /// expects the current active screen to be T, and returns it
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public T S<T>() where T : Screen
-        {
-            if (ActiveScreen is T t)
-                return t;
-            throw new Exception("Tried to access a screen which is inactive");
-        }
-
-        /// <summary>
-        /// sets the active screen to the given one
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="s"></param>
-        /// <returns></returns>
-
-        public T S<T>(T s) where T : Screen
-        {
-            //TODO
-            // if(!s.CheckActive())
-            //     throw new Exception("Tried to give control to a screen which is inactive");
-            ActiveScreen = s;
-            return s;
-        }
-
-        /// <summary>
-        /// waits for a screen to actually become active, then sets current active screen to that
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="s"></param>
-        /// <returns></returns>
-        public T SWait<T>(T s) where T : Screen
-        {
-            while (!s.CheckActive()) ;
-            return S(s);
-        }
 
         bool screensInit = false;
         public void InitScreens()
