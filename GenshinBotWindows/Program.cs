@@ -1,5 +1,6 @@
 ﻿
 
+using genshinbot.automation;
 using genshinbot.diag;
 using System;
 using System.Threading;
@@ -16,6 +17,7 @@ namespace genshinbot
         [STAThread]
         static async Task Main(string[] args)
         {
+            DPIAware.Set(SHCore.PROCESS_DPI_AWARENESS.PROCESS_PER_MONITOR_DPI_AWARE);
             //TaskExceptionCatcher.Do ();
             Kernel32.AllocConsole();
             //   Screenshot.Init();
@@ -43,8 +45,9 @@ namespace genshinbot
             //stream.Poller.Test1();
             //  automation.screenshot.directx.Test.Run();
             // automation.screenshot.gdi.run();
-            // automation.screenshot.gdi.GDIStream.Test2();
-            await automation.windows.WindowAutomator2.Test2();
+             //automation.screenshot.gdi.GDIStream.Test2();
+       //     await automation.windows.WindowAutomator2.Test2();
+             automation.windows.WindowAutomator2.Test3();
             Console.WriteLine("Program ended. Press enter to exit");
             Console.ReadLine();
             CvThread.Stop();

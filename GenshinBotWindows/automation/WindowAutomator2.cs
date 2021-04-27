@@ -17,6 +17,8 @@ using System.Reactive;
 using System.Reactive.Subjects;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using genshinbot.automation.screenshot.gdi;
+using genshinbot.diag;
 
 namespace genshinbot.automation.windows
 {
@@ -28,13 +30,12 @@ namespace genshinbot.automation.windows
 
 
 
-        public IKeySimulator2 Keys => iS;
+        /// <summary>
+        /// Outputs rects only when the window is focused
+        /// </summary>
+        private IObservable<Rect> clientAreaFocused;
 
-        public IMouseSimulator2 Mouse => iS;
 
-        public ScreenshotObservable Screen { get; private init; }
-
-        private InputSim iS;
 
         public void TryFocus()
         {
@@ -105,7 +106,11 @@ namespace genshinbot.automation.windows
             Size = s_tmp;
             disposeList.Add(s_tmp.Connect());
 
-            //   Screen = new screenshot.gdi.GDIStream();
+            clientAreaFocused = clientAreaStream
+                .Relay(Focused)
+                .DistinctUntilChanged();
+
+            Screen = new ScreenshotAdapter(this);
             iS = new InputSim(this);
 
         }
@@ -168,9 +173,11 @@ namespace genshinbot.automation.windows
         #endregion
 
 
-
-
         #region Input
+
+        public IKeySimulator2 Keys => iS;
+        public IMouseSimulator2 Mouse => iS;
+        private InputSim iS;
         class InputSim : IMouseSimulator2, IKeySimulator2
         {
             private InputSimulatorStandard.InputSimulator iS;
@@ -291,6 +298,40 @@ namespace genshinbot.automation.windows
         }
         #endregion
 
+        #region Screenshot
+        Point clientToScreen(Point p)
+        {
+            var pp = new System.Drawing.Point(p.X, p.Y);
+            if (!User32.ClientToScreen(hWnd, ref pp))
+                throw new Exception();
+            return pp.Cv();
+        }
+
+        public ScreenshotObservable Screen { get; private init; }
+        class ScreenshotAdapter : ScreenshotObservable
+        {
+            WindowAutomator2 parent;
+            private GDIStream gdi;
+
+            public ScreenshotAdapter(WindowAutomator2 parent)
+            {
+                this.parent = parent;
+                gdi = new GDIStream(parent.Focused);
+            }
+
+            public IObservable<Mat> Watch(Rect r)
+            {
+                return parent.clientAreaFocused
+                    .Select(clientArea =>
+                    {
+                        Rect actual = new Rect(parent.clientToScreen(r.TopLeft), r.Size);
+                        return gdi.Watch(actual);
+                    })
+                    .Switch();
+            }
+        }
+        #endregion
+
         #region Tests
         public static void Test()
         {
@@ -349,6 +390,18 @@ namespace genshinbot.automation.windows
                 Console.ReadLine();
             }
 
+        }
+
+        public static  void Test3()
+        {
+            var w = new WindowAutomator2("*Untitled - Notepad", null);
+            using (w.Screen.Watch(new Rect(10,10,100,100)).Subscribe(m =>
+            {
+                CvThread.ImShow("m", m);
+            }))
+            {
+                Console.ReadLine();
+            }
         }
         #endregion
     }

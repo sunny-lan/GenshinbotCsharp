@@ -22,14 +22,14 @@ namespace genshinbot.reactive
         public Poller(Func<T> poll)
         {
             this.poll = poll;
-             subject = new Subject<T>();
+            subject = new Subject<T>();
             //dummy observable to enable/disable
             var obs = Observable.FromEvent<T>(h => enableChanged(true), h => enableChanged(false));
             obsSubj = Observable.Merge(obs, subject);
-            
+
         }
 
-        private bool running = false;
+        private volatile bool running = false;
         private Task poller;
 
         /// <summary>
@@ -74,26 +74,31 @@ namespace genshinbot.reactive
 
         private async Task pollLoop()
         {
-            await semaphore.WaitAsync();
+            Task delay = Task.CompletedTask;
             while (running)
-            {
-                _ = Task.Run(() =>
-                {
-                    try
-                    {
-                        subject.OnNext(poll());
-                    }
-                    catch (Exception e)
-                    {
-                        subject.OnError(e);
-                    }
-                    finally
-                    {
-                        semaphore.Release();
-                    }
-                });
+            { 
                 //Fire a new poll task when both the delay and the semaphore are done
-                await Task.WhenAll(Task.Delay(Interval), semaphore.WaitAsync());
+                await Task.WhenAll(delay, semaphore.WaitAsync());
+                //the delay for the next task starts as soon as the task launches
+                delay = Task.Delay(Interval);
+                _ = Task.Run(() =>
+                  {
+                      try
+                      {
+                          if (!running) return;
+                          var v = poll();
+                          if (!running) return;
+                          subject.OnNext(v);
+                      }
+                      catch (Exception e)
+                      {
+                          subject.OnError(e);
+                      }
+                      finally
+                      {
+                          semaphore.Release();
+                      }
+                  });
             }
         }
 
@@ -135,7 +140,7 @@ namespace genshinbot.reactive
             });
             stream.Interval = 500;
 
-            using ( stream.Subscribe(x => Console.WriteLine(x)))
+            using (stream.Subscribe(x => Console.WriteLine(x)))
             {
                 Thread.Sleep(5000);
             }
@@ -153,7 +158,7 @@ namespace genshinbot.reactive
             });
             stream.MaxInFlight = 2;
 
-            using ( stream.Subscribe(x => Console.WriteLine(x)))
+            using (stream.Subscribe(x => Console.WriteLine(x)))
             {
                 Thread.Sleep(5000);
             }
@@ -172,7 +177,7 @@ namespace genshinbot.reactive
             });
             stream.Interval = 100;
             stream.MaxInFlight = 3;
-            using ( stream.Subscribe(x => Console.WriteLine(x)))
+            using (stream.Subscribe(x => Console.WriteLine(x)))
             {
                 Thread.Sleep(5000);
             }
@@ -201,7 +206,7 @@ namespace genshinbot.reactive
             Thread.Sleep(2000);
 
             Console.WriteLine("poll should begin after");
-            using ( stream.Subscribe(x => Console.WriteLine(x)))
+            using (stream.Subscribe(x => Console.WriteLine(x)))
             {
                 Thread.Sleep(5000);
             }

@@ -64,6 +64,11 @@ namespace genshinbot.automation
         /// </remarks>
         public static readonly DPI_AWARENESS_CONTEXT DPI_AWARENESS_CONTEXT_UNAWARE_GDISCALED = new DPI_AWARENESS_CONTEXT(new IntPtr(-5));
      
+        public static void Set(SHCore.PROCESS_DPI_AWARENESS aware)
+        {
+            SHCore.SetProcessDpiAwareness(aware).ThrowIfFailed();
+        }
+
         public static void Use(DPI_AWARENESS_CONTEXT context, Action a)
         {
             var prev = User32.SetThreadDpiAwarenessContext(context);

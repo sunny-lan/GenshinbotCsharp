@@ -13,6 +13,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Vanara.PInvoke;
+using genshinbot.reactive;
+using System.Reactive.Subjects;
 
 namespace genshinbot.automation.screenshot.gdi
 {
@@ -31,7 +33,7 @@ namespace genshinbot.automation.screenshot.gdi
             hDesktopDC.Dispose();
         }
 
-        public GDIStream()
+        public GDIStream(IObservable<bool> enable = null)
         {
             hDesktopDC = User32.GetDC(IntPtr.Zero);
             if (hDesktopDC.IsInvalid)
@@ -42,9 +44,14 @@ namespace genshinbot.automation.screenshot.gdi
             hTmpDC = Gdi32.CreateCompatibleDC(hDesktopDC);
 
             //TODO support changing desktop sizes
-            CreateBuffer(SystemInformation.VirtualScreen.Width, SystemInformation.VirtualScreen.Height);
+            DPIAware.Use(DPIAware.DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE, () =>
+            {
+                CreateBuffer(SystemInformation.VirtualScreen.Width, SystemInformation.VirtualScreen.Height);
+            });
 
-            poller = new reactive.Poller<Mat>(Poll);
+            this.enable = enable ?? Observable.Return(true);
+            poller = new Poller<Mat>(Poll);
+            pollerEnable = poller.Relay(this.enable);
         }
 
 
@@ -78,62 +85,78 @@ namespace genshinbot.automation.screenshot.gdi
         Mat Poll()
         {
             Debug.Assert(buf != null);
-            if (listeningRects.Count > MinRectsBeforeMerge)
+            lock (pollRegions)
             {
-                if (bounds is Rect region)
-                    if (!Gdi32.BitBlt(hTmpDC, region.X, region.Y, region.Width, region.Height, hDesktopDC,
-                        region.X, region.Y, Gdi32.RasterOperationMode.SRCCOPY
-                    ))
-                        Kernel32.GetLastError().ThrowIfFailed("failed performing BitBlt");
-            }
-            else
-            {
-                //  Console.WriteLine("refresh");
-                foreach (var region in listeningRects)
+                foreach (var region in pollRegions)
                 {
                     if (!Gdi32.BitBlt(hTmpDC, region.X, region.Y, region.Width, region.Height, hDesktopDC,
                         region.X, region.Y, Gdi32.RasterOperationMode.SRCCOPY
                     ))
                         Kernel32.GetLastError().ThrowIfFailed("failed performing BitBlt");
                 }
+
+                if (!Gdi32.GdiFlush())
+                    Kernel32.GetLastError().ThrowIfFailed("failed performing GdiFlush");
+
+                return buf;
             }
-
-            if (!Gdi32.GdiFlush())
-                Kernel32.GetLastError().ThrowIfFailed("failed performing GdiFlush");
-
-            return buf;
         }
-        reactive.Poller<Mat> poller;
+        private IObservable<bool> enable;
+
+        Poller<Mat> poller;
 
         /// <summary>
-        /// min number of distinct rects before switching modes
+        /// Poller output, filtered through Enable signal
         /// </summary>
-        public int MinRectsBeforeMerge = 2;
+        IObservable<Mat> pollerEnable;
+
+        /// <summary>
+        /// min number of distinct rects before applying merge algo
+        /// </summary>
+        public int MinRectsBeforeMerge = 0;
 
         /// <summary>
         /// cache of IObservables for each screen region being watched
         /// </summary>
         Dictionary<Rect, IObservable<Mat>> cache = new Dictionary<Rect, IObservable<Mat>>();
 
+        /// <summary>
+        /// List of regions to actually poll
+        /// </summary>
+        List<Rect> pollRegions = new List<Rect>();
 
         /// <summary>
         /// list of rects which are currently being watched
         /// </summary>
-        ICollection<Rect> listeningRects => thing.Keys;
-        ConcurrentDictionary<Rect, Unit> thing = new ConcurrentDictionary<Rect, Unit>();
+        ConcurrentDictionary<Rect, Unit> listeningRects = new ConcurrentDictionary<Rect, Unit>();
 
-        /// <summary>
-        /// the overall bounding rect of all the rects in listeningRects
-        /// </summary>
-        Rect? bounds;
 
         /// <summary>
         /// Reevaluate what strategy is used to screenshot all the rects being watched
         /// </summary>
         void RecalculateStrategy()
         {
-            foreach (var x in listeningRects)
-                bounds = bounds?.Union(x) ?? x;
+            lock (pollRegions)
+            {
+                pollRegions.Clear();
+
+
+                // When we have too many rects
+                // We will merge them into subrects
+                if (listeningRects.Count > MinRectsBeforeMerge)
+                {
+                    Rect? bounds = null;
+                    foreach (var x in listeningRects.Keys)
+                        bounds = bounds?.Union(x) ?? x;
+                    pollRegions.Add(bounds.Expect());
+                }
+                else
+                {
+                    // first we will eliminate rects which are nested
+                    var orignal = new List<Rect>(listeningRects.Keys);
+                    pollRegions.AddRange(orignal);
+                }
+            }
         }
 
         public IObservable<Mat> Watch(Rect r)
@@ -143,22 +166,23 @@ namespace genshinbot.automation.screenshot.gdi
                 //a dummy observable to update the list of rects
                 var boundsCalcer = Observable.FromEvent<Mat>(h =>
                 {
-                    thing[r] = default;
+                    listeningRects[r] = default;
                     RecalculateStrategy();
                 }, h =>
                 {
-                    Debug.Assert(thing.Remove(r, out var _));
+                    Debug.Assert(listeningRects.Remove(r, out var _));
                     RecalculateStrategy();
                 });
-                cache[r] = Observable.Merge(boundsCalcer, poller.Select(m => m[r]));
+                cache[r] = Observable.Merge(boundsCalcer, pollerEnable.Select(m => m[r]));
 
             }
             return cache[r];
         }
         public static void Test2()
         {
-            //Task.Run(()=> { while (true) Cv2.WaitKey(1); });
-            GDIStream strm = new GDIStream();
+            //Task.Run(()=> { while (true) Cv2.WaitKey(1); });\
+            var enable = new BehaviorSubject<bool>(true);
+            GDIStream strm = new GDIStream(enable);
             var poll = strm.Watch(new Rect(0, 0, 1600, 900));
             Console.WriteLine("b:");
             Console.ReadLine();//ds
@@ -187,7 +211,14 @@ namespace genshinbot.automation.screenshot.gdi
             })))
             {
                 Console.WriteLine("a:");
-                Console.ReadLine();
+                bool v = true;
+                while (true)
+                {
+                    Console.ReadLine();
+                    v = !v;
+                    Console.WriteLine($"enable={v}");
+                    enable.OnNext(v);
+                }
             }
 
         }
