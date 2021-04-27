@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,13 +30,54 @@ namespace genshinbot
         }
         public static class ObservableValue
         {
+            public static Task WaitTrue(this IObservable<bool> oo, TimeSpan? timeout = null)
+            {
+                var o = oo
+                    .Where(f => f);
+                if (timeout is TimeSpan d)
+                    o = o.Timeout(d);
+                return o.Get();
+            }
+
+            /// <summary>
+            /// Fails a task if observable sends false while task isn't complete
+            /// </summary>
+            /// <typeparam name="T"></typeparam>
+            /// <param name="o"></param>
+            /// <param name="t"></param>
+            /// <param name="timeout">timeout on initial lock</param>
+            /// <returns></returns>
+            public static async Task LockWhile(this IObservable<bool> o, Func<Task> t , TimeSpan? timeout = null)
+            {
+                await o.WaitTrue(timeout);
+
+                var taskCompletionSource = new TaskCompletionSource<Unit>();
+
+                using (o.Subscribe(
+                    onNext: x =>
+                    {
+                        if (!x)
+                            taskCompletionSource.SetException(
+                                new Exception("stream became false while running task"));
+                    },
+                    onCompleted: () => taskCompletionSource.SetException(
+                        new Exception("stream ended while running task")),
+                    onError: e => taskCompletionSource.SetException(
+                        new Exception("error happened in stream while running task", e))
+                ))
+                {
+                    var tt = await Task.WhenAny(t(), taskCompletionSource.Task);
+                    await tt;
+                }
+            }
+
             public static Task<T> Get<T>(this IObservable<T> o)
             {
                 TaskCompletionSource<T> taskCompletionSource = new TaskCompletionSource<T>();
-                IDisposable thing  = o.Subscribe(
+                IDisposable thing = o.Subscribe(
                     onNext: taskCompletionSource.SetResult,
                     onCompleted: taskCompletionSource.SetCanceled,
-                    onError:taskCompletionSource.SetException
+                    onError: taskCompletionSource.SetException
                 );
                 taskCompletionSource.Task.ContinueWith(t => thing.Dispose());
                 return taskCompletionSource.Task;

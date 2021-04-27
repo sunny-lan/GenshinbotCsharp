@@ -16,28 +16,24 @@ namespace genshinbot.automation
         /// </summary>
         IObservable<bool> Focused { get; }
 
-        Task WaitForFocus(TimeSpan? timeout=null)
+        Task WaitForFocus(TimeSpan? timeout = null)
         {
-            var o=Focused
-                .Where(f => f);
-            if (timeout is TimeSpan d)
-                o = o.Timeout(d);
-            return o.Get();
+            return Focused.WaitTrue(timeout);
         }
 
         /// <summary>
         /// The size of the window
         /// </summary>
         IObservable<Size> Size { get; }
-        
+
         /// <summary>
         /// Try to focus the window
         /// </summary>
         void TryFocus();
 
-        input.IKeySimulator Keys { get; }
-        input.IMouseSimulator Mouse { get; }
-        screenshot.ScreenshotObservable Screen {get;}
+        input.IKeySimulator2 Keys { get; }
+        input.IMouseSimulator2 Mouse { get; }
+        screenshot.ScreenshotObservable Screen { get; }
 
-}
+    }
 }

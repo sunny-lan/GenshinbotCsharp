@@ -16,6 +16,7 @@ using System.Reactive.Linq;
 using System.Reactive;
 using System.Reactive.Subjects;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace genshinbot.automation.windows
 {
@@ -25,13 +26,15 @@ namespace genshinbot.automation.windows
         private HWND hWnd;
         private uint pid, thread;
 
+        
 
+        public IKeySimulator2 Keys => iS;
 
-        public IKeySimulator Keys => throw new NotImplementedException();
-
-        public IMouseSimulator Mouse => throw new NotImplementedException();
+        public IMouseSimulator2 Mouse => iS;
 
         public ScreenshotObservable Screen { get; private init; }
+
+        private InputSim iS;
 
         public void TryFocus()
         {
@@ -59,6 +62,7 @@ namespace genshinbot.automation.windows
                 .MergeNotification(closed)
                 .Where(e => e.hwnd == hWnd && e.idObject == User32.ObjectIdentifiers.OBJID_WINDOW)
                 .Select(e => GetRectDirect());
+            locationChangeHook.Start();
 
             clientAreaStream = Observable
                 .Return(GetRectDirect())
@@ -77,6 +81,7 @@ namespace genshinbot.automation.windows
                     .MergeNotification(closed)
                     .Where(e => e.idObject == User32.ObjectIdentifiers.OBJID_WINDOW)
                     .Select(e => IsForegroundWindow());
+            foregroundChangeHook.Start();
 
             var foregroundStream = Observable
                 .Return(IsForegroundWindow())
@@ -101,10 +106,8 @@ namespace genshinbot.automation.windows
             disposeList.Add(s_tmp.Connect());
 
             Screen = new screenshot.gdi.GDIStream();
+            iS = new InputSim(this);
 
-
-            foregroundChangeHook.Start();
-            locationChangeHook.Start();
         }
 
         ~WindowAutomator2()
@@ -163,6 +166,70 @@ namespace genshinbot.automation.windows
 
 
         #endregion
+
+
+
+
+        #region Input
+        class InputSim : IMouseSimulator2, IKeySimulator2
+        {
+            private InputSimulatorStandard.InputSimulator iS;
+            IWindowAutomator2 parent;
+
+            internal InputSim(IWindowAutomator2 parent)
+            {
+
+                iS = new InputSimulatorStandard.InputSimulator();
+                this.parent = parent;
+            }
+
+
+            ~InputSim()
+            {
+
+            }
+
+             
+
+
+            public Task Key(input.Keys k, bool down)
+            {
+                void _Key()
+                {
+                    if (down)
+                    {
+                        iS.Keyboard.KeyDown((InputSimulatorStandard.Native.VirtualKeyCode)k);
+                    }
+                    else
+                    {
+                        iS.Keyboard.KeyUp((InputSimulatorStandard.Native.VirtualKeyCode)k);
+                    }
+                }
+                return parent.Focused.LockWhile(()=>Task.Run(_Key));
+            }
+
+            public Task MouseButton(MouseBtn btn, bool down)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task MouseMove(Point2d d)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task<Point2d> MousePos()
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task MouseTo(Point2d p)
+            {
+                throw new NotImplementedException();
+            }
+        }
+        #endregion
+
         #region Tests
         public static void Test()
         {
@@ -193,6 +260,27 @@ namespace genshinbot.automation.windows
             Console.ReadLine();
             Console.WriteLine("waiting for focus");
             (w as IWindowAutomator2).WaitForFocus().Wait();
+
+
+        }
+
+        public static async Task Test2()
+        {
+            var w = new WindowAutomator2("*Untitled - Notepad", null);
+            while (true)
+            {
+                using (w.Focused.Subscribe(x => Console.WriteLine($"focused={x}")))
+                {
+                    for (int i = 0; i < 10; i++)
+                    {
+                        Console.WriteLine("trigger key");
+                        await w.Keys.KeyPress(input.Keys.A);
+                        await Task.Delay(100);
+
+                    }
+                }
+                Console.ReadLine();
+            }
 
         }
         #endregion

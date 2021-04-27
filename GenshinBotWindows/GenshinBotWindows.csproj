@@ -80,6 +80,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="automation\input\" />
     <Folder Include="badui\" />
     <Folder Include="database\map\" />
   </ItemGroup>
