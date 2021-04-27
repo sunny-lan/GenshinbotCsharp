@@ -16,8 +16,8 @@ namespace genshinbot.algorithm
 
             public double Epsilon { get; set; } = 2;
             public ColorRange ArrowColor { get; set; } = new ColorRange(
-                new Scalar(250, 220, 0),
-                new Scalar(256, 256, 10)
+                new Scalar(250, 220, 0,0),
+                new Scalar(256, 256, 10,256)
             );
 
         }
@@ -78,7 +78,7 @@ namespace genshinbot.algorithm
                         var direction = a + b;
                         angle = Math.Atan2(y: direction.Y, x: direction.X);
                         Dbg.Line(point, (point + direction * 10).Round(), Scalar.Red);
-                        Dbg.Flush(true);
+                        Dbg.Flush();
                     }
                 }
             }
@@ -89,7 +89,7 @@ namespace genshinbot.algorithm
         public static void Test()
         {
             var detect = new ArrowDirectionDetect();
-            detect.Dbg.Enabled = true;
+            detect.Dbg.Show();
             var img = Data.Imread("test/bad arrow.png");
             var angle = detect.GetAngle(img);
             Console.WriteLine(angle);

@@ -1,6 +1,7 @@
 ﻿using OpenCvSharp;
 using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 using System.Text;
 
 namespace genshinbot.diag
@@ -8,21 +9,24 @@ namespace genshinbot.diag
     /// <summary>
     /// Provides a way for other classes to display debug images but allow debug to be disabled when unneeded
     /// </summary>
-    public class DbgMat
+    public class DbgMat : IObservable<Mat>
     {
-        Mat img = new Mat();
+        private Mat img= new Mat();
         public string DbgWindowName;
-
+        private IObservable<Mat> thing;
         static int ctr = 0;
         static string genName()
         {
             return "dbg" + ctr++;
         }
-
+        public IDisposable Show()
+        {
+            return this.Subscribe(x => Cv2.ImShow(DbgWindowName, x));
+        }
         public DbgMat()
         {
             DbgWindowName = genName();
-            OnDebugImg = DefaultAction;
+            thing = Observable.FromEvent<Mat>(x => OnDebugImg += x, x => OnDebugImg -= x).Replay(1);
         }
 
         ~DbgMat()
@@ -30,16 +34,10 @@ namespace genshinbot.diag
             img.Dispose();
         }
 
-        void DefaultAction(Mat m, bool w)
-        {
-            Cv2.ImShow(DbgWindowName, m);
-            Cv2.WaitKey(w ? 0 : 1);
-        }
+        private event Action<Mat> OnDebugImg;
+        private bool Enabled => OnDebugImg != null;
 
-        public Action<Mat, bool> OnDebugImg;
-        public bool Enabled;
-
-        public void Image(Mat a, Point? dst=null)
+        public void Image(Mat a, Point? dst = null)
         {
             if (!Enabled) return;
             var d = dst ?? Util.Origin;
@@ -69,10 +67,15 @@ namespace genshinbot.diag
         /// Call this function whenever the content in this debug mat is ready for display
         /// </summary>
         /// <param name="wait">Set to true in order to wait for user input before continuing</param>
-        public void Flush(bool wait = false)
+        public void Flush()
         {
             if (!Enabled) return;
-            OnDebugImg?.Invoke(img, wait);
+            OnDebugImg?.Invoke(img);
+        }
+
+        public IDisposable Subscribe(IObserver<Mat> observer)
+        {
+            return thing.Subscribe(observer);
         }
     }
 }

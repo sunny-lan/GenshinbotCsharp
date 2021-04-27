@@ -104,10 +104,10 @@ namespace genshinbot.tools
                    btn.Enabled = true;
                };
             }
-
+/*TODO
             makePoller("health", i=> health[i].Text = playingScreen.ReadSideHealth1(i).ToString());
             makePoller("num", i=> num[i].Text = playingScreen.ReadCharSelected(i).ToString());
-            makePoller("alive", i=> alive[i].Text = playingScreen.ReadSideAlive(i).ToString());
+            makePoller("alive", i=> alive[i].Text = playingScreen.ReadSideAlive(i).ToString());*/
         }
 
         public void Unload(GenshinBot b)

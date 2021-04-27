@@ -45,9 +45,10 @@ namespace genshinbot
             //stream.Poller.Test1();
             //  automation.screenshot.directx.Test.Run();
             // automation.screenshot.gdi.run();
-             //automation.screenshot.gdi.GDIStream.Test2();
-       //     await automation.windows.WindowAutomator2.Test2();
-             automation.windows.WindowAutomator2.Test3();
+            //automation.screenshot.gdi.GDIStream.Test2();
+            //     await automation.windows.WindowAutomator2.Test2();
+            //   automation.windows.WindowAutomator2.Test3();
+            screens.PlayingScreen.test();
             Console.WriteLine("Program ended. Press enter to exit");
             Console.ReadLine();
             CvThread.Stop();

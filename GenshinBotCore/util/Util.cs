@@ -210,9 +210,10 @@ namespace genshinbot
         {
             return new Point2d(x: Math.Sin(angle) * mag, y: Math.Cos(angle) * mag);
         }
+        [System.Diagnostics.DebuggerHidden]
         public static T Expect<T>(this T? t, string assert = "") where T : struct
         {
-            if (t == null) throw new ArgumentException(assert);
+            if (t == null) Debug.Fail(assert);
             return (T)t;
         }
         private static Random rng = new Random(1);

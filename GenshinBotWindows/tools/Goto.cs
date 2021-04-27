@@ -39,7 +39,7 @@ namespace genshinbot.tools
                         var d2 = b.Db.MapDb.Coord2Minimap.Expect().Inverse(dst.Center()+zoom.TopLeft);
 
                         b.W.TryFocus();
-                        b.LocationManager.WalkTo(d2, dst.Width);
+                     //TODO   b.LocationManager.WalkTo(d2, dst.Width);
                     }
                 }
             }

@@ -19,7 +19,7 @@ namespace genshinbot.tools.config
             Debug.Assert(b.Db != null);
 
             var ui = b.Ui;
-            var db = b.Db.PlayingScreenDb;
+            var db = b.PlayingScreen.db;
             tab = ui.CreateTab();
             tab.Title = "Playing screen";
             var content = tab.Content;
@@ -385,7 +385,7 @@ namespace genshinbot.tools.config
             {
                 if (ui.Popup("Really save?", "Confirm", yui.PopupType.Confirm) == yui.PopupResult.Ok)
                 {
-                    await Task.Run(() => b.Db.SavePlayingScreenDb());
+                    //TODO await Task.Run(() => b.Db.SavePlayingScreenDb());
                     tab.Status = "Saved";
                 }
             };
