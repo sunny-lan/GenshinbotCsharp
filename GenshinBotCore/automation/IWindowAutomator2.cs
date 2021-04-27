@@ -13,13 +13,13 @@ namespace genshinbot.automation
         /// <summary>
         /// whether the window is focused
         /// </summary>
-        IObservableValue<bool> Focused { get; }
+        IObservable<bool> Focused { get; }
 
         /// <summary>
-        /// The bounds of the window. The x,y position should always be 0
+        /// The size of the window
         /// </summary>
-        IObservableValue<Rect> Bounds { get; }
-
+        IObservable<Size> Size { get; }
+        
         /// <summary>
         /// Try to focus the window
         /// </summary>

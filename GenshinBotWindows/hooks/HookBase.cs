@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -15,7 +17,7 @@ namespace genshinbot.hooks
     /// Provides a base implementation with a message loop for all hooking classes
     /// </summary>
     /// <typeparam name="T">The event type returned by the hook</typeparam>
-    abstract class HookBase<T> 
+    abstract class HookBase<T> :IObservable<T>
     {
         protected uint ThreadID { get; private set; }
 
@@ -80,6 +82,23 @@ namespace genshinbot.hooks
             loopThread.Wait();
         }
 
+        private IObservable<T> events;
+        bool observableMode = false;
+        public IDisposable Subscribe(IObserver<T> observer)
+        {
+            return events.Subscribe(observer);
+        }
+        public HookBase()
+        {
+            events = Observable.FromEventPattern<T>(
+                x => {
+                    OnEvent += x;
+                },
+                x=> {
+                    OnEvent -= x;
+                }
+            ).Select(x=>x.EventArgs);
+        }
 
         ~HookBase()
         {

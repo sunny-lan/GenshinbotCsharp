@@ -1,7 +1,10 @@
 ﻿using OpenCvSharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,6 +12,43 @@ namespace genshinbot
 {
     public static class Util
     {
+        /// <summary>
+        /// Returns an observable which publishes unit.default everytime a new element is recieved.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="o"></param>
+        /// <returns></returns>
+        public static IObservable<Unit> ToUnit<T>(this IObservable<T> o)
+        {
+            return o.Select(x => Unit.Default);
+        }
+
+        /// <summary>
+        /// Merge Error and Completion notifications from another observable
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="first"></param>
+        /// <param name="completion"></param>
+        /// <returns></returns>
+        public static IObservable<T> MergeNotification<T>(this IObservable<T> first, IObservable<Unit> completion)
+        {
+            return Observable.Merge(
+                first.Materialize(),
+                completion.Materialize().Select(notif =>
+                {
+                    switch (notif.Kind)
+                    {
+                        case NotificationKind.OnCompleted:
+                            return Notification.CreateOnCompleted<T>();
+                        case NotificationKind.OnError:
+                            return Notification.CreateOnError<T>(notif.Exception);
+                        default:
+                            throw new Exception("Invalid notif type");
+                    }
+                })
+            ).Dematerialize();
+        }
+
         private static Mat conv_output = new Mat();
         private static Mat conv_input = new Mat(new Size(1, 1), MatType.CV_8UC3);
         public static Scalar CvtColor(this Scalar s, ColorConversionCodes code)

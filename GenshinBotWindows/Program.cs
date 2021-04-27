@@ -15,7 +15,7 @@ namespace genshinbot
         [STAThread]
         static void Main(string[] args)
         {
-            TaskExceptionCatcher.Do ();
+            //TaskExceptionCatcher.Do ();
             Kernel32.AllocConsole();
             //   Screenshot.Init();
             //TestMapLive();
@@ -42,7 +42,8 @@ namespace genshinbot
             //stream.Poller.Test1();
             //  automation.screenshot.directx.Test.Run();
             // automation.screenshot.gdi.run();
-            automation.screenshot.gdi.GDIStream.Test2();
+            // automation.screenshot.gdi.GDIStream.Test2();
+            automation.windows.WindowAutomator2.Test();
             Console.WriteLine("Program ended. Press enter to exit");
             Console.ReadLine();
             CvThread.Stop();
