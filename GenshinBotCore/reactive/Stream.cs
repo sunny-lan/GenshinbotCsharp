@@ -9,7 +9,6 @@ namespace genshinbot
     namespace reactive
     {
 
-        public interface Subscription : IDisposable { }
 
         /// <summary>
         /// An observable that stores it's last known value

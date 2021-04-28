@@ -96,11 +96,11 @@ namespace genshinbot.automation.screenshot.gdi
                         Kernel32.GetLastError().ThrowIfFailed("failed performing BitBlt");
                 }
 
-                if (!Gdi32.GdiFlush())
-                    Kernel32.GetLastError().ThrowIfFailed("failed performing GdiFlush");
-
-                return new Snap(buf);
             }
+            if (!Gdi32.GdiFlush())
+                Kernel32.GetLastError().ThrowIfFailed("failed performing GdiFlush");
+
+            return new Snap(buf);
         }
         private IObservable<bool> enable;
 
@@ -174,7 +174,7 @@ namespace genshinbot.automation.screenshot.gdi
                     Debug.Assert(listeningRects.Remove(r, out var _));
                     RecalculateStrategy();
                 });
-                cache[r] = Observable.Merge(boundsCalcer, 
+                cache[r] = Observable.Merge(boundsCalcer,
                     pollerEnable.Select(m => m[r])
                 );
 
