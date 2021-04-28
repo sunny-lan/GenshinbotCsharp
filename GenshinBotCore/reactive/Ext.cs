@@ -1,5 +1,6 @@
 ﻿using genshinbot.reactive;
 using System;
+using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -11,6 +12,7 @@ namespace genshinbot
     {
         public static class Ext
         {
+            
             /// <summary>
             /// Creates a new observable which is only subscribed to this when control=true
             /// Events sent before a signal on control will be ignored
