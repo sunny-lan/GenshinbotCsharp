@@ -321,7 +321,7 @@ namespace genshinbot.automation.windows
                 gdi = new GDIStream(parent.Focused);
             }
 
-            public IObservable<Mat> Watch(Rect r)
+            public IObservable<Pkt<Mat>> Watch(Rect r)
             {
                 var mappedRectStream = parent.clientAreaFocused
                     .Select(_ =>DPIAware.Use(DPIAware.DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE, () =>
@@ -408,7 +408,7 @@ namespace genshinbot.automation.windows
             Console.WriteLine("follow screen sz");
             using (w.Screen.Watch(w.Bounds).Subscribe(m =>
             {
-                CvThread.ImShow("m", m);
+                CvThread.ImShow("m", m.Value);
             }))
             {
                 Console.ReadLine();

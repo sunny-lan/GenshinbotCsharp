@@ -15,6 +15,7 @@ using System.Reactive.Linq;
 using genshinbot.util;
 using System.Reactive;
 using OneOf;
+using genshinbot.reactive;
 
 namespace genshinbot.screens
 {
@@ -66,7 +67,7 @@ namespace genshinbot.screens
             locationMatch = new algorithm.MapLocationMatch(Data.MapDb.Features);
             templateMatch = new algorithm.MapTemplateMatch();
 
-            Screen = b.W.Screen.Watch(b.W.Bounds);
+            Screen = b.W.Screen.Watch(b.W.Bounds).Depacket();//TODO
             Features = Screen.Select(map => templateMatch.FindTeleporters(map).ToList());
             Location = Observable.CombineLatest(Features, b.W.Size, (features, size) =>
             {

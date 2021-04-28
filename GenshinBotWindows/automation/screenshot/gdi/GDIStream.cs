@@ -18,6 +18,7 @@ using System.Reactive.Subjects;
 
 namespace genshinbot.automation.screenshot.gdi
 {
+    using Snap = Pkt<Mat>;
 
     class GDIStream : ScreenshotObservable
     {
@@ -50,7 +51,7 @@ namespace genshinbot.automation.screenshot.gdi
             });
 
             this.enable = enable ?? Observable.Return(true);
-            poller = new Poller<Mat>(Poll);
+            poller = new Poller<Snap>(Poll);
             pollerEnable = poller.Relay(this.enable);
         }
 
@@ -82,7 +83,7 @@ namespace genshinbot.automation.screenshot.gdi
             hTmpDC.SelectObject(sec);
         }
 
-        Mat Poll()
+        Snap Poll()
         {
             Debug.Assert(buf != null);
             lock (pollRegions)
@@ -98,17 +99,17 @@ namespace genshinbot.automation.screenshot.gdi
                 if (!Gdi32.GdiFlush())
                     Kernel32.GetLastError().ThrowIfFailed("failed performing GdiFlush");
 
-                return buf;
+                return new Snap(buf);
             }
         }
         private IObservable<bool> enable;
 
-        Poller<Mat> poller;
+        Poller<Snap> poller;
 
         /// <summary>
         /// Poller output, filtered through Enable signal
         /// </summary>
-        IObservable<Mat> pollerEnable;
+        IObservable<Snap> pollerEnable;
 
         /// <summary>
         /// min number of distinct rects before applying merge algo
@@ -118,7 +119,7 @@ namespace genshinbot.automation.screenshot.gdi
         /// <summary>
         /// cache of IObservables for each screen region being watched
         /// </summary>
-        Dictionary<Rect, IObservable<Mat>> cache = new Dictionary<Rect, IObservable<Mat>>();
+        Dictionary<Rect, IObservable<Snap>> cache = new Dictionary<Rect, IObservable<Snap>>();
 
         /// <summary>
         /// List of regions to actually poll
@@ -159,12 +160,12 @@ namespace genshinbot.automation.screenshot.gdi
             }
         }
 
-        public IObservable<Mat> Watch(Rect r)
+        public IObservable<Snap> Watch(Rect r)
         {
             if (!cache.ContainsKey(r))
             {
                 //a dummy observable to update the list of rects
-                var boundsCalcer = Observable.FromEvent<Mat>(h =>
+                var boundsCalcer = Observable.FromEvent<Snap>(h =>
                 {
                     listeningRects[r] = default;
                     RecalculateStrategy();
@@ -173,7 +174,9 @@ namespace genshinbot.automation.screenshot.gdi
                     Debug.Assert(listeningRects.Remove(r, out var _));
                     RecalculateStrategy();
                 });
-                cache[r] = Observable.Merge(boundsCalcer, pollerEnable.Select(m => m[r]));
+                cache[r] = Observable.Merge(boundsCalcer, 
+                    pollerEnable.Select(m => m[r])
+                );
 
             }
             return cache[r];
@@ -191,7 +194,7 @@ namespace genshinbot.automation.screenshot.gdi
             sw.Start();
             using (poll.Subscribe(m =>
             {
-                CvThread.ImShow("a", m);
+                CvThread.ImShow("a", m.Value);
                 //    Console.WriteLine("frame");
                 fps++;
                 if (sw.ElapsedMilliseconds >= 1000)
@@ -201,14 +204,14 @@ namespace genshinbot.automation.screenshot.gdi
                     sw.Restart();
                 }
             }))
-            using (strm.Watch(new Rect(300, 100, 100, 100)).Subscribe(Observer.Create<Mat>(m =>
+            using (strm.Watch(new Rect(300, 100, 100, 100)).Subscribe(m =>
             {
-                CvThread.ImShow("b", m);
-            })))
-            using (strm.Watch(new Rect(300, 300, 100, 100)).Subscribe(Observer.Create<Mat>(m =>
+                CvThread.ImShow("b", m.Value);
+            }))
+            using (strm.Watch(new Rect(300, 300, 100, 100)).Subscribe(m =>
             {
-                CvThread.ImShow("c", m);
-            })))
+                CvThread.ImShow("c", m.Value);
+            }))
             {
                 Console.WriteLine("a:");
                 bool v = true;

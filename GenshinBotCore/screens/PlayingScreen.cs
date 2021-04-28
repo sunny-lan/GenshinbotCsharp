@@ -1,6 +1,7 @@
 ﻿using genshinbot.automation;
 using genshinbot.automation.input;
 using genshinbot.data;
+using genshinbot.reactive;
 using genshinbot.util;
 using OpenCvSharp;
 using System;
@@ -69,10 +70,12 @@ namespace genshinbot.screens
         {
             this.b = b;
             rd = b.W.Size.Select(sz => db.R[sz]);
-            Minimap = b.W.Screen.Watch(rd.Select(r => r.MinimapLoc));
-            Arrow = b.W.Screen.Watch(
-                rd.Select(r => r.MinimapLoc.Center().RectAround(new Size(db.ArrowRadius * 2, db.ArrowRadius * 2))));
-            //TODO handle errors
+            Minimap = b.W.Screen.Watch(rd.Select(r => r.MinimapLoc)).Depacket();//TODO
+            Arrow = b.W.Screen.Watch(rd.Select(r => 
+                r.MinimapLoc.Center()
+                .RectAround(new Size(db.ArrowRadius * 2, db.ArrowRadius * 2))
+            )).Depacket();//TODO
+            //TODO handle errors+offload to separate thread!
             ArrowDirection = Arrow.Select(arrow => arrowDirectionAlg.GetAngle(arrow));
         }
 
