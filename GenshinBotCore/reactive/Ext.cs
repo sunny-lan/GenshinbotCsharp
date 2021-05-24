@@ -5,6 +5,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 
 namespace genshinbot
 {
@@ -12,6 +13,52 @@ namespace genshinbot
     {
         public static class Ext
         {
+            public static IObservable<U> ProcessAsync<T, U>(this IObservable<T> o,IPropagatorBlock<T,U> blk)
+            {
+                var blkIn = blk.AsObserver();
+                IDisposable d = null;
+                //TODO sketchy way of doing stuff
+                return Observable.FromEvent<U>(
+                    addHandler: _ =>
+                    {
+                        Debug.Assert(d == null);
+                        d = o.Subscribe(blkIn);
+                    },
+                    removeHandler: _ =>
+                    {
+                        Debug.Assert(d != null);
+                        d.Dispose();
+                        d = null;
+                    }
+                ).Merge(blk.AsObservable());
+            }
+            /// <summary>
+            /// runs async processing upon a stream, 
+            /// </summary>
+            /// <typeparam name="T"></typeparam>
+            /// <typeparam name="U"></typeparam>
+            /// <param name="o"></param>
+            /// <param name="process"></param>
+            /// <returns></returns>
+            public static IObservable<U> ProcessAsync<T, U>(this IObservable<T> o, Func<T,Task<U>> process, int concurrentLimit=1)
+            {
+                var blk = new TransformBlock<T, U>(process, new ExecutionDataflowBlockOptions
+                {
+                    MaxDegreeOfParallelism = concurrentLimit,
+                    BoundedCapacity=1,
+                });
+                return o.ProcessAsync(blk);
+            }
+            public static IObservable<U> ProcessAsync<T, U>(this IObservable<T> o, Func<T, U> process, int concurrentLimit = 1)
+            {
+                var blk = new TransformBlock<T, U>(process, new ExecutionDataflowBlockOptions
+                {
+                    MaxDegreeOfParallelism = concurrentLimit,
+                    BoundedCapacity = 1,
+                });
+                return o.ProcessAsync(blk);
+            }
+
             public static IObservable<U> Is<T, U>(this IObservable<T> o, U obj) where U:class where T:class
             {
                 return o.Where(x => x ==obj ).Select(x=>x as U);

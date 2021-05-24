@@ -294,6 +294,10 @@ namespace genshinbot.controllers
                 onNext:x=>Console.WriteLine(x),
                 onError:x=>Console.WriteLine(x)
             ))
+            using(mgr.PlayingScreen.ArrowDirection.Subscribe(
+
+                onNext: x => Console.WriteLine(x)
+                ))
             {
                 Console.ReadLine();
             }

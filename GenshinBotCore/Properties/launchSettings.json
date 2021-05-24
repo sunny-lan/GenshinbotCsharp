@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "GenshinBotCore": {
+      "commandName": "Project",
+      "nativeDebugging": false
+    }
+  }
+}

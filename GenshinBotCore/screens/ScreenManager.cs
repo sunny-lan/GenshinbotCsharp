@@ -2,6 +2,7 @@
 using genshinbot.reactive;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -42,17 +43,17 @@ namespace genshinbot.screens
             MapScreen = new MapScreen(new ProxyBotIO(ActiveScreen.Select(s => s == MapScreen), io), this);
 
         }
-        public async Task ForceScreen(IScreen s)//TODO no async needed
+        public void ForceScreen(IScreen s)//TODO no async needed
         {
             screen.OnNext(s);
-            await ActiveScreen.TakeUntil(x => x == s);
+            Debug.Assert(ActiveScreen.Value == s);
         }
         public async Task ExpectScreen(IScreen s, int timeout = 2000)
         {
             //TODO stuff
-            await ForceScreen(null);
+             ForceScreen(null);
             await Task.Delay(timeout);
-            await ForceScreen(s);
+             ForceScreen(s);
         }
 
 

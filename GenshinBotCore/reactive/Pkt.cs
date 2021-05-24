@@ -8,10 +8,13 @@ using System.Threading.Tasks;
 namespace genshinbot.reactive
 {
     /// <summary>
-    /// Utility class to represent datapoints figured out by bot
+    /// Utility class to wrap data passed through reactive streams.
+    /// Provides features such as:
+    ///  - Timestamp
+    ///  - Lock/refcount?
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public record Pkt<T>
+    public class Pkt<T>
     {
         public T Value { get; init; }
 

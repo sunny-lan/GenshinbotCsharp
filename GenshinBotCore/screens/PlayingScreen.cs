@@ -93,7 +93,7 @@ namespace genshinbot.screens
 
             algorithm.MinimapMatch.PositionTracker posTrack = null;
 
-            return Minimap.Select(x =>
+            return Minimap.ProcessAsync(x =>
             {
             begin:
                 Point2d res;
@@ -137,7 +137,7 @@ namespace genshinbot.screens
                 .RectAround(new Size(db.ArrowRadius * 2, db.ArrowRadius * 2))
             )).Depacket();//TODO
             //TODO handle errors+offload to separate thread!
-            ArrowDirection = Arrow.Select(arrow => arrowDirectionAlg.GetAngle(arrow));
+            ArrowDirection = Arrow.ProcessAsync(arrow => arrowDirectionAlg.GetAngle(arrow));
 
         }
 
