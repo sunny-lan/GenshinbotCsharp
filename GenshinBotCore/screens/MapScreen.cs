@@ -20,10 +20,7 @@ using genshinbot.reactive;
 namespace genshinbot.screens
 {
 
-    using LocationResult = OneOf<
-        algorithm.MapLocationMatch.Result,
-        algorithm.MapLocationMatch.NoSolutionException>;
-    public class MapScreen
+    public class MapScreen:IScreen
     {
         public class Db
         {
@@ -51,51 +48,43 @@ namespace genshinbot.screens
 
         private Db db = new Db();
 
-        private BotIO b;
 
         algorithm.MapLocationMatch locationMatch;
         algorithm.MapTemplateMatch templateMatch;
 
         public IObservable<Mat> Screen { get; private init; }
         public IObservable<List<algorithm.MapTemplateMatch.Result>> Features { get; private init; }
-        public IObservable<LocationResult> Location { get; private init; }
+        public IObservable<algorithm.MapLocationMatch.Result> Screen2Coord { get; private init; }
 
-        public MapScreen(BotIO b)
+
+        public MapScreen(BotIO b, ScreenManager screenManager):base(b,screenManager)
         {
-            this.b = b;
 
             locationMatch = new algorithm.MapLocationMatch(Data.MapDb.Features);
             templateMatch = new algorithm.MapTemplateMatch();
 
             Screen = b.W.Screen.Watch(b.W.Bounds).Depacket();//TODO
             Features = Screen.Select(map => templateMatch.FindTeleporters(map).ToList());
-            Location = Observable.CombineLatest(Features, b.W.Size, (features, size) =>
+            Screen2Coord = Observable.CombineLatest(Features, b.W.Size, (features, size) =>
             {
-                LocationResult res;
                 try
                 {
-                    res = locationMatch.FindLocation2(features, size, ExpectUnknown);
+                    return locationMatch.FindLocation2(features, size, ExpectUnknown);
                 }
                 catch (algorithm.MapLocationMatch.NoSolutionException e)
                 {
-                    res = e;
+                    //TODO
+                    return null;
                 }
-                return res;
-            });
+            }).NonNull();
+
 
         }
 
         public async Task Close()
         {
-            await b.K.KeyPress(Keys.Escape);
-            await Task.Delay(2000);//TODO
-            //switch screen
-        }
-
-        public void AddFeature(Feature f)
-        {
-            Data.MapDb.Features.Add(f);
-            locationMatch.AddFeature(f);
+            await Io.K.KeyPress(Keys.Escape);
+            await ScreenManager.ExpectScreen(ScreenManager.PlayingScreen);
         }
 
 
@@ -184,11 +173,8 @@ namespace genshinbot.screens
         public static void Test2(ITestingRig rig1)
         {
             var rig = rig1.Make();
-            var screen = new MapScreen(rig);
-            using (screen.Location.Subscribe(x =>x.Switch(
-                result=>Console.WriteLine($"t={result.Translation} s={result.Scale}"),
-                error=>Console.WriteLine($"err={error}")
-            )))
+            var screen = new MapScreen(rig,null);
+            using (screen.Screen2Coord.Subscribe(x => Console.WriteLine($"t={x.Translation} s={x.Scale}")))
             {
                 Console.ReadLine();
             }

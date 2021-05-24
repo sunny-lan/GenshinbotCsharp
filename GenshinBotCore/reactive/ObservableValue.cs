@@ -40,6 +40,7 @@ namespace genshinbot
             public ObservableValue(IObservable<T> wrapped, T init)
             {
                 this.wrapped = wrapped.Do(v => Value = v);
+                wrapped.Subscribe();//TODO
                 Value = init;
             }
 

@@ -106,7 +106,7 @@ namespace genshinbot
             Debug.Assert(screensInit);
 
 
-            LocationManager = new controllers.LocationManager(this);
+            //TODO LocationManager = new controllers.LocationManager(this);
             Console.WriteLine("Controllers initialized");
         }
 

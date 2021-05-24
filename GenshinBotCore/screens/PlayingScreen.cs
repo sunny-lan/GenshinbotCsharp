@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace genshinbot.screens
 {
-    public class PlayingScreen
+    public class PlayingScreen:IScreen
     {
         public class Db
         {
@@ -57,7 +58,6 @@ namespace genshinbot.screens
             public CharacterFilter CharFilter { get; set; } = new CharacterFilter();
         }
 
-        private BotIO b;
         private Lazy<Db> _db = new Lazy<Db>(
             () => Data.ReadJson("screens/PlayingScreen.json", new Db()));
         public Db db => _db.Value;
@@ -66,9 +66,70 @@ namespace genshinbot.screens
         public IObservable<Mat> Arrow { get; private init; }
         public IObservable<double> ArrowDirection { get; private init; }
 
-        public PlayingScreen(BotIO b)
+        public IObservable<Point2d> MinimapPos { get; private init; }
+
+        /*public enum TrackStatus
         {
-            this.b = b;
+            None,
+            Tracking
+        }
+        public IObservable<TrackStatus> MinimapTrackStatus=>trackStatus;
+        private BehaviorSubject<TrackStatus> trackStatus=new BehaviorSubject<TrackStatus>(TrackStatus.None);*/
+
+        class MinimapMatchSettingsAdapter : algorithm.MinimapMatch.Settings
+        {
+            public override Mat BigMap { get => Data.MapDb.BigMap.Load(); set => throw new NotImplementedException(); }
+        }
+
+        algorithm.MinimapMatch.ScaleMatcher scaleMatcher = new algorithm.MinimapMatch.ScaleMatcher(new MinimapMatchSettingsAdapter());
+
+        /// <summary>
+        /// the observable will end once the current approxPos is invalid
+        /// </summary>
+        /// <param name="approxPos"></param>
+        /// <returns></returns>
+        public IObservable<Point2d> TrackPos(Point2d approxPos)
+        {
+
+            algorithm.MinimapMatch.PositionTracker posTrack = null;
+
+            return Minimap.Select(x =>
+            {
+            begin:
+                Point2d res;
+                if (posTrack == null)
+                {
+                    //scale not known yet
+                    
+                    var res1 = scaleMatcher.FindScale(approxPos, x, out var posMatch);
+                    if (res1 is Point2d r1)
+                    {
+                        res = r1;
+                        posTrack = new algorithm.MinimapMatch.PositionTracker(posMatch);
+                    }
+                    else
+                        throw new Exception("Failed to find valid scale");
+                }
+
+                var res2 = posTrack.Track(x);
+                if (res2 is Point2d newApprox)
+                {
+                    res = newApprox;
+                }
+                else
+                {
+                    //unable to find position, check scale again
+                    posTrack = null;
+                    goto begin;
+                }
+
+                approxPos = res;
+                return res;
+            });
+        }
+
+        public PlayingScreen(BotIO b, ScreenManager screenManager) :base(b, screenManager)
+        {
             rd = b.W.Size.Select(sz => db.R[sz]);
             Minimap = b.W.Screen.Watch(rd.Select(r => r.MinimapLoc)).Depacket();//TODO
             Arrow = b.W.Screen.Watch(rd.Select(r => 
@@ -77,13 +138,14 @@ namespace genshinbot.screens
             )).Depacket();//TODO
             //TODO handle errors+offload to separate thread!
             ArrowDirection = Arrow.Select(arrow => arrowDirectionAlg.GetAngle(arrow));
+
         }
 
 
         public async Task OpenMap()
         {
-            await b.K.KeyPress(Keys.M);
-            await Task.Delay(2000);//TODO
+            await Io.K.KeyPress(Keys.M);
+            await ScreenManager.ExpectScreen(ScreenManager.MapScreen);
         }
 
 
@@ -94,7 +156,7 @@ namespace genshinbot.screens
         public static void test(ITestingRig rig)
         {
             BotIO b = rig.Make();
-            var p = new PlayingScreen(b);
+            var p = new PlayingScreen(b,null);
             using (p.ArrowDirection.Subscribe(
                 onNext: x => Console.WriteLine($"angle={x}")
             ))

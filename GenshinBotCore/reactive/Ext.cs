@@ -12,7 +12,22 @@ namespace genshinbot
     {
         public static class Ext
         {
-            
+            public static IObservable<U> Is<T, U>(this IObservable<T> o, U obj) where U:class where T:class
+            {
+                return o.Where(x => x ==obj ).Select(x=>x as U);
+            }
+            public static IObservable<T> NonNull<T>(this IObservable<T> o) where T : class
+            {
+                return o.Where(x => x != null);
+            }
+            public static IObservable<T> NonNull<T>(this IObservable<T?> o)where T : struct
+            {
+                return o.Where(x => x != null).Expect("should never be null");
+            }
+            public static IObservable<T> Expect<T>(this IObservable<T?> o, string msg="") where T : struct
+            {
+                return o.Select(x => x.Expect(msg));
+            }
             /// <summary>
             /// Creates a new observable which is only subscribed to this when control=true
             /// Events sent before a signal on control will be ignored
