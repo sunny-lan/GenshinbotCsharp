@@ -1,8 +1,8 @@
 ﻿using genshinbot.automation;
 using genshinbot.automation.input;
 using genshinbot.data;
+using genshinbot.diag;
 using genshinbot.reactive;
-using genshinbot.util;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;

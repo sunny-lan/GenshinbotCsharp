@@ -1,5 +1,6 @@
 ﻿using genshinbot.automation;
 using genshinbot.automation.windows;
+using genshinbot.diag;
 using System;
 using System.Collections.Generic;
 using System.Linq;

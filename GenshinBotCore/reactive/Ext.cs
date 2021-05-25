@@ -13,25 +13,6 @@ namespace genshinbot
     {
         public static class Ext
         {
-            public static IObservable<U> ProcessAsync<T, U>(this IObservable<T> o,IPropagatorBlock<T,U> blk)
-            {
-                var blkIn = blk.AsObserver();
-                IDisposable d = null;
-                //TODO sketchy way of doing stuff
-                return Observable.FromEvent<U>(
-                    addHandler: _ =>
-                    {
-                        Debug.Assert(d == null);
-                        d = o.Subscribe(blkIn);
-                    },
-                    removeHandler: _ =>
-                    {
-                        Debug.Assert(d != null);
-                        d.Dispose();
-                        d = null;
-                    }
-                ).Merge(blk.AsObservable());
-            }
             /// <summary>
             /// runs async processing upon a stream, 
             /// </summary>
@@ -40,38 +21,30 @@ namespace genshinbot
             /// <param name="o"></param>
             /// <param name="process"></param>
             /// <returns></returns>
-            public static IObservable<U> ProcessAsync<T, U>(this IObservable<T> o, Func<T,Task<U>> process, int concurrentLimit=1)
+            public static IObservable<U> ProcessAsync<T, U>(this IObservable<T> o, Func<T, Task<U>> process, int concurrentLimit = 1)
             {
-                var blk = new TransformBlock<T, U>(process, new ExecutionDataflowBlockOptions
-                {
-                    MaxDegreeOfParallelism = concurrentLimit,
-                    BoundedCapacity=1,
-                });
-                return o.ProcessAsync(blk);
+                return o
+                    .Select(x => Observable.FromAsync(() => process(x)))
+                    .Merge(concurrentLimit);
             }
             public static IObservable<U> ProcessAsync<T, U>(this IObservable<T> o, Func<T, U> process, int concurrentLimit = 1)
             {
-                var blk = new TransformBlock<T, U>(process, new ExecutionDataflowBlockOptions
-                {
-                    MaxDegreeOfParallelism = concurrentLimit,
-                    BoundedCapacity = 1,
-                });
-                return o.ProcessAsync(blk);
+                return o.ProcessAsync(t => Task.Run(() => process(t)), concurrentLimit);
             }
 
-            public static IObservable<U> Is<T, U>(this IObservable<T> o, U obj) where U:class where T:class
+            public static IObservable<U> Is<T, U>(this IObservable<T> o, U obj) where U : class where T : class
             {
-                return o.Where(x => x ==obj ).Select(x=>x as U);
+                return o.Where(x => x == obj).Select(x => x as U);
             }
             public static IObservable<T> NonNull<T>(this IObservable<T> o) where T : class
             {
                 return o.Where(x => x != null);
             }
-            public static IObservable<T> NonNull<T>(this IObservable<T?> o)where T : struct
+            public static IObservable<T> NonNull<T>(this IObservable<T?> o) where T : struct
             {
                 return o.Where(x => x != null).Expect("should never be null");
             }
-            public static IObservable<T> Expect<T>(this IObservable<T?> o, string msg="") where T : struct
+            public static IObservable<T> Expect<T>(this IObservable<T?> o, string msg = "") where T : struct
             {
                 return o.Select(x => x.Expect(msg));
             }
@@ -153,16 +126,9 @@ namespace genshinbot
                 }
             }
 
-            public static Task<T> Get<T>(this IObservable<T> o)
+            public static async Task<T> Get<T>(this IObservable<T> o)
             {
-                TaskCompletionSource<T> taskCompletionSource = new TaskCompletionSource<T>();
-                IDisposable thing = o.Subscribe(
-                    onNext: taskCompletionSource.SetResult,
-                    onCompleted: taskCompletionSource.SetCanceled,
-                    onError: taskCompletionSource.SetException
-                );
-                taskCompletionSource.Task.ContinueWith(t => thing.Dispose());
-                return taskCompletionSource.Task;
+                return await o.Take(1);
             }
 
             public static IObservableValue<Ret> CalculateFrom<Ret, Param1, Param2>(

@@ -1,4 +1,4 @@
-﻿namespace genshinbot.util
+﻿namespace genshinbot.diag
 {
     public interface ITestingRig
     {

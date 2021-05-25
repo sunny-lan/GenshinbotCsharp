@@ -12,7 +12,7 @@ using System.Diagnostics;
 using System.Reactive.Subjects;
 using System.Reactive.Linq;
 using genshinbot.reactive;
-using genshinbot.util;
+using genshinbot.diag;
 
 namespace genshinbot.controllers
 {
@@ -20,7 +20,6 @@ namespace genshinbot.controllers
     {
         private ScreenManager screens;
 
-        IObservable<algorithm.MapLocationMatch.Result> PosFromMap;
 
         public LocationManager(ScreenManager s)
         {
@@ -301,6 +300,17 @@ namespace genshinbot.controllers
             {
                 Console.ReadLine();
             }
+        }
+
+        public static async Task testAsync3()
+        {
+            var gw = new MockGenshinWindow(new Size(1680, 1050));
+            gw.MapScreen.Image = Data.Imread("test/map_luhua_1050.png");
+            gw.PlayingScreen.Image = Data.Imread("test/playing_luhua_1050.png");
+            gw.CurrentScreen = gw.PlayingScreen;
+
+            var rig1 = new MockTestingRig(gw);
+            await testAsync(rig1);
         }
     }
 }

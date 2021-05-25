@@ -12,15 +12,15 @@ using System.Diagnostics;
 using genshinbot.data;
 using genshinbot.automation.input;
 using System.Reactive.Linq;
-using genshinbot.util;
 using System.Reactive;
 using OneOf;
 using genshinbot.reactive;
+using genshinbot.diag;
 
 namespace genshinbot.screens
 {
 
-    public class MapScreen:IScreen
+    public class MapScreen : IScreen
     {
         public class Db
         {
@@ -57,7 +57,7 @@ namespace genshinbot.screens
         public IObservable<algorithm.MapLocationMatch.Result> Screen2Coord { get; private init; }
 
 
-        public MapScreen(BotIO b, ScreenManager screenManager):base(b,screenManager)
+        public MapScreen(BotIO b, ScreenManager screenManager) : base(b, screenManager)
         {
 
             locationMatch = new algorithm.MapLocationMatch(Data.MapDb.Features);
@@ -66,15 +66,14 @@ namespace genshinbot.screens
             Screen = b.W.Screen.Watch(b.W.Bounds).Depacket();//TODO
             Features = Screen.ProcessAsync(map =>
             {
-
-                Console.WriteLine("begin find teleporter");
-                return templateMatch.FindTeleporters(map).ToList();
+                var k = templateMatch.FindTeleporters(map).ToList();
+                Debug.Assert(k.Count > 0);//TODO
+                return k;
             });
             Screen2Coord = Observable
-                .CombineLatest(Features, b.W.Size, (features, size) =>(features,size))
+                .CombineLatest(Features, b.W.Size, (features, size) => (features, size))
                 .ProcessAsync(x =>
                 {
-                    Console.WriteLine("begin find loc");
                     var (features, size) = x;
                     try
                     {
@@ -82,7 +81,7 @@ namespace genshinbot.screens
                     }
                     catch (algorithm.MapLocationMatch.NoSolutionException e)
                     {
-                        //TODO
+                        Debug.Assert(false);//TODO
                         return null;
                     }
                 })
@@ -180,15 +179,30 @@ namespace genshinbot.screens
 
               }
           }*/
-        public static void Test2(ITestingRig rig1)
+        public static async Task Test2Async(ITestingRig rig1)
         {
             var rig = rig1.Make();
-            var screen = new MapScreen(rig,null);
+            var screen = new MapScreen(rig, null);
+            Console.WriteLine("await get before");
+            var loc = await screen.Screen2Coord.Get();
+            Console.WriteLine("await get after");
+            Console.ReadLine();
             using (screen.Screen2Coord.Subscribe(x => Console.WriteLine($"t={x.Translation} s={x.Scale}")))
             {
                 Console.ReadLine();
             }
-        }
 
+        }
+        public static async Task Test3Async()
+        {
+            var gw = new MockGenshinWindow(new Size(1680, 1050));
+            gw.MapScreen.Image = Data.Imread("test/map_luhua_1050.png");
+            gw.PlayingScreen.Image = Data.Imread("test/playing_luhua_1050.png");
+            gw.CurrentScreen = gw.MapScreen;
+
+
+            var rig1 = new MockTestingRig(gw);
+            await Test2Async(rig1);
+        }
     }
 }

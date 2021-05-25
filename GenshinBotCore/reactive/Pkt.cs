@@ -69,5 +69,16 @@ namespace genshinbot.reactive
         {
             return observable.Select((Pkt<In> x) => x.Value);
         }
+
+        /// <summary>
+        /// Wraps stream in Pkt, at current time
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="observable"></param>
+        /// <returns></returns>
+        public static IObservable<Pkt<T>> Packetize<T>(this IObservable<T> observable)
+        {
+            return observable.Select(x=>new Pkt<T>(x));
+        }
     }
 }
