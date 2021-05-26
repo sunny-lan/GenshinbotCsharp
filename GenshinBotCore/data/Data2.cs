@@ -13,8 +13,8 @@ namespace genshinbot.data
                  () => ReadJson("map/db.json", map.MapDb.Default()));
         public static map.MapDb MapDb => mapDb.Value;
 
-        private static Lazy<ClickDb> clickDb = new Lazy<ClickDb>(
-                () => ReadJson1<ClickDb>("clickDb.json"));
-        public static ClickDb ClickDb=>clickDb.Value;
+        private static Lazy<GeneralDb> clickDb = new Lazy<GeneralDb>(
+                () => ReadJson1<GeneralDb>("clickDb.json"));
+        public static GeneralDb ClickDb=>clickDb.Value;
     }
 }
