@@ -52,9 +52,10 @@ namespace genshinbot
             //   automation.windows.WindowAutomator2.Test3();
             //screens.PlayingScreen.test();
             //screens.MapScreen.Test2(rig);
-            await controllers.LocationManager.testAsync(rig);
-           // await controllers.LocationManager.testAsync3();
+            //await controllers.LocationManager.testAsync(rig);
+            // await controllers.LocationManager.testAsync3();
             //await screens.MapScreen.Test3Async();
+            automation.windows.WindowAutomator2.Test4();
             Console.WriteLine("Program ended. Press enter to exit");
             Console.ReadLine();
             CvThread.Stop();

@@ -63,7 +63,9 @@ namespace genshinbot.data
                 return def;
             return JsonSerializer.Deserialize<T>(Read(name), options);
         }
-
+        public static T ReadJson1<T>(string name)where T:new(){
+            return ReadJson(name, new T());
+        }
         public static T ReadJson<T>(string name)
         {
 

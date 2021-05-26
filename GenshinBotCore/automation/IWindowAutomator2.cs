@@ -41,5 +41,8 @@ namespace genshinbot.automation
         input.IMouseSimulator2 Mouse { get; }
         screenshot.ScreenshotObservable Screen { get; }
 
+        hooking.IMouseCapture MouseCap { get; }
+        hooking.IKeyCapture KeyCap { get; }
+
     }
 }

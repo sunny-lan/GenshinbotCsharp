@@ -17,7 +17,7 @@ namespace genshinbot.hooks
     /// Provides a base implementation with a message loop for all hooking classes
     /// </summary>
     /// <typeparam name="T">The event type returned by the hook</typeparam>
-    abstract class HookBase<T> :IObservable<T>
+    public abstract class HookBase<T> :IObservable<T>
     {
         protected uint ThreadID { get; private set; }
 
@@ -111,7 +111,7 @@ namespace genshinbot.hooks
     /// Provides a base implementation for all hooks using SetWindowsHookEx
     /// </summary>
     /// <typeparam name="T">Type of event returned by the hook</typeparam>
-    abstract class WindowsHookEx<T> : HookBase<T> 
+    public abstract class WindowsHookEx<T> : HookBase<T> 
     {
 
         private User32.SafeHHOOK hookID;
@@ -173,7 +173,7 @@ namespace genshinbot.hooks
     /// Implements boilerplate code for all SetWindowsHookEx
     /// </summary>
     /// <typeparam name="T">Type of events returned</typeparam>
-    abstract class BasicWindowsHookEx<T>:WindowsHookEx<T>
+   public abstract class BasicWindowsHookEx<T>:WindowsHookEx<(IntPtr wParam,T lParam)> 
     {
         protected BasicWindowsHookEx(User32.HookType hooktype) : base(hooktype)
         {
@@ -182,7 +182,9 @@ namespace genshinbot.hooks
 
         protected override void HookProc(IntPtr wParam, IntPtr lParam)
         {
-            signal(Marshal.PtrToStructure<T>(lParam));
+            signal((wParam,Marshal.PtrToStructure<T>(lParam)));
         }
     }
+
+    
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using genshinbot.automation.hooking;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -8,9 +9,9 @@ using Vanara.PInvoke;
 
 namespace genshinbot.hooks
 {
-    public class KbdHooker : BasicWindowsHookEx<User32.KBDLLHOOKSTRUCT>
+    public class MouseHook: BasicWindowsHookEx<User32.MOUSEHOOKSTRUCT>
     {
-        public KbdHooker() : base(User32.HookType.WH_KEYBOARD_LL) { }
+        public MouseHook() : base(User32.HookType.WH_MOUSE_LL) { }
 
     }
 }

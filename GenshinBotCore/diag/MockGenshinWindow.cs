@@ -1,4 +1,5 @@
 ﻿using genshinbot.automation;
+using genshinbot.automation.hooking;
 using genshinbot.automation.input;
 using genshinbot.automation.screenshot;
 using OpenCvSharp;
@@ -85,6 +86,11 @@ namespace genshinbot.diag
             focused.OnNext(b);
         }
         public IObservable<bool> Focused => focused;
+
+        public IMouseCapture MouseCap => throw new NotImplementedException();
+
+        public IKeyCapture KeyCap => throw new NotImplementedException();
+
         private BehaviorSubject<bool> focused = new BehaviorSubject<bool>(true);
 
         public void TryFocus()

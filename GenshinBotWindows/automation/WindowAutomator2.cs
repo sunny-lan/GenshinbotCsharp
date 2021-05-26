@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using genshinbot.automation.screenshot.gdi;
 using genshinbot.diag;
+using genshinbot.automation.hooking;
 
 namespace genshinbot.automation.windows
 {
@@ -113,6 +114,8 @@ namespace genshinbot.automation.windows
 
             Screen = new ScreenshotAdapter(this);
             iS = new InputSim(this);
+            mouseCap = new Lazy<MouseHookAdapter>(() => new MouseHookAdapter(Focused));
+            keyCap = new Lazy<KbdHookAdapter>(() => new KbdHookAdapter(Focused));
 
         }
 
@@ -310,6 +313,12 @@ namespace genshinbot.automation.windows
         }
 
         public ScreenshotObservable Screen { get; private init; }
+
+        public IMouseCapture MouseCap => mouseCap.Value;
+        private Lazy<MouseHookAdapter> mouseCap;
+        public IKeyCapture KeyCap => keyCap.Value;
+        private Lazy<KbdHookAdapter> keyCap;
+
         class ScreenshotAdapter : ScreenshotObservable
         {
             WindowAutomator2 parent;
@@ -324,10 +333,10 @@ namespace genshinbot.automation.windows
             public IObservable<Pkt<Mat>> Watch(Rect r)
             {
                 var mappedRectStream = parent.clientAreaFocused
-                    .Select(_ =>DPIAware.Use(DPIAware.DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE, () =>
-                    {
-                        return new Rect(parent.clientToScreen(r.TopLeft), r.Size);
-                    }));
+                    .Select(_ => DPIAware.Use(DPIAware.DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE, () =>
+                     {
+                         return new Rect(parent.clientToScreen(r.TopLeft), r.Size);
+                     }));
                 return gdi.Watch(mappedRectStream);
             }
         }
@@ -410,6 +419,26 @@ namespace genshinbot.automation.windows
             {
                 CvThread.ImShow("m", m.Value);
             }))
+            {
+                Console.ReadLine();
+            }
+        }
+
+        public static void Test4()
+        {
+            IWindowAutomator2 w = new WindowAutomator2("*Untitled - Notepad", null);
+            using (w.MouseCap.MouseEvents.Subscribe(x =>
+                 Console.WriteLine(x.Position)
+                ))
+            using (w.KeyCap.KeyEvents.Subscribe(
+                x => Console.WriteLine($"{x.Key} {x.Down}")
+                ))
+            using (w.KeyCap.KbdState.KeyCombo(new input.Keys[] {
+                input.Keys.LControlKey,
+                input.Keys.B,
+            }).Subscribe(
+                x => Console.WriteLine($"key combo")
+                ))
             {
                 Console.ReadLine();
             }

@@ -10,7 +10,11 @@ namespace genshinbot.data
     static partial class Data
     {
         private static Lazy<map.MapDb> mapDb = new Lazy<map.MapDb>(
-                 () => Data.ReadJson("map/db.json", map.MapDb.Default()));
+                 () => ReadJson("map/db.json", map.MapDb.Default()));
         public static map.MapDb MapDb => mapDb.Value;
+
+        private static Lazy<ClickDb> clickDb = new Lazy<ClickDb>(
+                () => ReadJson1<ClickDb>("clickDb.json"));
+        public static ClickDb ClickDb=>clickDb.Value;
     }
 }

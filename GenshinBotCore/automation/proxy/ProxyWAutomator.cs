@@ -1,4 +1,5 @@
-﻿using genshinbot.automation.input;
+﻿using genshinbot.automation.hooking;
+using genshinbot.automation.input;
 using genshinbot.automation.screenshot;
 using genshinbot.reactive;
 using OpenCvSharp;
@@ -22,6 +23,10 @@ namespace genshinbot.automation
         public IMouseSimulator2 Mouse { get; private init; }
 
         public ScreenshotObservable Screen { get; private init; }
+
+        public IMouseCapture MouseCap => throw new NotImplementedException();
+
+        public IKeyCapture KeyCap => throw new NotImplementedException();
 
         public ProxyWAutomator(IObservableValue<bool> enabled, IWindowAutomator2 w)
         {
