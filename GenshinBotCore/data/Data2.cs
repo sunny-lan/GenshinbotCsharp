@@ -13,8 +13,14 @@ namespace genshinbot.data
                  () => ReadJson("map/db.json", map.MapDb.Default()));
         public static map.MapDb MapDb => mapDb.Value;
 
-        private static Lazy<GeneralDb> clickDb = new Lazy<GeneralDb>(
-                () => ReadJson1<GeneralDb>("clickDb.json"));
-        public static GeneralDb ClickDb=>clickDb.Value;
+        private static Lazy<GeneralDb> general = new Lazy<GeneralDb>(
+                () => ReadJson1<GeneralDb>("generaldb.json"));
+        public static GeneralDb General=>general.Value;
+
+        //TODO
+        public static async System.Threading.Tasks.Task SaveGeneralAsync()
+        {
+            await WriteJsonAsync("generaldb.json",General);
+        }
     }
 }

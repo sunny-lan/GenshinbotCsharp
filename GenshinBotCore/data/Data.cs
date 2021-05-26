@@ -57,6 +57,16 @@ namespace genshinbot.data
             File.WriteAllText(path, value);
         }
 
+        public static async Task WriteAsync(string name, string value, bool createDirs = true)
+        {
+            var path = Get(name);
+            if (createDirs)
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+            }
+            await File.WriteAllTextAsync(path, value);
+        }
+
         public static T ReadJson<T>(string name, T def)
         {
             if (!Exists(name))
@@ -74,6 +84,10 @@ namespace genshinbot.data
         public static void WriteJson<T>(string name, T data)
         {
             Write(name, JsonSerializer.Serialize(data, options));
+        }
+        public static async Task WriteJsonAsync<T>(string name, T data)
+        {
+            await WriteAsync(name, JsonSerializer.Serialize(data, options));
         }
 
         public static Mat Imread(string name, ImreadModes mode = ImreadModes.Color)

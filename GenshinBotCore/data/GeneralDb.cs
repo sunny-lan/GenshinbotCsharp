@@ -13,7 +13,7 @@ namespace genshinbot.data
         {
             public class Node
             {
-                public Dictionary<Size2d, Point2d> Points { get; set; } = new Dictionary<Size2d, Point2d>();
+                public Dictionary<Size, Point2d> Points { get; set; } = new Dictionary<Size, Point2d>();
             }
 
             public Dictionary<string, Node> Nodes { get; set; } = new Dictionary<string, Node>();
@@ -37,7 +37,7 @@ namespace genshinbot.data
             public Node Find(string[] path, bool createMissing=false)
             {
                 var v = FindFolder(path[..^1],createMissing)?.Nodes;
-                if (v==null || v.ContainsKey(path[^1]))
+                if (v==null || !v.ContainsKey(path[^1]))
                 {
                     if (createMissing)
                         v[path[^1]] = new Node();
@@ -55,7 +55,7 @@ namespace genshinbot.data
             {
                 FindFolder(path[..^1], createMissing).Nodes.Add(path[^1], g);
             }
-            public void Add(string[] path, Size2d s,Point2d d, bool createMissing = true)
+            public void Add(string[] path, Size s,Point2d d, bool createMissing = true)
             {
                 Find(path, createMissing).Points[s] = d;
             }
@@ -64,8 +64,9 @@ namespace genshinbot.data
             public Node Find(string path) => Find(path.Split('.'));
             public void Add(string path, Folder f, bool createMissing = true) => Add(path.Split('.'), f, createMissing);
             public void Add(string path, Node g, bool createMissing = true) => Add(path.Split('.'), g, createMissing);
-            public void Add(string path, Size2d s, Point2d d, bool createMissing = true) => Add(path.Split('.'), s, d, createMissing);
+            public void Add(string path, Size s, Point2d d, bool createMissing = true) => Add(path.Split('.'), s, d, createMissing);
         }
+        public Folder Root { get; set; } = new Folder();
     }
 
 }
