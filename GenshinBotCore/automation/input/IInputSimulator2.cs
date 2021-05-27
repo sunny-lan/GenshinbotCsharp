@@ -32,7 +32,15 @@ namespace genshinbot.automation.input
             await MouseDown(btn);
             await MouseUp(btn);
         }
-
+        async Task MouseClick(MouseBtn btn, Point pos)
+        {
+            await MouseTo(pos);
+            await MouseClick(btn);
+        }
+        async Task LeftClick(Point pos)
+        {
+            await MouseClick(MouseBtn.Left, pos);
+        }
         Task MouseButton(MouseBtn btn, bool down);
     }
 

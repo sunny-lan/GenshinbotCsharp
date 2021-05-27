@@ -6,6 +6,7 @@ using genshinbot.data;
 using genshinbot.diag;
 using genshinbot.util;
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Vanara.PInvoke;
@@ -20,9 +21,13 @@ namespace genshinbot
         [STAThread]
         static async Task Main(string[] args)
         {
+
             DPIAware.Set(SHCore.PROCESS_DPI_AWARENESS.PROCESS_PER_MONITOR_DPI_AWARE);
             //TaskExceptionCatcher.Do ();
             Kernel32.AllocConsole();
+
+
+
             var rig = new TestingRig();
             //   Screenshot.Init();
             //TestMapLive();
@@ -59,8 +64,9 @@ namespace genshinbot
             //await screens.MapScreen.Test3Async();
             // automation.windows.WindowAutomator2.Test4();
             //Console.WriteLine(Data.General.Root.Find("derpity.derp").Points.Keys);
-           //await tools.ScreencoordRecorder.runAsync(new WindowAutomator2("*Untitled - Notepad", null));
-            //await tools.ScreencoordRecorder.runAsync(rig.Make().W);
+            //await tools.ScreencoordRecorder.runAsync(new WindowAutomator2("*Untitled - Notepad", null));
+            // await tools.ScreencoordRecorder.runAsync(rig.Make().W);
+            await tools.DailyDoer.runAsync(rig.Make());
             Console.WriteLine("Program ended. Press enter to exit");
             Console.ReadLine();
             CvThread.Stop();

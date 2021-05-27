@@ -14,13 +14,25 @@ namespace genshinbot.tools
 {
    public static class ScreencoordRecorder
     {
+        class Db
+        {
+            class RD
+            {
+
+            }
+        }
         public static async Task runAsync(IWindowAutomator2 w)
         {
             Keys[] take = { Keys.LControlKey, Keys.J };
             Keys[] stop = { Keys.LControlKey, Keys.K };
             Keys[] save = { Keys.LControlKey, Keys.S };
             var kbd = w.KeyCap.KbdState;
-            while(true)
+
+            Console.Write("prefix? ");
+            var prefix= Console.ReadLine().Split('.');
+
+
+            while (true)
             {
                 var k =await await Task.WhenAny(
                    kbd.KeyCombo(take).Select(_=>take).Get(),
@@ -35,7 +47,7 @@ namespace genshinbot.tools
                     Console.Write("name? ");
                     var name = Console.ReadLine();
 
-                    Data.General.Root.Add(name, sz, pos, true);
+                    Data.General.Root.Add(prefix.Concat(name.Split('.')).ToArray(), sz, pos, true);
                     //var line= $"public static Point2d P{name} = new Point2d({pos.X},{pos.Y});\n";
                     //Console.Write(line);
                     //res += line;
