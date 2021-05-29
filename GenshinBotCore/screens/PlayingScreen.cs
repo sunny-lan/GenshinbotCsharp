@@ -63,8 +63,8 @@ namespace genshinbot.screens
         public Db db => _db.Value;
         private IObservable<Db.RD> rd;
         public IObservable<Mat> Minimap { get; private init; }
-        public IObservable<Mat> Arrow { get; private init; }
-        public IObservable<double> ArrowDirection { get; private init; }
+        public IObservable<Pkt<Mat>> Arrow { get; private init; }
+        public IObservable<Pkt<double>> ArrowDirection { get; private init; }
 
         public IObservable<Point2d> MinimapPos { get; private init; }
 
@@ -132,12 +132,12 @@ namespace genshinbot.screens
         {
             rd = b.W.Size.Select(sz => db.R[sz]);
             Minimap = b.W.Screen.Watch(rd.Select(r => r.MinimapLoc)).Depacket();//TODO
-            Arrow = b.W.Screen.Watch(rd.Select(r => 
+            Arrow = b.W.Screen.Watch(rd.Select(r =>
                 r.MinimapLoc.Center()
                 .RectAround(new Size(db.ArrowRadius * 2, db.ArrowRadius * 2))
-            )).Depacket();//TODO
+            ));
             //TODO handle errors+offload to separate thread!
-            ArrowDirection = Arrow.ProcessAsync(arrow => arrowDirectionAlg.GetAngle(arrow));
+            ArrowDirection = Arrow.Select(arrow => arrowDirectionAlg.GetAngle(arrow));
 
         }
 

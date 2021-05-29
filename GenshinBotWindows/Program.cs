@@ -9,6 +9,7 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using Vanara.PInvoke;
 
 namespace genshinbot
@@ -25,8 +26,13 @@ namespace genshinbot
             DPIAware.Set(SHCore.PROCESS_DPI_AWARENESS.PROCESS_PER_MONITOR_DPI_AWARE);
             //TaskExceptionCatcher.Do ();
             Kernel32.AllocConsole();
+            /*IntPtr handle = Process.GetCurrentProcess().MainWindowHandle;
 
-
+            User32.SetWindowLong(handle, User32.WindowLongFlags.GWL_EXSTYLE,
+              (IntPtr)((uint)User32.GetWindowLong(handle,User32.WindowLongFlags.GWL_EXSTYLE)
+              |(uint)User32.WindowStylesEx.WS_EX_NOACTIVATE |(uint)User32.WindowStylesEx.WS_EX_TOPMOST));
+            Console.ReadLine();
+            */
 
             var rig = new TestingRig();
             //   Screenshot.Init();
@@ -66,7 +72,10 @@ namespace genshinbot
             //Console.WriteLine(Data.General.Root.Find("derpity.derp").Points.Keys);
             //await tools.ScreencoordRecorder.runAsync(new WindowAutomator2("*Untitled - Notepad", null));
             // await tools.ScreencoordRecorder.runAsync(rig.Make().W);
-            await tools.DailyDoer.runAsync(rig.Make());
+          //// .Show();
+            Application.Run(new yui.windows.Overlay(rig));
+
+       //     await tools.DailyDoer.runAsync(rig.Make());
             Console.WriteLine("Program ended. Press enter to exit");
             Console.ReadLine();
             CvThread.Stop();

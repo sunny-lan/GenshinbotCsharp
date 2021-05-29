@@ -90,13 +90,16 @@ namespace genshinbot.automation.screenshot.gdi
             {
                 foreach (var region in pollRegions)
                 {
-                    if (!Gdi32.BitBlt(hTmpDC, region.X, region.Y, region.Width, region.Height, hDesktopDC,
-                        region.X, region.Y, Gdi32.RasterOperationMode.SRCCOPY
-                    ))
-                        Kernel32.GetLastError().ThrowIfFailed("failed performing BitBlt");
+                   
+                        Console.WriteLine($"capture {region}");
+                        if (!Gdi32.BitBlt(hTmpDC, region.X, region.Y, region.Width, region.Height, hDesktopDC,
+                            region.X, region.Y, Gdi32.RasterOperationMode.SRCCOPY
+                        ))
+                            Kernel32.GetLastError().ThrowIfFailed("failed performing BitBlt");
                 }
 
             }
+            Console.WriteLine("flush screenshot");
             if (!Gdi32.GdiFlush())
                 Kernel32.GetLastError().ThrowIfFailed("failed performing GdiFlush");
 
@@ -130,6 +133,7 @@ namespace genshinbot.automation.screenshot.gdi
         /// list of rects which are currently being watched
         /// </summary>
         ConcurrentDictionary<Rect, Unit> listeningRects = new ConcurrentDictionary<Rect, Unit>();
+        ConcurrentDictionary<Rect, Snap> lastSent = new ConcurrentDictionary<Rect, Snap>();
 
 
         /// <summary>
@@ -175,7 +179,7 @@ namespace genshinbot.automation.screenshot.gdi
                     RecalculateStrategy();
                 });
                 cache[r] = Observable.Merge(boundsCalcer,
-                    pollerEnable.Select(m => m[r])
+                    pollerEnable.Select(m =>  m[r])
                 );
 
             }

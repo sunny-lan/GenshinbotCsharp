@@ -178,7 +178,7 @@ namespace genshinbot.tools
             // await DispatchLiyue(w);
             //await CollectLiyue(w);
             //await DispatchMondstadt(w);
-            await GetCommissions(w);
+            //await GetCommissions(w);
             await DispatchCollect(w);
         }
     }

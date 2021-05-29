@@ -27,7 +27,6 @@ namespace genshinbot.algorithm
         private Mat v_thres = new Mat();
         Mat filtered = new Mat();
         public DbgMat Dbg { get; private set; } = new DbgMat();
-
         ~ArrowDirectionDetect()
         {
             s_thres.Dispose();
@@ -35,8 +34,11 @@ namespace genshinbot.algorithm
             filtered.Dispose();
         }
 
+        
         public double GetAngle(Mat img)
         {
+            Console.WriteLine("getangle begin");
+           
             Dbg.Image(img);
             Cv2.InRange(img, db.ArrowColor.Min, db.ArrowColor.Max, filtered);
 
@@ -83,14 +85,15 @@ namespace genshinbot.algorithm
                 }
             }
 
-            return angle.Expect("Angle unable to be found");
+            Console.WriteLine("getangle end");
+            return angle ?? 0;//.Expect("Angle unable to be found");
         }
 
         public static void Test()
         {
             var detect = new ArrowDirectionDetect();
             detect.Dbg.Show();
-            var img = Data.Imread("test/bad arrow.png");
+            var img = Data.Imread("test/arrow_fail.png");
             var angle = detect.GetAngle(img);
             Console.WriteLine(angle);
         }

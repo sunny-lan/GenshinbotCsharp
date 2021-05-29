@@ -30,7 +30,7 @@ namespace genshinbot.diag
         public DbgMat()
         {
             Name = genName();
-            thing = Observable.FromEvent<Mat>(x => OnDebugImg += x, x => OnDebugImg -= x).Replay(1);
+            thing = Observable.FromEvent<Mat>(x => OnDebugImg += x, x => OnDebugImg -= x).Replay(1).RefCount();
             Debug.Assert(all.Add(this), "this is impposeible to happen");
         }
         bool disposed = false;

@@ -20,6 +20,8 @@ namespace genshinbot.reactive
 
         public DateTime CaptureTime { get; init; }
 
+        public volatile int RefCount = 0;
+
         public Pkt(T value) : this(value, DateTime.Now) { }
 
         public Pkt(T value, DateTime time)
@@ -36,6 +38,12 @@ namespace genshinbot.reactive
 
     public static class PktObservableExtensions
     {
+        public static IObservable<Pkt<Out>> ProcessAsync<In, Out>(this IObservable<Pkt<In>> observable, Func<In, Out> fn)
+        {
+            return observable.ProcessAsync(x => x.Select(fn));
+        }
+
+
         /// <summary>
         /// Performs transformation on stream of packets, keeping the CaptureTime of the packet the same
         /// </summary>
@@ -46,7 +54,7 @@ namespace genshinbot.reactive
         /// <returns></returns>
         public static IObservable<Pkt<Out>> Select<In, Out>(this IObservable<Pkt<In>> observable, Func<In, Out> fn)
         {
-            return observable.Select((Pkt<In> x) => new Pkt<Out>(fn(x.Value), x.CaptureTime));
+            return observable.Select((Pkt<In> x) => x.Select(fn));
         }
 
         /// <summary>
