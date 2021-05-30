@@ -28,15 +28,13 @@ namespace genshinbot.algorithm
         Mat s_thres = new Mat();
         private Mat v_thres = new Mat();
         Mat filtered = new Mat();
-        public DbgMat Dbg { get; private set; } = new DbgMat(true);
+        public DbgMat Dbg { get; private set; } = new DbgMat();
         ~ArrowDirectionDetect()
         {
             s_thres.Dispose();
             v_thres.Dispose();
             filtered.Dispose();
         }
-        Mat tmp = Mat.FromArray(1, 1, 1, 0).Transpose();
-        Mat sum = new Mat();
         Mat edges = new Mat();
         Mat tmp4 = new Mat();
         Mat img = new Mat();
@@ -46,8 +44,7 @@ namespace genshinbot.algorithm
         Mat tmp1 = new Mat();
         public double GetAngle(Mat img1)
         {
-            try
-            {
+            double? angle = null;
                 Console.WriteLine("getangle begin");
 
 
@@ -56,7 +53,6 @@ namespace genshinbot.algorithm
                 Cv2.Absdiff(img, bac, filtered);
                 Cv2.Multiply(filtered, filtered, filtered);
 
-                Cv2.Transform(filtered, sum, tmp);
                 Cv2.CvtColor(filtered, hsv, ColorConversionCodes.BGR2HSV);
 
                 //Mat sum1 = new Mat();
@@ -71,21 +67,23 @@ namespace genshinbot.algorithm
                 var cc1 = edges.ConnectedComponentsEx();
                 var center = img.Center().Round();
                 var lbl = cc1.Labels[center.X, center.Y];
-                cc1.RenderBlobs(tmp1);
+                //cc1.RenderBlobs(tmp1);
 
                 arrowMask.SetTo(Scalar.Black);
-                cc1.FilterByLabel(edges, arrowMask, lbl);
+                cc1.FilterByLabel(edges, arrowMask, lbl);//TODO increase efficiency using own impl
                 Cv2.BitwiseAnd(arrowMask, red, red);
-                Cv2.BitwiseAnd(tmp1, tmp1, tmp1, mask: arrowMask);
+                //Cv2.BitwiseAnd(tmp1, tmp1, tmp1, mask: arrowMask);
                 Cv2.Dilate(red, red,null);
 
                 //Cv2.AdaptiveThreshold(sum, edges, 255, AdaptiveThresholdTypes.MeanC, ThresholdTypes.BinaryInv, 3, 10);
                 //Cv2.InRange(img, db.ArrowColor.Min, db.ArrowColor.Max, filtered);
-                CvThread.ImShow("filtered", filtered);
+                /*CvThread.ImShow("filtered", filtered);
                 CvThread.ImShow("arrowMask", arrowMask);
                 CvThread.ImShow("red", red);
                 CvThread.ImShow("blobs", tmp1);
+                */
                 //TODO optimize by using Mat
+                //TODO some accuracy problems when there is blue on the head of the arrow
                 var contours1 = Cv2.FindContoursAsArray(arrowMask, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
                 var contours = contours1;
                 //var max = contours.Where(x => Cv2.PointPolygonTest(x, edges.Center().Round(), false) >= 0);
@@ -96,7 +94,7 @@ namespace genshinbot.algorithm
                 contour = Cv2.ApproxPolyDP(contour, db.Epsilon, true);
                 //contour = Cv2.ConvexHullIndices(contour).Select(idx => contour[idx]).ToArray();
 
-                Cv2.DrawContours(img, new Point[][] { contour }, 0, Scalar.Blue);
+               // Cv2.DrawContours(img, new Point[][] { contour }, 0, Scalar.Blue);
                 Dbg.Image(img);
                 var cc = Cv2.ConnectedComponentsEx(red);
                 var lst = cc.Blobs.Skip(1);
@@ -124,15 +122,14 @@ namespace genshinbot.algorithm
                 }
 
                 if (p is Point ppp)
+                {
                     Dbg.Circle(ppp, 2, Scalar.Red);
+                    angle = redCtr.AngleTo(ppp);
+                }
                 Dbg.Flush();
 
                 Console.WriteLine("getangle end");
-            }
-            catch(Exception e)
-            {
-            }
-            return 0;//.Expect("Angle unable to be found");
+            return angle??0;//.Expect("Angle unable to be found");
         }
 
         public static void Test()
