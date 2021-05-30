@@ -23,15 +23,18 @@ namespace genshinbot.diag
         public string Name;
         private Mat img = new Mat();
         private IObservable<Mat> thing;
+
         public IDisposable Show()
         {
             return this.Subscribe(x => CvThread.ImShow(Name, x));
         }
-        public DbgMat()
+        public DbgMat(bool dow=false)
         {
             Name = genName();
             thing = Observable.FromEvent<Mat>(x => OnDebugImg += x, x => OnDebugImg -= x).Replay(1).RefCount();
             Debug.Assert(all.Add(this), "this is impposeible to happen");
+            if (dow)
+                Show();
         }
         bool disposed = false;
         public void Dispose()

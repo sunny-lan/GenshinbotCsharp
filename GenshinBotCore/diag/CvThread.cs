@@ -13,7 +13,7 @@ namespace genshinbot.diag
         static bool running;
         static ConcurrentQueue<Action> run = new ConcurrentQueue<Action>();
         private static Task tsk;
-        static ConcurrentDictionary<string, Mat> updates = new ConcurrentDictionary<string, Mat>();
+        static Dictionary<string, Mat> updates = new Dictionary<string, Mat>();
 
         public static double MaxFps = 24;
 
@@ -23,11 +23,14 @@ namespace genshinbot.diag
             sw.Start();
             while (running)
             {
-                foreach (var entry in updates)
+                lock (updates)
                 {
-                    Cv2.ImShow(entry.Key, entry.Value);
+                    foreach (var entry in updates)
+                    {
+                        Cv2.ImShow(entry.Key, entry.Value);
+                    }
+                    updates.Clear();
                 }
-                updates.Clear();
 
                 while (!run.IsEmpty)
                 {
@@ -43,7 +46,8 @@ namespace genshinbot.diag
 
         public static void ImShow(string name, Mat m)
         {
-            updates[name] = m;
+            lock (updates)
+                updates[name] = m;
         }
 
         public static void Invoke(Action a)

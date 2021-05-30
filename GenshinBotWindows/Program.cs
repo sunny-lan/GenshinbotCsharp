@@ -76,6 +76,7 @@ namespace genshinbot
             Application.Run(new yui.windows.Overlay(rig));
 
        //     await tools.DailyDoer.runAsync(rig.Make());
+          //  await tools.DailyDoer.DispatchCollect(rig.Make());
             Console.WriteLine("Program ended. Press enter to exit");
             Console.ReadLine();
             CvThread.Stop();

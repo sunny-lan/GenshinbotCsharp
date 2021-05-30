@@ -208,7 +208,7 @@ namespace genshinbot
         }
         public static Point2d Vec(this double angle, double mag = 1)
         {
-            return new Point2d(x: Math.Sin(angle) * mag, y: Math.Cos(angle) * mag);
+            return new Point2d(x: Math.Cos(angle) * mag, y: Math.Sin(angle) * mag);
         }
         [System.Diagnostics.DebuggerHidden]
         public static T Expect<T>(this T? t, string assert = "") where T : struct
@@ -244,6 +244,20 @@ namespace genshinbot
             return new Size(r.Width + sz * 2, r.Height + sz * 2);
         }
 
+        public static Point2d Cvt(this Point2f p)
+        {
+            return new Point2d(p.X, p.Y);
+        }
+        public static Point2d Cvt(this Point p)
+        {
+            return new Point2d(p.X, p.Y);
+        }
+        public static double Radians(this double deg)
+        {
+            return deg*Math.PI/180;
+        }
+
+
         public static void fftShift(this Mat src, Mat dst)
         {
             int cx = src.Width >> 1;
@@ -257,6 +271,10 @@ namespace genshinbot
         public static double scoreFunc(double a, double b)
         {
             return 1.0 / (1 + Math.Abs(a - b));
+        }
+        public static double Degrees(this double rad)
+        {
+            return rad*180/Math.PI;
         }
         public static Point Round(this Point2d p)
         {
