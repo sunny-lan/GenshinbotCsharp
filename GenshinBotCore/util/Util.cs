@@ -143,7 +143,7 @@ namespace genshinbot
 
         public static double RelativeAngle(this double a, double b)
         {
-            var diff = b.ConfineAngle() - a.ConfineAngle();
+            var diff =( b.ConfineAngle() - a.ConfineAngle()).ConfineAngle();
             if (diff > Math.PI) return -(Math.PI * 2 - diff);
             else return diff;
         }

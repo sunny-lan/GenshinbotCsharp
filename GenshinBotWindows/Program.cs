@@ -63,7 +63,7 @@ namespace genshinbot
             //  automation.screenshot.gdi.GDIStream.Test2();
                  //automation.windows.WindowAutomator2.Test();
                  //await automation.windows.WindowAutomator2.Test2();
-            await tools.AutofillTool.Test(rig);
+           // await tools.AutofillTool.Test(rig);
             //   automation.windows.WindowAutomator2.Test3();
             //screens.PlayingScreen.test();
             //screens.MapScreen.Test2(rig);
@@ -75,9 +75,9 @@ namespace genshinbot
             //await tools.ScreencoordRecorder.runAsync(new WindowAutomator2("*Untitled - Notepad", null));
             // await tools.ScreencoordRecorder.runAsync(rig.Make().W);
           //// .Show();
-            //Application.Run(new yui.windows.Overlay(rig));
+            Application.Run(new yui.windows.Overlay(rig));
 
-            await tools.DailyDoer.runAsync(rig.Make());
+            //await tools.DailyDoer.runAsync(rig.Make());
           //  await tools.DailyDoer.DispatchCollect(rig.Make());
             Console.WriteLine("Program ended. Press enter to exit");
             Console.ReadLine();

@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -18,7 +19,7 @@ namespace genshinbot.yui.windows
     public partial class Overlay : Form
     {
         private ITestingRig rig;
-        private Series arrowAng;
+        private Chart chart;
 
         public Overlay(ITestingRig r)
         {
@@ -28,47 +29,48 @@ namespace genshinbot.yui.windows
 
             User32.SetWindowLong(handle, User32.WindowLongFlags.GWL_EXSTYLE,
               (IntPtr)((uint)User32.GetWindowLong(handle, User32.WindowLongFlags.GWL_EXSTYLE)
-              | (uint)User32.WindowStylesEx.WS_EX_NOACTIVATE    ));
+              | (uint)User32.WindowStylesEx.WS_EX_NOACTIVATE));
 
-            Chart c = new Chart();
-            c.Location = new Point(0, 0);
-            c.Size = Size;
+            chart = new Chart();
+            chart.Location = new Point(0, 0);
+            chart.Size = Size;
 
             ChartArea area = new ChartArea();
             area.Name = "default";
             area.AxisX.Title = "Time";
             area.AxisY.Maximum = 360;
             area.AxisY.Minimum = 0;
+            
+            chart.ChartAreas.Add(area);
+
+            Controls.Add(chart);
+
+        }
+        private void graph(IObservable<Pkt<double>> obs, string legend, AxisType axis=AxisType.Primary)
+        {
+            Series arrowAng;
 
             arrowAng = new Series();
-            arrowAng.Legend = "Arrow angle";
+            arrowAng.Legend = legend;
             arrowAng.ChartType = SeriesChartType.Line;
             arrowAng.ChartArea = "default";
             arrowAng.XValueType = ChartValueType.DateTime;
             arrowAng.YValueType = ChartValueType.Double;
-
-
-            c.Series.Add(arrowAng);
-            c.ChartAreas.Add(area);
-
-            Controls.Add(c);
-        }
-        private void load()
-        {
-            var b = rig.Make();
-            var p = new screens.PlayingScreen(b, null);
-            
-
-
-            Queue<Pkt<double>> q=new Queue<Pkt<double>>();
+            arrowAng.YAxisType = axis;
+            Invoke((MethodInvoker)delegate
+            {
+                chart.Series.Add(arrowAng);
+            });
+            Queue<Pkt<double>> q = new Queue<Pkt<double>>();
             var interval = TimeSpan.FromSeconds(10);
-            p.ArrowDirection.Subscribe(x =>
+            obs.Subscribe(x =>
             {
                 if (x.Value == 0) return;
                 q.Enqueue(x);
-                while (q.Count > 0 && x.CaptureTime - q.Peek().CaptureTime > interval)
+                while (q.Count > 0 && DateTime.Now - q.Peek().CaptureTime > interval)
                     q.Dequeue();
-                Invoke((MethodInvoker)delegate {
+                Invoke((MethodInvoker)delegate
+                {
                     arrowAng.Points.Clear();
                     foreach (var x in q)
                     {
@@ -77,6 +79,30 @@ namespace genshinbot.yui.windows
                     }
                 });
             });
+        }
+        private double getVal()
+        {
+            return ((double)Invoke(new Func<double>(() => trackBar1.Value))).Radians();
+        }
+        private void load()
+        {
+            var b = rig.Make();
+            var p = new screens.PlayingScreen(b, null);
+
+            var wanted = Observable
+                .Return(getVal())
+                .Concat(
+                    Observable.Interval(TimeSpan.FromMilliseconds(100)).Select(x => getVal())
+                )
+                .Replay(1).RefCount();
+            var wantedPkt = wanted.Packetize();
+
+            var alg = new algorithm.ArrowSteering(p.ArrowDirection, wanted);
+            alg.MouseDelta.Subscribe(x => p.Io.M.MouseMove(new OpenCvSharp.Point2d(x, 0)));
+
+            graph(p.ArrowDirection, "arrow dir");
+            graph(wantedPkt, "wanted dir");
+
         }
 
         private void Overlay_Load(object sender, EventArgs e)

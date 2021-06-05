@@ -281,7 +281,7 @@ namespace genshinbot.automation.windows
                 void _MouseTo()
                 {
                     var pp = new System.Drawing.Point((int)Math.Round(p.X), (int)Math.Round(p.Y));
-                    DPIAware.Use(DPIAware.DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE, () =>
+                    DPIAware.Use(DPIAware.DPI_AWARENESS_CONTEXT_UNAWARE, () =>
                     {
                         if (!User32.ClientToScreen(parent.hWnd, ref pp))
                             throw new Exception();

@@ -164,6 +164,8 @@ namespace genshinbot.automation.screenshot.gdi
             }
         }
 
+
+
         public IObservable<Snap> Watch(Rect r)
         {
             if (!cache.ContainsKey(r))
@@ -172,15 +174,17 @@ namespace genshinbot.automation.screenshot.gdi
                 var boundsCalcer = Observable.FromEvent<Snap>(h =>
                 {
                     listeningRects[r] = default;
+                    Console.WriteLine($"gdi begin {r}");
                     RecalculateStrategy();
                 }, h =>
                 {
+                    Console.WriteLine($"gdi stop {r}");
                     Debug.Assert(listeningRects.Remove(r, out var _));
                     RecalculateStrategy();
                 });
                 cache[r] = Observable.Merge(boundsCalcer,
                     pollerEnable.Select(m =>  m[r])
-                );
+                ).Publish().RefCount();
 
             }
             return cache[r];
