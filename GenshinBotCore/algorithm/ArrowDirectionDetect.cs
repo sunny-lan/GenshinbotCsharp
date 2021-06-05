@@ -44,7 +44,7 @@ namespace genshinbot.algorithm
         public double GetAngle(Mat img1)
         {
             double? angle = null;
-                Console.WriteLine("getangle begin");
+               // Console.WriteLine("getangle begin");
 
 
                 var bac = new Scalar(253, 240, 0);
@@ -127,7 +127,7 @@ namespace genshinbot.algorithm
                 }
                 Dbg.Flush();
 
-                Console.WriteLine("getangle end");
+                //  Console.WriteLine("getangle end");
             return angle??0;//.Expect("Angle unable to be found");
         }
 

@@ -80,28 +80,24 @@ namespace genshinbot.yui.windows
                 });
             });
         }
-        private double getVal()
-        {
-            return ((double)Invoke(new Func<double>(() => trackBar1.Value))).Radians();
-        }
         private void load()
         {
             var b = rig.Make();
             var p = new screens.PlayingScreen(b, null);
 
             var wanted = Observable
-                .Return(getVal())
-                .Concat(
-                    Observable.Interval(TimeSpan.FromMilliseconds(100)).Select(x => getVal())
+                .FromEventPattern(
+                    x => trackBar1.ValueChanged += x,
+                    x => trackBar1.ValueChanged -= x
                 )
-                .Replay(1).RefCount();
+                .Publish().RefCount()
+                .Select(x => ((double)trackBar1.Value).Radians());
             var wantedPkt = wanted.Packetize();
 
             var alg = new algorithm.ArrowSteering(p.ArrowDirection, wanted);
             alg.MouseDelta.Subscribe(x => p.Io.M.MouseMove(new OpenCvSharp.Point2d(x, 0)));
 
             graph(p.ArrowDirection, "arrow dir");
-            graph(wantedPkt, "wanted dir");
 
         }
 

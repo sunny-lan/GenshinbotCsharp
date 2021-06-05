@@ -80,12 +80,13 @@ namespace genshinbot.automation.screenshot.gdi
                 Kernel32.GetLastError().ThrowIfFailed("failed creating dib section");
 
             buf = new Mat(height, width, OpenCvSharp.MatType.CV_8UC4, raw);
-            hTmpDC.SelectObject(sec);
+            
         }
 
         Snap Poll()
         {
             Debug.Assert(buf != null);
+            hTmpDC.SelectObject(sec);
             lock (pollRegions)
             {
                 foreach (var region in pollRegions)
@@ -183,8 +184,8 @@ namespace genshinbot.automation.screenshot.gdi
                     RecalculateStrategy();
                 });
                 cache[r] = Observable.Merge(boundsCalcer,
-                    pollerEnable.Select(m =>  m[r])
-                ).Publish().RefCount();
+                    pollerEnable.Select(m => m[r])
+                );
 
             }
             return cache[r];
