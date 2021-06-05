@@ -41,7 +41,6 @@ namespace genshinbot.algorithm
         Mat hsv = new Mat();
         Mat arrowMask = new Mat();
         Mat red = new Mat();
-        Mat tmp1 = new Mat();
         public double GetAngle(Mat img1)
         {
             double? angle = null;

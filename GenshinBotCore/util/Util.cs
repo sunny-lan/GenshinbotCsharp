@@ -108,6 +108,15 @@ namespace genshinbot
             r.Height = Math.Max(initial.Y, final.Y) - r.Top;
             return r;
         }
+        public static Rect2d RectAround(Point2d initial, Point2d final)
+        {
+            var r = new OpenCvSharp.Rect2d();
+            r.Left = Math.Min(initial.X, final.X);
+            r.Width = Math.Max(initial.X, final.X) - r.Left;
+            r.Top = Math.Min(initial.Y, final.Y);
+            r.Height = Math.Max(initial.Y, final.Y) - r.Top;
+            return r;
+        }
         public static int Area(this Rect r)
         {
             return r.Width * r.Height;

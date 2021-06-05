@@ -101,7 +101,12 @@ namespace genshinbot
                     await tt;
                 }
             }
+            public static  Task<T> LockWhile<T>(this IObservable<bool> o, Func<T> t, TimeSpan? timeout = null)
 
+
+            {
+                return o.LockWhile(() => Task.Run(t), timeout);
+            }
             public static async Task<T> LockWhile<T>(this IObservable<bool> o, Func<Task<T>> t, TimeSpan? timeout = null)
             {
                 await o.WaitTrue(timeout);

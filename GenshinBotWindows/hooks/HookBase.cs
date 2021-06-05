@@ -97,7 +97,7 @@ namespace genshinbot.hooks
                 x=> {
                     OnEvent -= x;
                 }
-            ).Select(x=>x.EventArgs);
+            ).Publish().RefCount().Select(x=>x.EventArgs);
         }
 
         ~HookBase()

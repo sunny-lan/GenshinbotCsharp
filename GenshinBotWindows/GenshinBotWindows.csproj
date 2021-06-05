@@ -84,6 +84,7 @@
   <ItemGroup>
     <Folder Include="automation\input\" />
     <Folder Include="badui\" />
+    <Folder Include="controllers\" />
     <Folder Include="data\map\" />
   </ItemGroup>
 

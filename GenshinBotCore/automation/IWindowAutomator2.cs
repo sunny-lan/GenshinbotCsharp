@@ -37,6 +37,8 @@ namespace genshinbot.automation
         /// </summary>
         void TryFocus();
 
+        //Point ClientToScreen(Point p);
+
         input.IKeySimulator2 Keys { get; }
         input.IMouseSimulator2 Mouse { get; }
         screenshot.ScreenshotObservable Screen { get; }

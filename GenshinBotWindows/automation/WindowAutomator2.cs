@@ -281,7 +281,7 @@ namespace genshinbot.automation.windows
                 void _MouseTo()
                 {
                     var pp = new System.Drawing.Point((int)Math.Round(p.X), (int)Math.Round(p.Y));
-                    DPIAware.Use(DPIAware.DPI_AWARENESS_CONTEXT_UNAWARE, () =>
+                    DPIAware.Use(DPIAware.DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE, () =>
                     {
                         if (!User32.ClientToScreen(parent.hWnd, ref pp))
                             throw new Exception();
@@ -381,6 +381,7 @@ namespace genshinbot.automation.windows
             var w = new WindowAutomator2("*Untitled - Notepad", null);
             while (true)
             {
+                Console.ReadLine();
                 using (w.Focused.Subscribe(x => Console.WriteLine($"focused={x}")))
                 {
                     /*for (int i = 0; i < 10; i++)
@@ -391,7 +392,7 @@ namespace genshinbot.automation.windows
                     }*/
                     var sz = await w.Size.Get();
                     Console.WriteLine($"sz={sz}");
-                    for (int i = 0; i < 100000; i++)
+                    for (int i = 0; i < 1000; i++)
                     {
                         await w.Mouse.MouseTo(sz.Bounds().RandomWithin());
                     }
@@ -442,6 +443,14 @@ namespace genshinbot.automation.windows
             {
                 Console.ReadLine();
             }
+        }
+
+        public Point ClientToScreen(Point p)
+        {
+            //TODO
+            var pt = p.Sys();
+            User32.ClientToScreen(hWnd, ref pt);
+            return pt.Cv();
         }
         #endregion
     }

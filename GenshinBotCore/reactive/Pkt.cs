@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,7 +22,14 @@ namespace genshinbot.reactive
 
         public DateTime CaptureTime { get; init; }
 
-        public volatile int RefCount = 0;
+        public IObserver<(Pkt<T> dst, bool doLock)> Locker { get;  init; }
+
+        public IDisposable Lock()
+        {
+            Debug.Assert(Locker != null);
+            Locker.OnNext((this, true));
+            return Disposable.Create(() => Locker.OnNext((this, false)));
+        }
 
         public Pkt(T value) : this(value, DateTime.Now) { }
 
