@@ -80,13 +80,13 @@ namespace genshinbot.automation.screenshot.gdi
                 Kernel32.GetLastError().ThrowIfFailed("failed creating dib section");
 
             buf = new Mat(height, width, OpenCvSharp.MatType.CV_8UC4, raw);
+            hTmpDC.SelectObject(sec);
             
         }
 
         Snap Poll()
         {
             Debug.Assert(buf != null);
-            hTmpDC.SelectObject(sec);
             lock (pollRegions)
             {
                 foreach (var region in pollRegions)
@@ -96,13 +96,13 @@ namespace genshinbot.automation.screenshot.gdi
                         if (!Gdi32.BitBlt(hTmpDC, region.X, region.Y, region.Width, region.Height, hDesktopDC,
                             region.X, region.Y, Gdi32.RasterOperationMode.SRCCOPY
                         ))
-                            Kernel32.GetLastError().ThrowIfFailed("failed performing BitBlt");
+                            throw new Exception("failed performing BitBlt");
                 }
 
             }
             Console.WriteLine("flush screenshot");
             if (!Gdi32.GdiFlush())
-                Kernel32.GetLastError().ThrowIfFailed("failed performing GdiFlush");
+                throw new Exception("failed performing GdiFlush");
 
             return new Snap(buf);
         }
