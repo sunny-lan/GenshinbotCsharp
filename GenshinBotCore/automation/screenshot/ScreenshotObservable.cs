@@ -21,7 +21,7 @@ namespace genshinbot.automation.screenshot
         /// <returns></returns>
         IObservable<Pkt<Mat>> Watch(IObservable<Rect> r)
         {
-            return r.Select(rec => Watch(rec)).Switch();
+            return r.Select(rec => Watch(rec)).Switch().Publish().RefCount();
         }
 
 

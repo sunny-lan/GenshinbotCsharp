@@ -42,7 +42,7 @@ namespace genshinbot.algorithm
 
 
                 return Math.Min(maxDelta, rel * scale * limiter);
-            })).Switch();
+            })).Switch().Publish().RefCount();
         }
     }
 }

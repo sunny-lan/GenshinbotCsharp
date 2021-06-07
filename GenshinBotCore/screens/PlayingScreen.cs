@@ -135,9 +135,9 @@ namespace genshinbot.screens
             Arrow = b.W.Screen.Watch(rd.Select(r =>
                 r.MinimapLoc.Center()
                 .RectAround(new Size(db.ArrowRadius * 2, db.ArrowRadius * 2))
-            ));
+            )).Publish().RefCount();
             //TODO handle errors+offload to separate thread!
-            ArrowDirection = Arrow.Select(arrow => arrowDirectionAlg.GetAngle(arrow));
+            ArrowDirection = Arrow.Select(arrow => arrowDirectionAlg.GetAngle(arrow)).Publish().RefCount();
 
         }
 

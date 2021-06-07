@@ -26,12 +26,13 @@ namespace genshinbot.experiments
                 }
             });
 
-            var o1 = thing;
+            var o1 = thing.Publish().RefCount(); ;
 
-            var o2 = o1.Select(x => {
+            var o2 = o1.Select(x =>
+            {
                 Console.WriteLine("processing called");
                 return $"o2={x}";
-            }).Publish().RefCount();
+            });
 
             await o2.Take(1).ObserveOn(Scheduler.Default);
 

@@ -28,8 +28,8 @@ namespace genshinbot.automation.hooking
                 {
                     Down = (User32.WindowMessage)x.wParam == User32.WindowMessage.WM_KEYDOWN,
                     Key = (input.Keys)x.lParam.vkCode,
-                });
-            kbdState=KeyEvents.KbdState();
+                }).Publish().RefCount();
+            kbdState=KeyEvents.KbdState().Publish().RefCount();
             kbdHook.Start();
         }
 

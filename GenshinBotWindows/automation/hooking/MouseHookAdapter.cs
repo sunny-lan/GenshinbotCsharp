@@ -46,7 +46,7 @@ namespace genshinbot.automation.hooking
                     }
 
                     return null;
-                }).NonNull();
+                }).NonNull().Publish().RefCount();
             mouseHook.Start();
         }
 

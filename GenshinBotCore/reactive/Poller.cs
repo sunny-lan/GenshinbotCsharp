@@ -25,7 +25,7 @@ namespace genshinbot.reactive
             subject = new Subject<T>();
             //dummy observable to enable/disable
             var obs = Observable.FromEvent<T>(h => enableChanged(true), h => enableChanged(false));
-            obsSubj = Observable.Merge(obs, subject);
+            obsSubj = Observable.Merge(obs, subject).Publish().RefCount();
 
         }
 

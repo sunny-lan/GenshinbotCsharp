@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
@@ -133,7 +134,7 @@ namespace genshinbot
 
             public static async Task<T> Get<T>(this IObservable<T> o)
             {
-                return await o.Take(1);
+                return await o.Take(1).ObserveOn(Scheduler.Default);
             }
 
             public static IObservableValue<Ret> CalculateFrom<Ret, Param1, Param2>(

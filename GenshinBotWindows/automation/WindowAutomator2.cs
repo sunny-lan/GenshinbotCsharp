@@ -105,7 +105,7 @@ namespace genshinbot.automation.windows
                 .DistinctUntilChanged()
                 .Replay(1);
             Size = s_tmp;
-            Bounds = Size.Select(x => x.Bounds());
+            Bounds = Size.Select(x => x.Bounds()).Publish().RefCount();
             disposeList.Add(s_tmp.Connect());
 
             clientAreaFocused = clientAreaStream

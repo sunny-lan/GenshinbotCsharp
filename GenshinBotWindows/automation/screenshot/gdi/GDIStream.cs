@@ -185,7 +185,7 @@ namespace genshinbot.automation.screenshot.gdi
                 });
                 cache[r] = Observable.Merge(boundsCalcer,
                     pollerEnable.Select(m => m[r])
-                );
+                ).Publish().RefCount();
 
             }
             return cache[r];
