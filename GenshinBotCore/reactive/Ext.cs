@@ -5,6 +5,7 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
@@ -70,7 +71,24 @@ namespace genshinbot
                     o = o.Timeout(d);
                 return o.Get();
             }
+            public class LockInterruptedException : Exception
+            {
+                public LockInterruptedException()
+                {
+                }
 
+                public LockInterruptedException(string message) : base(message)
+                {
+                }
+
+                public LockInterruptedException(string message, Exception innerException) : base(message, innerException)
+                {
+                }
+
+                protected LockInterruptedException(SerializationInfo info, StreamingContext context) : base(info, context)
+                {
+                }
+            }
             /// <summary>
             /// Fails a task if observable sends false while task isn't complete
             /// </summary>
@@ -90,12 +108,12 @@ namespace genshinbot
                     {
                         if (!x)
                             taskCompletionSource.SetException(
-                                new Exception("stream became false while running task"));
+                                new LockInterruptedException("stream became false while running task"));
                     },
                     onCompleted: () => taskCompletionSource.SetException(
-                        new Exception("stream ended while running task")),
+                        new LockInterruptedException("stream ended while running task")),
                     onError: e => taskCompletionSource.SetException(
-                        new Exception("error happened in stream while running task", e))
+                        new LockInterruptedException("error happened in stream while running task", e))
                 ))
                 {
                     var tt = await Task.WhenAny(t(), taskCompletionSource.Task);

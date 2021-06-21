@@ -4,8 +4,6 @@ using genshinbot.automation.input;
 using genshinbot.data;
 using genshinbot.reactive;
 using OpenCvSharp;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Text;
@@ -14,76 +12,14 @@ using static genshinbot.data.GeneralDb;
 
 namespace genshinbot.tools
 {
-
-    public class DispatchDb
-    {
-        public static Lazy<DispatchDb> Instance = new Lazy<DispatchDb>(
-            () => Data.ReadJson1<DispatchDb>("dispatchDb.json"));
-
-        public static async Task SaveInstanceAsync(DispatchDb instance=null)
-        {
-            if (instance == null) instance = Instance.Value;
-            await Data.WriteJsonAsync("dispatchDb.json", instance);
-        }
-
-        public Dictionary<Size, RD> Rd { get; set; } = new Dictionary<Size, RD>();
-        public class RD
-        {
-            public Point Hours20 { get; set; }
-            public Point Claim { get; set; }
-            public Point ConfirmRecall { get; set; }
-            public Mondstadt Mondstadt { get; set; }
-            public Liyue Liyue{ get; set; }
-          
-        }
-
-        public class Mondstadt
-        {
-
-            public Point Button { get; set; }
-            public Point WhisperingWoods { get; set; }
-            public Point DadupaGorge { get; set; }
-            public Point Wolvendom { get; set; }
-
-            public Point[] All
-            {
-                get
-                {
-                    return new[]{
-                        WhisperingWoods,
-                        DadupaGorge,
-                        Wolvendom
-                   };
-                }
-            }
-        }
-
-        public class Liyue
-        {
-
-            public Point Button { get; set; }
-            public Point YaoguangShoal { get; set; }
-            public Point GuyunStoneForest { get; set; }
-
-            public Point[] All
-            {
-                get
-                {
-                    return new[]{
-                        YaoguangShoal,
-                        GuyunStoneForest,
-                    };
-                }
-            }
-        }
-    }
     public static class DailyDoer
     {
+        //TODO completely migrate to Autofillable
         static Folder db = Data.General.Root;
         public static async Task Collect(BotIO b, Point button, Point[] all)
         {
             var sz = await b.W.Size.Get();
-            var Dispatch = DispatchDb.Instance.Value.Rd[sz];
+            var Dispatch = DispatchDb.Instance.Rd[sz];
 
             await b.M.LeftClick(button);
             await Task.Delay(500);
@@ -105,7 +41,7 @@ namespace genshinbot.tools
         public static async Task CollectMondstadt(BotIO b)
         {
             var sz = await b.W.Size.Get();
-            var Dispatch = DispatchDb.Instance.Value.Rd[sz];
+            var Dispatch = DispatchDb.Instance.Rd[sz];
 
             await Collect(b, Dispatch.Mondstadt.Button, Dispatch.Mondstadt.All);
         }
@@ -113,7 +49,7 @@ namespace genshinbot.tools
         public static async Task CollectLiyue(BotIO b)
         {
             var sz = await b.W.Size.Get();
-            var Dispatch = DispatchDb.Instance.Value.Rd[sz];
+            var Dispatch = DispatchDb.Instance.Rd[sz];
 
             await Collect(b, Dispatch.Liyue.Button, Dispatch.Liyue.All);
         }
@@ -121,7 +57,7 @@ namespace genshinbot.tools
         public static async Task DispatchChara(BotIO b, Point pos, string chara)
         {
             var sz = await b.W.Size.Get();
-            var Dispatch = DispatchDb.Instance.Value.Rd[sz];
+            var Dispatch = DispatchDb.Instance.Rd[sz];
 
             await b.M.LeftClick(pos);
             await Task.Delay(500);
@@ -142,7 +78,7 @@ namespace genshinbot.tools
         public static async Task DispatchMondstadt(BotIO b)
         {
             var sz = await b.W.Size.Get();
-            var Dispatch = DispatchDb.Instance.Value.Rd[sz];
+            var Dispatch = DispatchDb.Instance.Rd[sz];
 
             await b.M.LeftClick(Dispatch.Mondstadt.Button);
             await Task.Delay(500);
@@ -155,7 +91,7 @@ namespace genshinbot.tools
         public static async Task DispatchLiyue(BotIO b)
         {
             var sz = await b.W.Size.Get();
-            var Dispatch = DispatchDb.Instance.Value.Rd[sz];
+            var Dispatch = DispatchDb.Instance.Rd[sz];
 
             await b.M.LeftClick(Dispatch.Liyue.Button);
             await Task.Delay(500);

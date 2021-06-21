@@ -1,6 +1,7 @@
 ﻿using genshinbot.automation;
 using genshinbot.automation.hooking;
 using genshinbot.automation.input;
+using genshinbot.data;
 using genshinbot.diag;
 using genshinbot.reactive;
 using OneOf;
@@ -61,18 +62,6 @@ namespace genshinbot.tools
 
         }
 
-
-        Filler<T> ComboFiller<T>(Func<Task<T>> get)
-        {
-            return Filler.From(async (T x) =>
-            {
-                Prompt("Ctrl-J to select");
-                await kk.KeyCombo(Keys.LControlKey, Keys.J).Get();
-                ClearPrompt();
-                return await get();
-            });
-        }
-
         private void Prompt(string s, int idx = -1)
         {
             lock (overlay.Text)
@@ -87,54 +76,73 @@ namespace genshinbot.tools
                     overlay.Text.Pop();
         }
 
+        class KeyComb
+        {
+            public Keys[] Keys;
+            public string Description;
+        }
+
+        KeyComb Select = new KeyComb
+        {
+            Keys = new[] { Keys.OemSemicolon },
+            Description = ";"
+        };
+        KeyComb Cancel = new KeyComb
+        {
+            Keys = new[] { Keys.N },
+            Description = "N"
+        };
+        KeyComb Left = new KeyComb
+        {
+            Keys = new[] { Keys.OemOpenBrackets },
+            Description = "["
+        }; KeyComb Right = new KeyComb
+        {
+            Keys = new[] { Keys.OemCloseBrackets },
+            Description = "]"
+        };
+
+        private async Task<KeyComb> WaitComboAsync(params KeyComb[] cmb)
+        {
+            //TODO KSETCH
+            return await w.KeyCap.KeyEvents
+                .Where(e => !e.Down)
+                .Select(e => cmb.Where(cmb => cmb.Keys[0] == e.Key).ToArray())
+                .Where(x => x.Length == 1).Select(x => x[0]).Get();
+        }
+
         public AutofillTool(IWindowAutomator2 w)
         {
             this.w = w;
-            this.kk = w.KeyCap.KbdState;
+            this.kk = w.KeyCap.KbdState.Do(x =>
+            {
+                foreach (var k in x) Console.Write(k.Value ? k.Key : "" + ",");
+                Console.WriteLine();
+            });
             var point2DFiller = Filler.From<Point2d>(async x =>
             {
-                //TODO move logic to overlay
-                while (true)
+                Prompt($"{Select.Description} to select, {Cancel.Description} to cancel", 1);
+                Point2d pos = x;
+                KeyComb key;
+                using (w.MouseCap.MouseEvents.Subscribe(onNext: evt =>
                 {
-                    Prompt("Ctrl-J to select, Ctrl-L to skip", 1);
-                    Point2d pos = x;
-                    string key;
-                    using (w.MouseCap.MouseEvents.Subscribe(onNext: evt =>
+                    if (evt is IMouseCapture.MoveEvent mEvt)
                     {
-                        if (evt is IMouseCapture.MoveEvent mEvt)
-                        {
-                            overlay.Point = pos.Round();
-                            pos = mEvt.Position;
-                        }
-                    }))
-                    {
-                        key = await await Task.WhenAny(
-                            kk.KeyCombo(Keys.LControlKey, Keys.J).Select(_ => "select").Get(),
-                            kk.KeyCombo(Keys.LControlKey, Keys.L).Select(_ => "skip").Get()
-                        );
+                        overlay.Point = pos.Round();
+                        pos = mEvt.Position;
                     }
-                    ClearPrompt(1);
-                    if (key == "skip")
-                    {
-                        return x;
-                    }
-                    Prompt("Enter to return, Ctrl-0 to retry", 1);
-                    key = await await Task.WhenAny(
-                       kk.KeyCombo(Keys.Enter).Select(x => "go").Get(),
-                       kk.KeyCombo(Keys.LControlKey, Keys.D0).Select(x => "retry").Get()
-                   );
-                    ClearPrompt(1);
-                    if (key == "go")
-                    {
-                        overlay.Point = null;
-                        return pos;
-                    }
-                    else if (key == "retry")
-                    {
-                        continue;
-                    }
-                    else Debug.Assert(false);
+                }))
+                {
+                    key = await WaitComboAsync(Select, Cancel);
                 }
+
+                ClearPrompt(1);
+                if (key == Select)
+                {
+                    overlay.Point = null;
+                    return pos;
+                }
+                else return x;
 
             });
             var pointFiller = Filler.From<Point>(async x =>
@@ -145,39 +153,37 @@ namespace genshinbot.tools
               {
                   using (Indent.Inc())
                   {
-                      while (true)
+                      //show original
+                      overlay.Rect = x.round();
+
+                      Prompt("Top left", 1);
+                      var tl = await point2DFiller.FillT(x.TopLeft);
+                      ClearPrompt(1);
+                      Prompt("Bottom right", 1);
+                      var br = await point2DFiller.FillT(x.BottomRight);
+                      ClearPrompt(1);
+
+                      var res = Util.RectAround(tl, br);
+                      overlay.Rect = res.round();
+
+                      Prompt($"{Select.Description} to return, {Cancel.Description} to revert", 1);
+                      var key = await WaitComboAsync(
+                         Select,
+                         Cancel
+                      );
+                      ClearPrompt(1);
+
+                      overlay.Rect = null;
+                      if (key == Select)
                       {
-                          //show original
-                          overlay.Rect = x.round();
-
-                          Prompt("Top left", 1);
-                          var tl = await point2DFiller.FillT(x.TopLeft);
-                          ClearPrompt(1);
-                          Prompt("Bottom right", 1);
-                          var br = await point2DFiller.FillT(x.BottomRight);
-                          ClearPrompt(1);
-
-                          var res = Util.RectAround(tl, br);
-                          overlay.Rect = res.round();
-
-                          Prompt("Enter to return, Ctrl-0 to retry", 1);
-                          var key = await await Task.WhenAny(
-                              kk.KeyCombo(Keys.Enter).Select(x => "go").Get(),
-                              kk.KeyCombo(Keys.LControlKey, Keys.D0).Select(x => "retry").Get()
-                          );
-                          ClearPrompt(1);
-
-                          overlay.Rect = null;
-                          if (key == "go")
-                          {
-                              return res;
-                          }
-                          else if (key == "retry")
-                          {
-                              continue;
-                          }
-                          else Debug.Assert(false);
+                          return res;
                       }
+                      else if (key == Cancel)
+                      {
+                          return x;
+                      }
+                      else Debug.Assert(false);
+                      return x;
                   }
               });
             var rectFiller = Filler.From<Rect>(async x =>
@@ -191,6 +197,7 @@ namespace genshinbot.tools
                 var img = await w.Screen.Watch(w.Bounds).Depacket().Get();
                 overlay.Visible = true;
 
+                img = img.Clone();
                 overlay.Image = img;
 
                 var r = await rectFiller.FillT(x.Region);
@@ -199,12 +206,12 @@ namespace genshinbot.tools
                 return new data.Snap
                 {
                     //TODO we need to hide the overlay when taking a shot
-                    Image = img[r],
+                    Image = new SavableMat { Value = img[r] },
                     Region = r,
                 };
             });
 
-            var matFiller = Filler.From<Mat>(async x =>
+            var matFiller = Filler.From<SavableMat>(async x =>
             {
                 return (await snapFiller.FillT(new data.Snap { })).Image;
             });
@@ -230,7 +237,7 @@ namespace genshinbot.tools
             {
                 if (o == null)
                 {
-                    Prompt("object is null. Ctrl-5 to construct. Ctrl-0 to skip", 1);
+                    Prompt("object is null. try to construct", 1);
                     ClearPrompt(1);
 
                     o = Activator.CreateInstance(tt);
@@ -257,7 +264,7 @@ namespace genshinbot.tools
                     {
                         var icpy = i;
                         stuffs.Add((
-                            ()=>arr.GetValue(icpy),
+                            () => arr.GetValue(icpy),
                             $"{path}[{icpy}]",
                             o => arr.SetValue(o, icpy),
                             tt.GetElementType()
@@ -273,8 +280,8 @@ namespace genshinbot.tools
                         var subpath = $"{path}.{prop.Name}";
                         stuffs.Add((
                             () => prop.GetValue(o),
-                            subpath, 
-                            x => prop.SetValue(o, x), 
+                            subpath,
+                            x => prop.SetValue(o, x),
                             prop.PropertyType
                         ));
                     }
@@ -291,32 +298,27 @@ namespace genshinbot.tools
                 {
                     var subpath = stuffs[idx].subpath;
                     Prompt($"{stuffs[idx].t.Name} {subpath} = {stuffs[idx].o() ?? "null"}", 0);
-                    Prompt("Ctrl-[/] to inc/dec. Ctrl-J to select. Ctrl-L to exit.",1);
-                    var key = await await Task.WhenAny(
-                       kk.KeyCombo(Keys.LControlKey, Keys.J).Select(_ => "select").Get(),
-                       kk.KeyCombo(Keys.LControlKey, Keys.L).Select(_ => "return").Get(),
-                       kk.KeyCombo(Keys.LControlKey, Keys.OemOpenBrackets).Select(_ => "left").Get(),
-                       kk.KeyCombo(Keys.LControlKey, Keys.OemCloseBrackets).Select(_ => "right").Get()
-                   );
+                    Prompt($"{Left.Description}/{Right.Description} to inc/dec. {Select.Description} to select. {Cancel.Description} to exit.", 1);
+                    var key = await WaitComboAsync(Select, Cancel, Left, Right);
                     ClearPrompt(1);
                     ClearPrompt(0);
-                    if (key == "select")
+                    if (key == Select)
                     {
                         var val = stuffs[idx];
                         val.set(await edit(val.o(), val.t, subpath));
-                        idx = (idx  + 1) % stuffs.Count;
+                        //idx = (idx + 1) % stuffs.Count;
                     }
-                    else if (key == "return")
+                    else if (key == Cancel)
                     {
                         return o;
                     }
-                    else if (key == "left")
+                    else if (key == Left)
                     {
-                        idx = (idx - 1+stuffs.Count) % stuffs.Count;
+                        idx = (idx - 1 + stuffs.Count) % stuffs.Count;
                     }
-                    else if (key == "right")
+                    else if (key == Right)
                     {
-                        idx = (idx  + 1) % stuffs.Count;
+                        idx = (idx + 1) % stuffs.Count;
                     }
                     else Debug.Assert(false);
                 }
@@ -344,16 +346,17 @@ namespace genshinbot.tools
                             var args = type.GetGenericArguments();
                             if (args.Length == 2 && args[0] == typeof(Size))
                             {
+
                                 var sz = await w.Size.Get();
                                 //ensure window size doesn't change while doing RD
-                                await w.Size.Select(x=>x==sz).LockWhile(async() =>
-                                {
-                                    var rd = d[sz];
-                                    Prompt($"{prop.Name}:{sz.Width}x{sz.Height}", 0);
+                                await w.Size.Select(x => x == sz).LockWhile(async () =>
+                                    {
+                                        var rd = d[sz];
+                                        Prompt($"{prop.Name}:{sz.Width}x{sz.Height}", 0);
 
-                                    d[sz] = await edit(rd, args[1], prop.Name);
-                                    ClearPrompt(0);
-                                });
+                                        d[sz] = await edit(rd, args[1], prop.Name);
+                                        ClearPrompt(0);
+                                    });
                             }
                         }
                     }
@@ -400,7 +403,7 @@ namespace genshinbot.tools
             foreach (var val in obj.Rd.Values)
             {
                 CvThread.ImShow("a", val.derp);
-                CvThread.ImShow("b", val.derp1.Image);
+                CvThread.ImShow("b", val.derp1.Image.Value);
             }
         }
 
@@ -408,9 +411,17 @@ namespace genshinbot.tools
         public static async Task ConfigureDailyDoer(BotIO w)
         {
             var tool = new AutofillTool(w.W);
-            await tool.Edit(DispatchDb.Instance.Value);
+            await tool.Edit(DispatchDb.Instance);
             await DispatchDb.SaveInstanceAsync();
         }
+
+        public static async Task ConfigurePlayingScreen(BotIO w)
+        {
+            var tool = new AutofillTool(w.W);
+            await tool.Edit(screens.PlayingScreen.Db.Instance);
+            await screens.PlayingScreen.Db.SaveInstanceAsync();
+        }
+
 
     }
 }

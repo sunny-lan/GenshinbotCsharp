@@ -12,7 +12,7 @@ namespace genshinbot.data
     /// </summary>
     public class Snap
     {
-        public Mat Image { get; set; }
+        public SavableMat Image { get; set; }
         public Rect Region { get; set; }
     }
 }

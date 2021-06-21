@@ -10,24 +10,27 @@ using System.Threading.Tasks;
 
 namespace genshinbot.data.jsonconverters
 {
-    public class MatConverter : JsonConverter<Mat>
+    public class MatConverter : JsonConverter<SavableMat>
     {
-        struct MatData
+        public override SavableMat Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            public string Path { get; set; }
-        }
-        public override Mat Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            var x = JsonSerializer.Deserialize<MatData>(ref reader, options);
-            return Data.Imread( x.Path,ImreadModes.Unchanged);
+            var x = JsonSerializer.Deserialize<SavableMatSubset>(ref reader, options);
+            if (x.Path == null || !Data.Exists(x.Path))
+                return null;
+            return new SavableMat
+            {
+                Path = x.Path,
+                ImreadMode = x.ImreadMode,
+                Value = Data.Imread(x.Path, x.ImreadMode),
+            };
         }
 
-        public override void Write(Utf8JsonWriter writer, Mat value, JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, SavableMat value, JsonSerializerOptions options)
         {
             
-            var fileName = $"images/{Guid.NewGuid()}.png";
-            Data.Imwrite(fileName, value);
-            JsonSerializer.Serialize(writer, new MatData { Path=fileName }, options);
+           value.Path = value.Path ?? $"images/{Guid.NewGuid()}.png";
+            Data.Imwrite(value.Path, value.Value);
+            JsonSerializer.Serialize< SavableMatSubset>(writer, value, options);
         }
 
         class TestCls

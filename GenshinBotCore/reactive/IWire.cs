@@ -84,7 +84,7 @@ namespace genshinbot.reactive.wire
         //Else need to call getVal()
         public T Value => running ? last : getVal();
     }
-    public class Wire<T> : IWire<T>, IObservable<T>
+    public class Wire<T> : IWire<T>, IObservable<T>,IDisposable
     {
         List<Action<T>> subscribers = new List<Action<T>>();
         Func<Action<T>, IDisposable> Enable;
@@ -141,6 +141,22 @@ namespace genshinbot.reactive.wire
         {
             return Subscribe(v => observer.OnNext(v));
         }
+
+        public void Dispose()
+        {
+            //already disposed
+            if (subscribers == null) return;
+            subscribers = null;
+            if(enabled!=null)
+            OnEnable(false);
+        }
+
+        ~Wire()
+        {
+            Dispose();
+        }
+
+
     }
 
 

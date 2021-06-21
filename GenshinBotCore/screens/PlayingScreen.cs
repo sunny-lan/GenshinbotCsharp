@@ -20,6 +20,14 @@ namespace genshinbot.screens
     {
         public class Db
         {
+            public static Db Instance => inst.Value;
+            private static Lazy<Db> inst = new Lazy<Db>(
+                () => Data.ReadJson("screens/PlayingScreen.json", new Db()));
+            public static async Task SaveInstanceAsync(Db instance = null)
+            {
+                if (instance == null) instance = Instance;
+                await Data.WriteJsonAsync("screens/PlayingScreen.json", instance);
+            }
             public class RD
             {
                 public Rect MinimapLoc { get; set; }
@@ -32,8 +40,8 @@ namespace genshinbot.screens
 
                 public CharacterTemplate[] Characters { get; set; } = new CharacterTemplate[4];
 
-                public Snap Swimming { get; set; }
-                public Snap Flying { get; set; }
+                public Snap ClimbingX { get; set; }
+                public Snap FlyingSpace { get; set; }
             }
 
             public Dictionary<Size, RD> R { get; set; } = new Dictionary<Size, RD>
@@ -60,10 +68,7 @@ namespace genshinbot.screens
 
             public CharacterFilter CharFilter { get; set; } = new CharacterFilter();
         }
-
-        private Lazy<Db> _db = new Lazy<Db>(
-            () => Data.ReadJson("screens/PlayingScreen.json", new Db()));
-        public Db db => _db.Value;
+        public Db db => Db.Instance;
         private IObservable<Db.RD> rd;
         public IObservable<Mat> Minimap { get; private init; }
         public IObservable<Pkt<Mat>> Arrow { get; private init; }

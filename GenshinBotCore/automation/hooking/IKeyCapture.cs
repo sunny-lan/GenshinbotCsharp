@@ -28,7 +28,7 @@ namespace genshinbot.automation.hooking
             {
                 d[x.Key] = x.Down;
                 return d;
-            });
+            }).Publish().RefCount();
         }
         public static IObservable<IReadOnlyDictionary<Keys, bool>> KeyCombo(this IObservable<IReadOnlyDictionary<Keys, bool>> o, params Keys[] combo)
         {
