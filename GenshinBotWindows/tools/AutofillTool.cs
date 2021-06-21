@@ -95,8 +95,9 @@ namespace genshinbot.tools
                 //TODO move logic to overlay
                 while (true)
                 {
-                    Prompt("Ctrl-J to select", 1);
+                    Prompt("Ctrl-J to select, Ctrl-L to skip", 1);
                     Point2d pos = x;
+                    string key;
                     using (w.MouseCap.MouseEvents.Subscribe(onNext: evt =>
                     {
                         if (evt is IMouseCapture.MoveEvent mEvt)
@@ -106,14 +107,23 @@ namespace genshinbot.tools
                         }
                     }))
                     {
-                        await kk.KeyCombo(Keys.LControlKey, Keys.J).Get();
+                        key = await await Task.WhenAny(
+                            kk.KeyCombo(Keys.LControlKey, Keys.J).Select(_ => "select").Get(),
+                            kk.KeyCombo(Keys.LControlKey, Keys.L).Select(_ => "skip").Get()
+
+
+                            );
                     }
                     ClearPrompt(1);
+                    if (key == "skip")
+                    {
+                        return x;
+                    }
                     Prompt("Enter to return, Ctrl-0 to retry", 1);
-                    var key = await await Task.WhenAny(
-                        kk.KeyCombo(Keys.Enter).Select(x => "go").Get(),
-                        kk.KeyCombo(Keys.LControlKey, Keys.D0).Select(x => "retry").Get()
-                    );
+                    key = await await Task.WhenAny(
+                       kk.KeyCombo(Keys.Enter).Select(x => "go").Get(),
+                       kk.KeyCombo(Keys.LControlKey, Keys.D0).Select(x => "retry").Get()
+                   );
                     ClearPrompt(1);
                     if (key == "go")
                     {
@@ -145,7 +155,7 @@ namespace genshinbot.tools
                           var br = await point2DFiller.FillT(x.BottomRight);
                           ClearPrompt(1);
 
-                          var res= Util.RectAround(tl, br);
+                          var res = Util.RectAround(tl, br);
                           overlay.Rect = res.round();
 
                           Prompt("Enter to return, Ctrl-0 to retry", 1);
@@ -214,8 +224,7 @@ namespace genshinbot.tools
                         var subpath = $"{path}.{prop.Name}";
                         if (fillers.TryGetValue(prop.PropertyType, out var filler))
                         {
-                            Prompt($"{prop.Name} - old: {val}");
-                            Prompt(subpath, 0);
+                            Prompt($"{subpath} - old: {val}", 0);
                             var newval = await filler.Fill(val);
                             ClearPrompt(0);
                             prop.SetValue(o, newval);
@@ -237,7 +246,7 @@ namespace genshinbot.tools
         {
             overlay = new yui.windows.Overlay2();
             overlay.run();
-            using(overlay.follow(w.Focused))
+            using (overlay.follow(w.Focused))
             using (overlay.follow(w.ScreenBounds))
             using (Indent.Inc())
             {
@@ -258,7 +267,7 @@ namespace genshinbot.tools
                                 var rd = d[sz];
                                 Prompt(prop.Name);
 
-                                d[sz] = await edit(rd, args[1],prop.Name);
+                                d[sz] = await edit(rd, args[1], prop.Name);
                             }
                         }
                     }
@@ -292,6 +301,14 @@ namespace genshinbot.tools
             var tool = new AutofillTool(notepad);
 
             await tool.Edit(new TestObj());
+        }
+
+
+        public static async Task ConfigureDailyDoer(BotIO w)
+        {
+            var tool = new AutofillTool(w.W);
+            await tool.Edit(DispatchDb.Instance.Value);
+            await DispatchDb.SaveInstanceAsync();
         }
 
     }
