@@ -59,6 +59,7 @@ namespace genshinbot.yui.windows
         {
             return bounds.Subscribe(onNext: rr =>
             {
+                Console.WriteLine($"size: {rr}");
                 gw.X = rr.X;
                 gw.Y = rr.Y;
                 gw.Width = rr.Width;

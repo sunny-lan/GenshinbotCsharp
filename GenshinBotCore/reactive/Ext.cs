@@ -132,6 +132,9 @@ namespace genshinbot
                 }
             }
 
+
+         
+
             public static async Task<T> Get<T>(this IObservable<T> o)
             {
                 return await o.Take(1).ObserveOn(Scheduler.Default);

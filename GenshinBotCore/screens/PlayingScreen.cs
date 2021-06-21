@@ -30,7 +30,7 @@ namespace genshinbot.screens
                     public Rect Number { get; set; }
                 }
 
-                public CharacterTemplate[] Characters { get; set; }
+                public CharacterTemplate[] Characters { get; set; } = new CharacterTemplate[4];
             }
 
             public Dictionary<Size, RD> R { get; set; } = new Dictionary<Size, RD>

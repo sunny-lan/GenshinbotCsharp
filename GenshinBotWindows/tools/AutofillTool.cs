@@ -14,6 +14,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static genshinbot.reactive.Ext;
 
 namespace genshinbot.tools
 {
@@ -248,55 +249,77 @@ namespace genshinbot.tools
                     Prompt($"{path} - new: {newval}");
                     return newval;
                 }
+                var stuffs = new List<(Func<object> o, string subpath, Action<object> set, Type t)>();
                 if (o is Array arr)
                 {
-                    var subtype = tt.GetElementType();
-                    int? idx=null;
-                    while (true)
+                    for (int i = 0; i < arr.Length; i++)
                     {
-                        var subpath = $"{path}[{idx}]";
-                        Prompt($"{subpath} Ctrl-[/] to inc/dec. Ctrl-J to select. Ctrl-L to exit.",1);
-                        var key = await await Task.WhenAny(
-                           kk.KeyCombo(Keys.LControlKey, Keys.J).Select(_ => "select").Get(),
-                           kk.KeyCombo(Keys.LControlKey, Keys.L).Select(_ => "return").Get(),
-                           kk.KeyCombo(Keys.LControlKey, Keys.OemOpenBrackets).Select(_ => "left").Get(),
-                           kk.KeyCombo(Keys.LControlKey, Keys.OemCloseBrackets).Select(_ => "right").Get()
-                       );
-                        ClearPrompt(1);
-                        if (key == "select")
-                        {
-                            var val = arr.GetValue(idx.Expect());
-                            arr.SetValue(await edit(val, subtype, subpath), idx.Expect());
-                        }
-                        else if (key == "return")
-                        {
-                            return arr;
-                        }
-                        else if (key == "left")
-                        {
-                            idx = ((idx ?? 0) - 1) % arr.Length;
-                        }
-                        else if (key == "right")
-                        {
-                            idx = ((idx ?? 0) + 1) % arr.Length;
-                        }
-                        else Debug.Assert(false);
+                        var icpy = i;
+                        stuffs.Add((
+                            ()=>arr.GetValue(icpy),
+                            $"{path}[{icpy}]",
+                            o => arr.SetValue(o, icpy),
+                            tt.GetElementType()
+                        ));
                     }
                 }
-                var props = tt.GetProperties();
-                foreach (var prop in props)
+                else
                 {
-                    if (prop.CanWrite && prop.CanRead)
-                    {
-                        var val = prop.GetValue(o);
-                        var subpath = $"{path}.{prop.Name}";
 
-                        Prompt($"{prop.Name}");
-                        prop.SetValue(o, await edit(val, prop.PropertyType, subpath));
+                    var props = tt.GetProperties().Where(prop => prop.CanWrite && prop.CanRead).ToList();
+                    foreach (var prop in props)
+                    {
+                        var subpath = $"{path}.{prop.Name}";
+                        stuffs.Add((
+                            () => prop.GetValue(o),
+                            subpath, 
+                            x => prop.SetValue(o, x), 
+                            prop.PropertyType
+                        ));
                     }
+
+                }
+                if (stuffs.Count == 1)
+                {
+                    var val = stuffs[0];
+                    val.set(await edit(val.o(), val.t, val.subpath));
+                    return o;
+                }
+                int idx = 0;
+                while (true)
+                {
+                    var subpath = stuffs[idx].subpath;
+                    Prompt($"{stuffs[idx].t.Name} {subpath} = {stuffs[idx].o()}", 0);
+                    Prompt("Ctrl-[/] to inc/dec. Ctrl-J to select. Ctrl-L to exit.",1);
+                    var key = await await Task.WhenAny(
+                       kk.KeyCombo(Keys.LControlKey, Keys.J).Select(_ => "select").Get(),
+                       kk.KeyCombo(Keys.LControlKey, Keys.L).Select(_ => "return").Get(),
+                       kk.KeyCombo(Keys.LControlKey, Keys.OemOpenBrackets).Select(_ => "left").Get(),
+                       kk.KeyCombo(Keys.LControlKey, Keys.OemCloseBrackets).Select(_ => "right").Get()
+                   );
+                    ClearPrompt(1);
+                    ClearPrompt(0);
+                    if (key == "select")
+                    {
+                        var val = stuffs[idx];
+                        val.set(await edit(val.o(), val.t, subpath));
+                        idx = (idx  + 1) % stuffs.Count;
+                    }
+                    else if (key == "return")
+                    {
+                        return o;
+                    }
+                    else if (key == "left")
+                    {
+                        idx = (idx - 1+stuffs.Count) % stuffs.Count;
+                    }
+                    else if (key == "right")
+                    {
+                        idx = (idx  + 1) % stuffs.Count;
+                    }
+                    else Debug.Assert(false);
                 }
             }
-            return o;
         }
 
         public async Task Edit(object o)
@@ -321,11 +344,15 @@ namespace genshinbot.tools
                             if (args.Length == 2 && args[0] == typeof(Size))
                             {
                                 var sz = await w.Size.Get();
-                                var rd = d[sz];
-                                Prompt($"{prop.Name}:{sz.Width}x{sz.Height}", 0);
+                                //ensure window size doesn't change while doing RD
+                                await w.Size.Select(x=>x==sz).LockWhile(async() =>
+                                {
+                                    var rd = d[sz];
+                                    Prompt($"{prop.Name}:{sz.Width}x{sz.Height}", 0);
 
-                                d[sz] = await edit(rd, args[1], prop.Name);
-                                ClearPrompt(0);
+                                    d[sz] = await edit(rd, args[1], prop.Name);
+                                    ClearPrompt(0);
+                                });
                             }
                         }
                     }
@@ -343,8 +370,15 @@ namespace genshinbot.tools
 
         class TestObj
         {
+            public class Peep
+            {
+                public Point[] advanced { get; set; } = new Point[4];
+
+            }
             public class RD
             {
+                public Peep peep { get; set; }
+
                 public Mat derp { get; set; }
                 public data.Snap derp1 { get; set; }
                 //public Point2d p2d { get; set; }
