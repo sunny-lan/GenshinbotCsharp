@@ -110,9 +110,7 @@ namespace genshinbot.tools
                         key = await await Task.WhenAny(
                             kk.KeyCombo(Keys.LControlKey, Keys.J).Select(_ => "select").Get(),
                             kk.KeyCombo(Keys.LControlKey, Keys.L).Select(_ => "skip").Get()
-
-
-                            );
+                        );
                     }
                     ClearPrompt(1);
                     if (key == "skip")
@@ -148,6 +146,9 @@ namespace genshinbot.tools
                   {
                       while (true)
                       {
+                          //show original
+                          overlay.Rect = x.round();
+
                           Prompt("Top left", 1);
                           var tl = await point2DFiller.FillT(x.TopLeft);
                           ClearPrompt(1);
@@ -187,7 +188,7 @@ namespace genshinbot.tools
             {
                 var r = await rectFiller.FillT(default);
                 overlay.Visible = false;
-                var res= await w.Screen.Watch(r).Depacket().Get();
+                var res = await w.Screen.Watch(r).Depacket().Get();
                 overlay.Visible = true;
                 return res;
             });
@@ -246,6 +247,41 @@ namespace genshinbot.tools
 
                     Prompt($"{path} - new: {newval}");
                     return newval;
+                }
+                if (o is Array arr)
+                {
+                    var subtype = tt.GetElementType();
+                    int? idx=null;
+                    while (true)
+                    {
+                        var subpath = $"{path}[{idx}]";
+                        Prompt($"{subpath} Ctrl-[/] to inc/dec. Ctrl-J to select. Ctrl-L to exit.",1);
+                        var key = await await Task.WhenAny(
+                           kk.KeyCombo(Keys.LControlKey, Keys.J).Select(_ => "select").Get(),
+                           kk.KeyCombo(Keys.LControlKey, Keys.L).Select(_ => "return").Get(),
+                           kk.KeyCombo(Keys.LControlKey, Keys.OemOpenBrackets).Select(_ => "left").Get(),
+                           kk.KeyCombo(Keys.LControlKey, Keys.OemCloseBrackets).Select(_ => "right").Get()
+                       );
+                        ClearPrompt(1);
+                        if (key == "select")
+                        {
+                            var val = arr.GetValue(idx.Expect());
+                            arr.SetValue(await edit(val, subtype, subpath), idx.Expect());
+                        }
+                        else if (key == "return")
+                        {
+                            return arr;
+                        }
+                        else if (key == "left")
+                        {
+                            idx = ((idx ?? 0) - 1) % arr.Length;
+                        }
+                        else if (key == "right")
+                        {
+                            idx = ((idx ?? 0) + 1) % arr.Length;
+                        }
+                        else Debug.Assert(false);
+                    }
                 }
                 var props = tt.GetProperties();
                 foreach (var prop in props)
@@ -313,7 +349,7 @@ namespace genshinbot.tools
                 public data.Snap derp1 { get; set; }
                 //public Point2d p2d { get; set; }
 
-               // public Rect poo { get; set; }
+                // public Rect poo { get; set; }
 
 
             }
@@ -326,10 +362,10 @@ namespace genshinbot.tools
             var tool = new AutofillTool(notepad);
             var obj = new TestObj();
             await tool.Edit(obj);
-            foreach(var val in obj.Rd.Values)
+            foreach (var val in obj.Rd.Values)
             {
-                CvThread.ImShow("a",val.derp);
-                CvThread.ImShow("b",val.derp1.Image);
+                CvThread.ImShow("a", val.derp);
+                CvThread.ImShow("b", val.derp1.Image);
             }
         }
 
