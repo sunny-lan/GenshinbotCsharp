@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace genshinbot.diag
 {
-    static class Indent
+    public static class Indent
     {
         static object lck = new object();
         //TODO locks

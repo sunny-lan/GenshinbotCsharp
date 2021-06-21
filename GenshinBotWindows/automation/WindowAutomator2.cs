@@ -112,9 +112,12 @@ namespace genshinbot.automation.windows
                 .Relay(Focused)
                 .DistinctUntilChanged();
 
+            ScreenBounds = clientAreaFocused;
+
             Screen = new ScreenshotAdapter(this);
             iS = new InputSim(this);
-            mouseCap = new Lazy<MouseHookAdapter>(() => new MouseHookAdapter(Focused));
+            mouseCap = new Lazy<MouseHookAdapter>(() => new MouseHookAdapter(Focused, 
+                pt=>ScreenToClient(pt)));
             keyCap = new Lazy<KbdHookAdapter>(() => new KbdHookAdapter(Focused));
 
         }
@@ -317,6 +320,9 @@ namespace genshinbot.automation.windows
         public IMouseCapture MouseCap => mouseCap.Value;
         private Lazy<MouseHookAdapter> mouseCap;
         public IKeyCapture KeyCap => keyCap.Value;
+
+        public IObservable<Rect> ScreenBounds { get; private init; }
+
         private Lazy<KbdHookAdapter> keyCap;
 
         class ScreenshotAdapter : ScreenshotObservable
@@ -445,6 +451,13 @@ namespace genshinbot.automation.windows
             }
         }
 
+        public Point ScreenToClient(Point p)
+        {
+            //TODO
+            var pt = p.Sys();
+            User32.ScreenToClient(hWnd, ref pt);
+            return pt.Cv();
+        }
         public Point ClientToScreen(Point p)
         {
             //TODO

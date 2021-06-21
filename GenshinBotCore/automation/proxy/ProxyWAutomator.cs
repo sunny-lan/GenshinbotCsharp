@@ -28,6 +28,8 @@ namespace genshinbot.automation
 
         public IKeyCapture KeyCap => throw new NotImplementedException();
 
+        public IObservable<Rect> ScreenBounds => throw new NotImplementedException();
+
         public ProxyWAutomator(IObservableValue<bool> enabled, IWindowAutomator2 w)
         {
             this.enabled = enabled;

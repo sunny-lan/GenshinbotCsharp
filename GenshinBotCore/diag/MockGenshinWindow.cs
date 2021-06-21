@@ -91,6 +91,8 @@ namespace genshinbot.diag
 
         public IKeyCapture KeyCap => throw new NotImplementedException();
 
+        public IObservable<Rect> ScreenBounds => throw new NotImplementedException();
+
         private BehaviorSubject<bool> focused = new BehaviorSubject<bool>(true);
 
         public void TryFocus()

@@ -10,7 +10,10 @@ namespace genshinbot.automation.hooking
             public Point2d Position { get; init; }
             
         }
+        public record MoveEvent:MouseEvent
+        {
 
+        }
         public record ClickEvent:MouseEvent
         {
             public MouseBtn Button { get; init; }

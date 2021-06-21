@@ -49,10 +49,6 @@
                 MoveMouse(p.X, p.Y);
             }
 
-            public static void MoveMouse(System.Windows.Point p)
-            {
-                MoveMouse(Convert.ToInt32(p.X), Convert.ToInt32(p.Y));
-            }
 
             public static void MoveMouse(int x, int y)
             {

@@ -60,7 +60,7 @@ namespace genshinbot
             public static IObservable<T> Relay<T>(this IObservable<T> o, IObservable<bool> control)
             {
                 var none = Observable.Never<T>();
-                return control.Select(b => b ? o : none).Switch();
+                return control.Select(b => b ? o : none).Switch().Publish().RefCount();
             }
             public static Task WaitTrue(this IObservable<bool> oo, TimeSpan? timeout = null)
             {

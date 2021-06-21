@@ -1,5 +1,6 @@
 ﻿using genshinbot.hooks;
 using genshinbot.reactive;
+using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace genshinbot.automation.hooking
 
         public MouseHook mouseHook;
 
-        public MouseHookAdapter(IObservable<bool> enable)
+        public MouseHookAdapter(IObservable<bool> enable, Func<Point,Point> map=null)
         {
             mouseHook = new MouseHook();
 
@@ -26,13 +27,22 @@ namespace genshinbot.automation.hooking
                 .Select(x => {
                     var k = x.lParam;
                     var msg = (User32.WindowMessage)x.wParam;
+                    var pt = k.pt.Cv();
+                    if (map != null) pt = map(pt);
                     if (msg == User32.WindowMessage.WM_LBUTTONDOWN)
                     {
                         return new IMouseCapture.ClickEvent
                         {
                             Button = automation.input.MouseBtn.Left,
                             Down = true,
-                            Position = k.pt.Cv()
+                            Position = pt,
+                        };
+                    }
+                    else if (msg == User32.WindowMessage.WM_MOUSEMOVE)
+                    {
+                        return new IMouseCapture.MoveEvent
+                        {
+                            Position = pt
                         };
                     }
                     else if (msg == User32.WindowMessage.WM_LBUTTONUP)
@@ -41,11 +51,11 @@ namespace genshinbot.automation.hooking
                         {
                             Button = automation.input.MouseBtn.Left,
                             Down = true,
-                            Position = k.pt.Cv()
+                            Position =pt
                         };
                     }
 
-                    return null;
+                    return null as IMouseCapture.MouseEvent;
                 }).NonNull().Publish().RefCount();
             mouseHook.Start();
         }

@@ -32,7 +32,9 @@ namespace genshinbot.automation.hooking
         }
         public static IObservable<IReadOnlyDictionary<Keys, bool>> KeyCombo(this IObservable<IReadOnlyDictionary<Keys, bool>> o, params Keys[] combo)
         {
-            return o.Where(st => combo.All(k=>st.GetValueOrDefault(k,false)) && st.Count(x=>x.Value)==combo.Length);
+            return o.Where(
+                st => combo.All(k=>st.GetValueOrDefault(k,false))
+                && st.Count(x=>x.Value)==combo.Length);
         }
 
     }

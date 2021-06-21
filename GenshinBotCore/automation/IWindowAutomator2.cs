@@ -33,6 +33,11 @@ namespace genshinbot.automation
         IObservable<Rect> Bounds => Size.Select(s => s.Bounds());
 
         /// <summary>
+        /// The real position of the window on screen
+        /// </summary>
+        IObservable<Rect> ScreenBounds { get; }
+
+        /// <summary>
         /// Try to focus the window
         /// </summary>
         void TryFocus();
