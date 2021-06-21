@@ -45,12 +45,46 @@ namespace genshinbot.reactive.wire
         IDisposable Subscribe(Action<T> onValue);
     }
 
-    public interface IWireValue<T> : IWire<T>
+    /// <summary>
+    /// A wire, but always has a well defined value
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public interface ILiveWire<T> : IWire<T>
     {
         public T Value { get; }
     }
+    public class LiveWire<T> : Wire<T>, ILiveWire<T>
+    {
+        private T last;
+        private bool running;
+        private Func<T> getVal;
 
-    class Wire<T> : IWire<T>
+        public LiveWire(Func<T> getVal, Func<Action, IDisposable> enable) : base(
+            onNext => enable(
+                () => onNext(getVal())
+            )
+        )
+        {
+            this.getVal = getVal;
+        }
+
+        protected override void OnNext(T value)
+        {
+            base.OnNext(value);
+            last = value;
+        }
+
+        protected override void OnEnable(bool e)
+        {
+            base.OnEnable(e);
+            running = e;
+        }
+
+        //If its running, then just use the last value
+        //Else need to call getVal()
+        public T Value => running ? last : getVal();
+    }
+    public class Wire<T> : IWire<T>, IObservable<T>
     {
         List<Action<T>> subscribers = new List<Action<T>>();
         Func<Action<T>, IDisposable> Enable;
@@ -61,8 +95,24 @@ namespace genshinbot.reactive.wire
         }
 
         IDisposable enabled;
+        protected virtual void OnEnable(bool e)
+        {
+            if (e)
+            {
 
-        protected void OnNext(T value)
+                Debug.Assert(enabled == null);
+                enabled = Enable.Invoke(OnNext);
+            }
+            else
+            {
+
+                Debug.Assert(enabled != null);
+                enabled.Dispose();
+                enabled = null;
+            }
+        }
+
+        protected virtual void OnNext(T value)
         {
             Debug.Assert(enabled != null);
             foreach (var subscriber in subscribers)
@@ -73,8 +123,7 @@ namespace genshinbot.reactive.wire
         {
             if (subscribers.Count == 0)
             {
-                Debug.Assert(enabled == null);
-                enabled = Enable.Invoke(OnNext);
+                OnEnable(true);
             }
 
             subscribers.Add(onValue);
@@ -83,16 +132,25 @@ namespace genshinbot.reactive.wire
                 subscribers.Remove(onValue);
                 if (subscribers.Count == 0)
                 {
-                    Debug.Assert(enabled != null);
-                    enabled.Dispose();
-                    enabled = null;
+                    OnEnable(false);
                 }
             });
         }
+
+        public IDisposable Subscribe(IObserver<T> observer)
+        {
+            return Subscribe(v => observer.OnNext(v));
+        }
     }
+
 
     public static class Wire
     {
+        public static IObservable<T> AsObservable<T>(this IWire<T> t)
+        {
+            if (t is Wire<T> tt) return tt;
+            return new Wire<T>(t.Subscribe);
+        }
         public static async Task<T> Get<T>(this IWire<T> t)
         {
             TaskCompletionSource<T> taskCompletionSource = new TaskCompletionSource<T>();
@@ -110,6 +168,13 @@ namespace genshinbot.reactive.wire
                   w.Subscribe(value => f(value, onNext))
             );
         }
+
+        public static ILiveWire<Out> Select<In, Out>(this ILiveWire<In> w, Func<In, Out> f)
+        {
+            return new LiveWire<Out>(() => f(w.Value), onChange =>
+                w.Subscribe(_ => onChange()));
+        }
+
 
         public static IWire<Out> Select<In, Out>(this IWire<In> w, Func<In, Out> f)
         {
