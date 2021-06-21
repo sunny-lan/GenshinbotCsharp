@@ -69,7 +69,7 @@ namespace genshinbot.reactive.wire
                 {
                     if (!EqualityComparer<T>.Default.Equals(x,v))
                         taskCompletionSource.SetException(
-                            new LockInterruptedException("stream became false while running task"));
+                            new LockInterruptedException("value changed while running task"));
                 }
             ))
             {
@@ -120,7 +120,8 @@ namespace genshinbot.reactive.wire
             Func<In1,In2,T> f)
         {
             return new LiveWire<T>(() => f(t1.Value, t2.Value),
-                onChange => DisposableUtil.Merge(
+                onChange => 
+                DisposableUtil.Merge(
                     t1.Subscribe(_ => onChange()),
                     t2.Subscribe(_ => onChange())
 
@@ -139,16 +140,18 @@ namespace genshinbot.reactive.wire
             if (t is Wire<T> tt) return tt;
             return new Wire<T>(t.Subscribe);
         }
-
+        
         public static async Task<T> Get<T>(this IWire<T> t, TimeSpan? timeout = null)
         {
-            if (timeout != null) throw new NotImplementedException();
             TaskCompletionSource<T> taskCompletionSource = new TaskCompletionSource<T>();
             using (t.Subscribe(o =>
              {
                  taskCompletionSource.SetResult(o);
              }))
             {
+                if (timeout is TimeSpan tt)
+                    _ = Task.Delay(tt).ContinueWith(_ => taskCompletionSource.SetException(
+                          new TimeoutException()));
                 return await taskCompletionSource.Task;
             }
         }

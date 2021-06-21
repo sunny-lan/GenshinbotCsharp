@@ -61,8 +61,10 @@ namespace genshinbot.automation.windows
 
             clientAreaStream = locationChangeHook.Wire
                 .Where(e => e.hwnd == hWnd && e.idObject == User32.ObjectIdentifiers.OBJID_WINDOW)
+                //.Do(e=>Console.WriteLine($"e={e.idObject} {e.hwnd.DangerousGetHandle()}"))
                 .ToLive(() => GetRectDirect())
-                .Do(x=>Console.WriteLine($"cliArea={x}"));
+                //.Do(x=>Console.WriteLine($"cliArea={x}"))
+                ;
             locationChangeHook.Start();
 
 
@@ -76,14 +78,17 @@ namespace genshinbot.automation.windows
                     .Wire
                     .Where(e => e.idObject == User32.ObjectIdentifiers.OBJID_WINDOW)
                     .ToLive(() => IsForegroundWindow())
-                .Do(x => Console.WriteLine($"fore={x}")); ;
+               // .Do(x =>
+                 //   Console.WriteLine($"fore={x} "))
+                ;
             foregroundChangeHook.Start();
 
 
 
             Focused = Wire.Combine(foregroundStream, clientAreaStream,(foreground, clientArea) =>
                         foreground && clientArea.Width > 0 && clientArea.Height > 0)
-                .Do(x => Console.WriteLine($"foc={x}"));
+             //   .Do(x => Console.WriteLine($"foc={x}"))
+                ;
 
             Size = clientAreaStream
                 .Select(r => r.Size)
@@ -125,7 +130,7 @@ namespace genshinbot.automation.windows
 
         private Rect GetRectDirect()
         {
-
+            //Console.WriteLine("GetRect");
             RECT r;
             if (!User32.GetClientRect(hWnd, out r))
                 throw new Win32Exception(Marshal.GetLastWin32Error());
@@ -156,6 +161,7 @@ namespace genshinbot.automation.windows
 
         bool IsForegroundWindow()
         {
+            //Console.WriteLine("IsFore");
             return User32.GetForegroundWindow() == hWnd;
         }
 

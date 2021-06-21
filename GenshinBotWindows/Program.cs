@@ -58,7 +58,7 @@ namespace genshinbot
             //screens.PlayingScreen.TestRead();
             // algorithm.ArrowDirectionDetect.Test();
             //stream.Poller.Test1();
-            //  automation.screenshot.directx.Test.Run();
+            // automation.screenshot.directx.Test.Run();
             // automation.screenshot.gdi.run();
             //  automation.screenshot.gdi.GDIStream.Test2();
             automation.windows.WindowAutomator2.Test();
@@ -81,8 +81,8 @@ namespace genshinbot
             // await tools.DailyDoer.DispatchCollect(rig.Make());
             //await experiments.RxTest.runAsync();
             //await tools.AutofillTool.ConfigureDailyDoer(rig.Make());
-            //await tools.AutofillTool.Test2();
-            await tools.AutofillTool.ConfigurePlayingScreen(rig.Make());
+         //   await tools.AutofillTool.Test2();
+            //await tools.AutofillTool.ConfigurePlayingScreen(rig.Make());
             //data.jsonconverters.MatConverter.Test();
             Console.WriteLine("Program ended. Press enter to exit");
             Console.ReadLine();

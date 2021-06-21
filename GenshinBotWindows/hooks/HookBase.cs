@@ -89,9 +89,12 @@ namespace genshinbot.hooks
         {
             Wire = new Wire<T>(listener =>
             {
-
-                OnEvent += e => listener(e);
-                return DisposableUtil.From(() => OnEvent -= listener);
+                Action<T> bad = e => listener(e);
+                OnEvent += bad;
+                return DisposableUtil.From(
+                    () => 
+                    OnEvent -= bad
+                    );
             });
         }
 
