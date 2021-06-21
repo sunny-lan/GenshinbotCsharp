@@ -42,20 +42,18 @@ namespace genshinbot.reactive
         {
             get => maxInFlight; set
             {
-                if (value == maxInFlight) return;
-                Debug.Assert(value > maxInFlight, "MaxInFlight cannot be decreased!");
-                semaphore.Release(value - maxInFlight);
-                maxInFlight = value;
+                if (value != 1) throw new NotImplementedException();
             }
         }
 
-        private SemaphoreSlim semaphore = new SemaphoreSlim(1);
+        //private SemaphoreSlim semaphore = new SemaphoreSlim(1);
         private int maxInFlight = 1;
 
         private void enableChanged(bool enabled)
         {
             if (enabled)
             {
+                Console.WriteLine("enable true");
                 Debug.Assert(poller == null);
 
                 running = true;
@@ -63,42 +61,50 @@ namespace genshinbot.reactive
             }
             else
             {
+                Console.WriteLine("enable false. waiting for join");
                 Debug.Assert(poller != null);
 
                 running = false;
                 //TODO this could take a while depending on MaxInFlight
-                poller.Wait();
+                //TODO causes deadlock
+                //poller.Wait();
+                Console.WriteLine(" joined");
                 poller = null;
             }
         }
 
-        private async Task pollLoop()
+        private void pollLoop()
         {
-            Task delay = Task.CompletedTask;
+            Console.WriteLine("pollLoop enter");
+            //Task delay = Task.CompletedTask;
             while (running)
-            { 
+            {
+                // Console.WriteLine("waiting for semaphore");
                 //Fire a new poll task when both the delay and the semaphore are done
-                await Task.WhenAll(delay, semaphore.WaitAsync());
+                //await Task.WhenAll(delay, semaphore.WaitAsync());
+                // Console.WriteLine("semaphore done");
                 //the delay for the next task starts as soon as the task launches
-                delay = Task.Delay(Interval);
-                _ = Task.Run(() =>
-                  {
-                      try
-                      {
-                          if (!running) return;
-                          var v = poll();
-                          if (!running) return;
-                          subject.OnNext(v);
-                      }
-                      catch (Exception e)
-                      {
-                          subject.OnError(e);
-                      }
-                      finally
-                      {
-                          semaphore.Release();
-                      }
-                  });
+                //  delay = Task.Delay(Interval);
+                // _ = Task.Run(() =>
+                //  {
+                try
+                {
+                    if (!running) return;
+                    Console.WriteLine("call Poll");
+                    var v = poll();
+                    if (!running) return;
+                    Console.WriteLine("call onNext");
+                    subject.OnNext(v);
+                }
+                catch (Exception e)
+                {
+                    subject.OnError(e);
+                }
+                finally
+                {
+                    //         semaphore.Release();
+                }
+                //   });
             }
         }
 

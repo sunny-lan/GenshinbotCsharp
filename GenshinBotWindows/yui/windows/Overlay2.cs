@@ -51,6 +51,7 @@ namespace genshinbot.yui.windows
         {
             return focused.Subscribe(onNext: rr =>
             {
+                Console.WriteLine($"visible: {rr}");
                 gw.IsVisible = rr;
             });
         }

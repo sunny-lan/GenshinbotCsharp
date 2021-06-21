@@ -183,6 +183,21 @@ namespace genshinbot.tools
                 var r = await rect2dFiller.FillT(x.cvt());
                 return r.round();
             });
+            var matFiller = Filler.From<Mat>(async x =>
+            {
+                var r = await rectFiller.FillT(default);
+                return await w.Screen.Watch(r).Depacket().Get();
+            });
+            var snapFiller = Filler.From<data.Snap>(async x =>
+            {
+                var r = await rectFiller.FillT(x.Region);
+                return new data.Snap
+                {
+                    //TODO we need to hide the overlay when taking a shot
+                    Image = await w.Screen.Watch(r).Depacket().Get(),
+                    Region = r,
+                };
+            });
 
             Filler[] fillers1 =
             {
@@ -190,6 +205,8 @@ namespace genshinbot.tools
                 rect2dFiller,
                 pointFiller,
                 point2DFiller,
+                matFiller,
+                snapFiller
             };
             fillers = new Dictionary<Type, Filler>();
             foreach (var filler in fillers1)
@@ -215,6 +232,15 @@ namespace genshinbot.tools
                         return o;
                     }
                 }
+                if (fillers.TryGetValue(tt, out var filler))
+                {
+                    Prompt($"{path} - {tt.Name}: {o}", 0);
+                    var newval = await filler.Fill(o);
+                    ClearPrompt(0);
+
+                    Prompt($"{path} - new: {newval}");
+                    return newval;
+                }
                 var props = tt.GetProperties();
                 foreach (var prop in props)
                 {
@@ -222,20 +248,9 @@ namespace genshinbot.tools
                     {
                         var val = prop.GetValue(o);
                         var subpath = $"{path}.{prop.Name}";
-                        if (fillers.TryGetValue(prop.PropertyType, out var filler))
-                        {
-                            Prompt($"{subpath} - old: {val}", 0);
-                            var newval = await filler.Fill(val);
-                            ClearPrompt(0);
-                            prop.SetValue(o, newval);
-                            Prompt($"{prop.Name} - new: {newval}");
 
-                        }
-                        else
-                        {
-                            Prompt($"{prop.Name}");
-                            prop.SetValue(o, await edit(val, prop.PropertyType, subpath));
-                        }
+                        Prompt($"{prop.Name}");
+                        prop.SetValue(o, await edit(val, prop.PropertyType, subpath));
                     }
                 }
             }
@@ -265,9 +280,10 @@ namespace genshinbot.tools
                             {
                                 var sz = await w.Size.Get();
                                 var rd = d[sz];
-                                Prompt(prop.Name);
+                                Prompt($"{prop.Name}:{sz.Width}x{sz.Height}", 0);
 
                                 d[sz] = await edit(rd, args[1], prop.Name);
+                                ClearPrompt(0);
                             }
                         }
                     }
@@ -287,9 +303,12 @@ namespace genshinbot.tools
         {
             public class RD
             {
-                public Point2d p2d { get; set; }
+                public Mat derp { get; set; }
+                public data.Snap derp1 { get; set; }
+                //public Point2d p2d { get; set; }
 
-                public Rect poo { get; set; }
+               // public Rect poo { get; set; }
+
 
             }
             public Dictionary<Size, RD> Rd { get; set; } = new Dictionary<Size, RD>();
@@ -299,8 +318,13 @@ namespace genshinbot.tools
         {
             var notepad = new automation.windows.WindowAutomator2("*Untitled - Notepad", null);
             var tool = new AutofillTool(notepad);
-
-            await tool.Edit(new TestObj());
+            var obj = new TestObj();
+            await tool.Edit(obj);
+            foreach(var val in obj.Rd.Values)
+            {
+                CvThread.ImShow("a",val.derp);
+                CvThread.ImShow("b",val.derp1.Image);
+            }
         }
 
 

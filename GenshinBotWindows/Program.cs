@@ -81,8 +81,8 @@ namespace genshinbot
             // await tools.DailyDoer.DispatchCollect(rig.Make());
             //await experiments.RxTest.runAsync();
             //await tools.AutofillTool.ConfigureDailyDoer(rig.Make());
-            // await tools.AutofillTool.Test2();
-            data.jsonconverters.MatConverter.Test();
+            await tools.AutofillTool.Test2();
+            //data.jsonconverters.MatConverter.Test();
             Console.WriteLine("Program ended. Press enter to exit");
             Console.ReadLine();
             CvThread.Stop();
