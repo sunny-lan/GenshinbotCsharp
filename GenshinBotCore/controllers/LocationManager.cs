@@ -13,6 +13,7 @@ using System.Reactive.Subjects;
 using System.Reactive.Linq;
 using genshinbot.reactive;
 using genshinbot.diag;
+using genshinbot.reactive.wire;
 
 namespace genshinbot.controllers
 {
@@ -56,7 +57,7 @@ namespace genshinbot.controllers
             };
         }
 
-        public async Task<IObservable<Point2d>> TrackPos()
+        public async Task<IWire<Point2d>> TrackPos()
         {
             var db = Data.MapDb;
             var coord2Mini = db.Coord2Minimap.Expect();
@@ -290,12 +291,12 @@ namespace genshinbot.controllers
             Console.WriteLine("trakin begin");
 
             using (trackin.Subscribe(
-                onNext:x=>Console.WriteLine(x),
-                onError:x=>Console.WriteLine(x)
+               x=>Console.WriteLine(x)//,
+             //   onError:x=>Console.WriteLine(x)
             ))
             using(mgr.PlayingScreen.ArrowDirection.Subscribe(
 
-                onNext: x => Console.WriteLine(x)
+                x => Console.WriteLine(x)
                 ))
             {
                 Console.ReadLine();

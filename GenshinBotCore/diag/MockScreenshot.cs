@@ -1,5 +1,6 @@
 ﻿using genshinbot.automation.screenshot;
 using genshinbot.reactive;
+using genshinbot.reactive.wire;
 using OpenCvSharp;
 using System;
 using System.Linq;
@@ -12,9 +13,10 @@ namespace genshinbot.diag
         public TimeSpan FrameInterval { get; init; }
         public Mat Image { get; set; }
 
-        public IObservable<Pkt<Mat>> Watch(Rect r)
+        public IWire<Pkt<Mat>> Watch(Rect r)
         {
             return Observable.Interval(FrameInterval)
+                .ToWire()
                 .Select(_ => Image[r])
                 .Packetize();
         }

@@ -1,4 +1,5 @@
 ﻿using genshinbot.automation.input;
+using genshinbot.reactive.wire;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,24 +16,21 @@ namespace genshinbot.automation.hooking
             public bool Down { get; init; }
         }
 
-        public IObservable<KeyEvent> KeyEvents { get; }
-        public IObservable<IReadOnlyDictionary<Keys, bool>> KbdState => KeyEvents.KbdState();
+        public IWire<KeyEvent> KeyEvents { get; }
+        public ILiveWire<IReadOnlyDictionary<Keys, bool>> KbdState => KeyEvents.KbdState();
     }
 
     public static class KeyExt
     {
-        public static IObservable<IReadOnlyDictionary<Keys,bool>> KbdState(this IObservable<IKeyCapture.KeyEvent> o)
+        public static ILiveWire<IReadOnlyDictionary<Keys,bool>> KbdState(this IWire<IKeyCapture.KeyEvent> o)
         {
             Dictionary<Keys, bool> d = new Dictionary<Keys, bool>();
-            return o.Select(x =>
-            {
-                d[x.Key] = x.Down;
-                return d;
-            }).Publish().RefCount();
+            return o.Do(x => d[x.Key] = x.Down)
+                .ToLive(() => d);
         }
-        public static IObservable<IReadOnlyDictionary<Keys, bool>> KeyCombo(this IObservable<IReadOnlyDictionary<Keys, bool>> o, params Keys[] combo)
+        public static ILiveWire<bool> KeyCombo(this ILiveWire<IReadOnlyDictionary<Keys, bool>> o, params Keys[] combo)
         {
-            return o.Where(
+            return o.Select(
                 st => combo.All(k=>st.GetValueOrDefault(k,false))
                 && st.Count(x=>x.Value)==combo.Length);
         }

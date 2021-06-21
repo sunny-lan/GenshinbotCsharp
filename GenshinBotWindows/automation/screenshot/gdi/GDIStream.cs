@@ -15,6 +15,7 @@ using System.Windows.Forms;
 using Vanara.PInvoke;
 using genshinbot.reactive;
 using System.Reactive.Subjects;
+using genshinbot.reactive.wire;
 
 namespace genshinbot.automation.screenshot.gdi
 {
@@ -34,7 +35,7 @@ namespace genshinbot.automation.screenshot.gdi
             hDesktopDC.Dispose();
         }
 
-        public GDIStream(IObservable<bool> enable = null)
+        public GDIStream(ILiveWire<bool> enable = null)
         {
             hDesktopDC = User32.GetDC(IntPtr.Zero);
             if (hDesktopDC.IsInvalid)
@@ -50,9 +51,9 @@ namespace genshinbot.automation.screenshot.gdi
                 CreateBuffer(SystemInformation.VirtualScreen.Width, SystemInformation.VirtualScreen.Height);
             });
 
-            this.enable = enable ?? Observable.Return(true);
+            this.enable = enable ?? new ConstLiveWire<bool>(true);
             poller = new Poller<Snap>(Poll);
-            pollerEnable = poller.Relay(this.enable);
+            pollerEnable = poller.Wire.Relay(this.enable);
         }
 
 
@@ -106,14 +107,14 @@ namespace genshinbot.automation.screenshot.gdi
 
             return new Snap(buf);
         }
-        private IObservable<bool> enable;
+        private ILiveWire<bool> enable;
 
         Poller<Snap> poller;
 
         /// <summary>
         /// Poller output, filtered through Enable signal
         /// </summary>
-        IObservable<Snap> pollerEnable;
+        IWire<Snap> pollerEnable;
 
         /// <summary>
         /// min number of distinct rects before applying merge algo
@@ -121,9 +122,9 @@ namespace genshinbot.automation.screenshot.gdi
         public int MinRectsBeforeMerge = 0;
 
         /// <summary>
-        /// cache of IObservables for each screen region being watched
+        /// cache of IWires for each screen region being watched
         /// </summary>
-        Dictionary<Rect, IObservable<Snap>> cache = new Dictionary<Rect, IObservable<Snap>>();
+        Dictionary<Rect, IWire<Snap>> cache = new Dictionary<Rect, IWire<Snap>>();
 
         /// <summary>
         /// List of regions to actually poll
@@ -167,7 +168,7 @@ namespace genshinbot.automation.screenshot.gdi
 
 
 
-        public IObservable<Snap> Watch(Rect r)
+        public IWire<Snap> Watch(Rect r)
         {
             if (!cache.ContainsKey(r))
             {
@@ -183,9 +184,7 @@ namespace genshinbot.automation.screenshot.gdi
                     Debug.Assert(listeningRects.Remove(r, out var _));
                     RecalculateStrategy();
                 });
-                cache[r] = Observable.Merge(boundsCalcer,
-                    pollerEnable.Select(m => m[r])
-                ).Publish().RefCount();
+                cache[r] = poller.Wire.Select(m => m[r]);
 
             }
             return cache[r];
@@ -193,7 +192,7 @@ namespace genshinbot.automation.screenshot.gdi
         public static void Test2()
         {
             //Task.Run(()=> { while (true) Cv2.WaitKey(1); });\
-            var enable = new BehaviorSubject<bool>(true);
+            var enable = new LiveWireSource<bool>(true);
             GDIStream strm = new GDIStream(enable);
             var poll = strm.Watch(new Rect(0, 0, 1600, 900));
             Console.WriteLine("b:");
@@ -229,15 +228,15 @@ namespace genshinbot.automation.screenshot.gdi
                     Console.ReadLine();
                     v = !v;
                     Console.WriteLine($"enable={v}");
-                    enable.OnNext(v);
+                    enable.Emit(v);
                 }
             }
 
         }
-
+/*
         public static void Test()
         {
-            IObservable<Unit> tmp = Observable.FromEvent(
+            IWire<Unit> tmp = Observable.FromEvent(
                 h => Console.WriteLine("add"),
                 h => Console.WriteLine("remove")
             );
@@ -258,6 +257,6 @@ namespace genshinbot.automation.screenshot.gdi
             }
             Console.WriteLine("c");
 
-        }
+        }*/
     }
 }

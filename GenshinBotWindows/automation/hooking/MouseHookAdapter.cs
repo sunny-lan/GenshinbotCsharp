@@ -1,5 +1,6 @@
 ﻿using genshinbot.hooks;
 using genshinbot.reactive;
+using genshinbot.reactive.wire;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -14,49 +15,50 @@ namespace genshinbot.automation.hooking
     public class MouseHookAdapter:IMouseCapture
     {
 
-        public IObservable<IMouseCapture.MouseEvent> MouseEvents { get; private init; }
+        public IWire<IMouseCapture.MouseEvent> MouseEvents { get; private init; }
 
         public MouseHook mouseHook;
 
-        public MouseHookAdapter(IObservable<bool> enable, Func<Point,Point> map=null)
+        public MouseHookAdapter(ILiveWire<bool> enable, Func<Point,Point> map=null)
         {
             mouseHook = new MouseHook();
 
-            MouseEvents = mouseHook
+            MouseEvents = mouseHook.Wire
                 .Relay(enable)
-                .Select(x => {
+                .Link<(IntPtr wParam,User32.MOUSEHOOKSTRUCT lParam),IMouseCapture.MouseEvent>(( x, next) =>
+                {
+                    
                     var k = x.lParam;
                     var msg = (User32.WindowMessage)x.wParam;
                     var pt = k.pt.Cv();
                     if (map != null) pt = map(pt);
                     if (msg == User32.WindowMessage.WM_LBUTTONDOWN)
                     {
-                        return new IMouseCapture.ClickEvent
+                         next(new IMouseCapture.ClickEvent
                         {
                             Button = automation.input.MouseBtn.Left,
                             Down = true,
                             Position = pt,
-                        };
+                        });
                     }
                     else if (msg == User32.WindowMessage.WM_MOUSEMOVE)
                     {
-                        return new IMouseCapture.MoveEvent
+                         next(new IMouseCapture.MoveEvent
                         {
                             Position = pt
-                        };
+                        });
                     }
                     else if (msg == User32.WindowMessage.WM_LBUTTONUP)
                     {
-                        return new IMouseCapture.ClickEvent
+                         next(new IMouseCapture.ClickEvent
                         {
                             Button = automation.input.MouseBtn.Left,
                             Down = true,
-                            Position =pt
-                        };
+                            Position = pt
+                        });
                     }
 
-                    return null as IMouseCapture.MouseEvent;
-                }).NonNull().Publish().RefCount();
+                });
             mouseHook.Start();
         }
 

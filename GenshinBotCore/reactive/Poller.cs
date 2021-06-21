@@ -1,4 +1,6 @@
-﻿using System;
+﻿using genshinbot.reactive.wire;
+using genshinbot.util;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reactive.Linq;
@@ -14,104 +16,46 @@ namespace genshinbot.reactive
     /// Polls the value of a function and outputs it into a stream
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class Poller<T> : IObservable<T>
+    public class Poller<T> 
     {
-        private Subject<T> subject;
-        private IObservable<T> obsSubj;
+        public ILiveWire<T> Wire => obsSubj;
+        private LiveWire<T> obsSubj;
         Func<T> poll;
         public Poller(Func<T> poll)
         {
             this.poll = poll;
-            subject = new Subject<T>();
-            //dummy observable to enable/disable
-            var obs = Observable.FromEvent<T>(h => enableChanged(true), h => enableChanged(false));
-            obsSubj = Observable.Merge(obs, subject).Publish().RefCount();
+            obsSubj = new LiveWire<T>(poll, onChange =>
+              {
+                  var ts = new CancellationTokenSource();
+                  Task.Run(() => {
+                      while (!ts.Token.IsCancellationRequested)
+                      {
+                          onChange();
+                      }
+                  },ts.Token);
+                  return DisposableUtil.From(ts.Cancel);
+              });
 
         }
 
-        private volatile bool running = false;
-        private Task poller;
 
         /// <summary>
         /// Polling interval, in milliseconds.
         /// If 0, the maximum speed possible is used
         /// </summary>
-        public int Interval = 0;
+        public int Interval
+        {
+            get => 0; set => throw new NotImplementedException();
+        }
 
         public int MaxInFlight
         {
-            get => maxInFlight; set
+            get => 1; set
             {
                 if (value != 1) throw new NotImplementedException();
             }
         }
 
-        //private SemaphoreSlim semaphore = new SemaphoreSlim(1);
-        private int maxInFlight = 1;
-
-        private void enableChanged(bool enabled)
-        {
-            if (enabled)
-            {
-                Console.WriteLine("enable true");
-                Debug.Assert(poller == null);
-
-                running = true;
-                poller = Task.Run(pollLoop);
-            }
-            else
-            {
-                Console.WriteLine("enable false. waiting for join");
-                Debug.Assert(poller != null);
-
-                running = false;
-                //TODO this could take a while depending on MaxInFlight
-                //TODO causes deadlock
-                //poller.Wait();
-                Console.WriteLine(" joined");
-                poller = null;
-            }
-        }
-
-        private void pollLoop()
-        {
-            Console.WriteLine("pollLoop enter");
-            //Task delay = Task.CompletedTask;
-            while (running)
-            {
-                // Console.WriteLine("waiting for semaphore");
-                //Fire a new poll task when both the delay and the semaphore are done
-                //await Task.WhenAll(delay, semaphore.WaitAsync());
-                // Console.WriteLine("semaphore done");
-                //the delay for the next task starts as soon as the task launches
-                //  delay = Task.Delay(Interval);
-                // _ = Task.Run(() =>
-                //  {
-                try
-                {
-                    if (!running) return;
-                    Console.WriteLine("call Poll");
-                    var v = poll();
-                    if (!running) return;
-                    Console.WriteLine("call onNext");
-                    subject.OnNext(v);
-                }
-                catch (Exception e)
-                {
-                    subject.OnError(e);
-                }
-                finally
-                {
-                    //         semaphore.Release();
-                }
-                //   });
-            }
-        }
-
-        public IDisposable Subscribe(IObserver<T> observer)
-        {
-            return obsSubj.Subscribe(observer);
-        }
     }
 
     public static class Poller
@@ -129,7 +73,7 @@ namespace genshinbot.reactive
             });
 
 
-            using (stream.Subscribe(x => Console.WriteLine(x)))
+            using (stream.Wire.Subscribe(x => Console.WriteLine(x)))
             {
                 Thread.Sleep(10000);
             }
@@ -146,7 +90,7 @@ namespace genshinbot.reactive
             });
             stream.Interval = 500;
 
-            using (stream.Subscribe(x => Console.WriteLine(x)))
+            using (stream.Wire.Subscribe(x => Console.WriteLine(x)))
             {
                 Thread.Sleep(5000);
             }
@@ -164,7 +108,7 @@ namespace genshinbot.reactive
             });
             stream.MaxInFlight = 2;
 
-            using (stream.Subscribe(x => Console.WriteLine(x)))
+            using (stream.Wire.Subscribe(x => Console.WriteLine(x)))
             {
                 Thread.Sleep(5000);
             }
@@ -183,7 +127,7 @@ namespace genshinbot.reactive
             });
             stream.Interval = 100;
             stream.MaxInFlight = 3;
-            using (stream.Subscribe(x => Console.WriteLine(x)))
+            using (stream.Wire.Subscribe(x => Console.WriteLine(x)))
             {
                 Thread.Sleep(5000);
             }
@@ -204,7 +148,7 @@ namespace genshinbot.reactive
             stream.MaxInFlight = 3;
 
             Console.WriteLine("poll should begin after");
-            using (stream.Subscribe(x => Console.WriteLine(x)))
+            using (stream.Wire.Subscribe(x => Console.WriteLine(x)))
             {
                 Thread.Sleep(5000);
             }
@@ -212,7 +156,7 @@ namespace genshinbot.reactive
             Thread.Sleep(2000);
 
             Console.WriteLine("poll should begin after");
-            using (stream.Subscribe(x => Console.WriteLine(x)))
+            using (stream.Wire.Subscribe(x => Console.WriteLine(x)))
             {
                 Thread.Sleep(5000);
             }

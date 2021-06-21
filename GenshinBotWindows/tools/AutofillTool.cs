@@ -4,6 +4,7 @@ using genshinbot.automation.input;
 using genshinbot.data;
 using genshinbot.diag;
 using genshinbot.reactive;
+using genshinbot.reactive.wire;
 using OneOf;
 using OpenCvSharp;
 using System;
@@ -22,7 +23,7 @@ namespace genshinbot.tools
     public class AutofillTool
     {
         private IWindowAutomator2 w;
-        private IObservable<IReadOnlyDictionary<Keys, bool>> kk;
+        private ILiveWire<IReadOnlyDictionary<Keys, bool>> kk;
         private yui.windows.Overlay2 overlay;
         abstract class Filler
         {
@@ -124,7 +125,7 @@ namespace genshinbot.tools
                 Prompt($"{Select.Description} to select, {Cancel.Description} to cancel", 1);
                 Point2d pos = x;
                 KeyComb key;
-                using (w.MouseCap.MouseEvents.Subscribe(onNext: evt =>
+                using (w.MouseCap.MouseEvents.Subscribe( evt =>
                 {
                     if (evt is IMouseCapture.MoveEvent mEvt)
                     {
@@ -349,14 +350,14 @@ namespace genshinbot.tools
 
                                 var sz = await w.Size.Get();
                                 //ensure window size doesn't change while doing RD
-                                await w.Size.Select(x => x == sz).LockWhile(async () =>
+                                await w.Size.Lock(async () =>
                                     {
                                         var rd = d[sz];
                                         Prompt($"{prop.Name}:{sz.Width}x{sz.Height}", 0);
 
                                         d[sz] = await edit(rd, args[1], prop.Name);
                                         ClearPrompt(0);
-                                    });
+                                    },sz);
                             }
                         }
                     }

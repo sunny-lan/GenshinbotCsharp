@@ -1,5 +1,6 @@
 ﻿using GameOverlay.Drawing;
 using GameOverlay.Windows;
+using genshinbot.reactive.wire;
 using System;
 using System.Collections.Generic;
 
@@ -55,9 +56,9 @@ namespace genshinbot.yui.windows
             Visible = true;
         }
 
-        public IDisposable follow(IObservable<OpenCvSharp.Rect> bounds)
+        public IDisposable follow(IWire<OpenCvSharp.Rect> bounds)
         {
-            return bounds.Subscribe(onNext: rr =>
+            return bounds.Subscribe( rr =>
             {
                 Console.WriteLine($"size: {rr}");
                 gw.X = rr.X;
@@ -66,9 +67,9 @@ namespace genshinbot.yui.windows
                 gw.Height = rr.Height;
             });
         }
-        public IDisposable follow(IObservable<bool> focused)
+        public IDisposable follow(IWire<bool> focused)
         {
-            return focused.Subscribe(onNext: rr =>
+            return focused.Subscribe(rr =>
             {
                 Console.WriteLine($"visible: {rr}");
                 internalVisible = rr;

@@ -2,6 +2,7 @@
 using genshinbot.automation.input;
 using genshinbot.automation.screenshot;
 using genshinbot.reactive;
+using genshinbot.reactive.wire;
 using OpenCvSharp;
 using System;
 using System.Diagnostics;
@@ -10,13 +11,13 @@ namespace genshinbot.automation
 {
     public class ProxyWAutomator : IWindowAutomator2
     {
-        IObservableValue<bool> enabled;
+        ILiveWire<bool> enabled;
         IWindowAutomator2 w;
 
 
-        public IObservable<bool> Focused { get; private init; }
+        public ILiveWire<bool> Focused { get; private init; }
 
-        public IObservable<Size> Size { get; private init; }
+        public IWire<Size> Size { get; private init; }
 
         public IKeySimulator2 Keys { get; private init; }
 
@@ -28,9 +29,9 @@ namespace genshinbot.automation
 
         public IKeyCapture KeyCap => throw new NotImplementedException();
 
-        public IObservable<Rect> ScreenBounds => throw new NotImplementedException();
+        public IWire<Rect> ScreenBounds => throw new NotImplementedException();
 
-        public ProxyWAutomator(IObservableValue<bool> enabled, IWindowAutomator2 w)
+        public ProxyWAutomator(ILiveWire<bool> enabled, IWindowAutomator2 w)
         {
             this.enabled = enabled;
             this.w = w;
@@ -38,7 +39,7 @@ namespace genshinbot.automation
             Mouse = new ProxyMouse(enabled, w.Mouse);
             Screen = new ProxyScreen(enabled, w.Screen);
 
-            Focused = w.Focused.Relay(enabled);
+            Focused = w.Focused;//TODO.Relay(enabled);
             Size = w.Size.Relay(enabled);
 
         }

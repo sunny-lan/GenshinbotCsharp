@@ -167,7 +167,7 @@ namespace genshinbot
             foregroundChangeHook.Start();
         }
 
-        private void HandleForegroundWindowChanged(object sender, WinEvent e)
+        private void HandleForegroundWindowChanged(WinEvent e)
         {
             if (e.idObject != User32.ObjectIdentifiers.OBJID_WINDOW) return;
             RefreshForeground();
@@ -247,7 +247,7 @@ namespace genshinbot
             locationChangeHook.Start();
         }
 
-        private void HandleWindowLocationChanged(object sender, WinEvent e)
+        private void HandleWindowLocationChanged(WinEvent e)
         {
             if (e.hwnd == hWnd && e.idObject == User32.ObjectIdentifiers.OBJID_WINDOW)
             {

@@ -111,7 +111,7 @@ namespace genshinbot.hooks
             hook.Stop();
             Console.WriteLine("ready");
             hook.Start();
-            hook.OnEvent += (_, e) =>
+            hook.OnEvent += ( e) =>
             {
                 //if (e.hwnd == hwnd) Console.WriteLine("genshin open");
                 //else Console.WriteLine("genshin close");

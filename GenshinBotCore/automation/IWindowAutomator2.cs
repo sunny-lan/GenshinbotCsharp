@@ -1,7 +1,7 @@
-﻿using genshinbot.reactive;
+﻿
+using genshinbot.reactive.wire;
 using OpenCvSharp;
 using System;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 namespace genshinbot.automation
@@ -14,7 +14,7 @@ namespace genshinbot.automation
         /// <summary>
         /// whether the window is focused
         /// </summary>
-        IObservable<bool> Focused { get; }
+        ILiveWire<bool> Focused { get; }
 
         Task WaitForFocus(TimeSpan? timeout = null)
         {
@@ -24,18 +24,18 @@ namespace genshinbot.automation
         /// <summary>
         /// The size of the window
         /// </summary>
-        IObservable<Size> Size { get; }
+        IWire<Size> Size { get; }
 
         /// <summary>
         /// The bounds of the window
         /// Recommended to override for performance
         /// </summary>
-        IObservable<Rect> Bounds => Size.Select(s => s.Bounds());
+        IWire<Rect> Bounds => Size.Select(s => s.Bounds());
 
         /// <summary>
         /// The real position of the window on screen
         /// </summary>
-        IObservable<Rect> ScreenBounds { get; }
+        IWire<Rect> ScreenBounds { get; }
 
         /// <summary>
         /// Try to focus the window

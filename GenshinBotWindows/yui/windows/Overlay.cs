@@ -1,6 +1,7 @@
 ﻿using genshinbot.automation.windows;
 using genshinbot.diag;
 using genshinbot.reactive;
+using genshinbot.reactive.wire;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -94,10 +95,10 @@ namespace genshinbot.yui.windows
                 .Select(x => ((double)trackBar1.Value).Radians());
             var wantedPkt = wanted.Packetize();
 
-            var alg = new algorithm.ArrowSteering(p.ArrowDirection, wanted);
+            var alg = new algorithm.ArrowSteering(p.ArrowDirection.AsObservable(), wanted);
             alg.MouseDelta.Subscribe(x => p.Io.M.MouseMove(new OpenCvSharp.Point2d(x, 0)));
 
-            graph(p.ArrowDirection, "arrow dir");
+            graph(p.ArrowDirection.AsObservable(), "arrow dir");
 
         }
 

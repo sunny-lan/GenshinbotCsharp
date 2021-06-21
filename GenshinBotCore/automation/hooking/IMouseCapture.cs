@@ -1,4 +1,5 @@
 ﻿using genshinbot.automation.input;
+using genshinbot.reactive.wire;
 using OpenCvSharp;
 using System;
 
@@ -20,7 +21,7 @@ namespace genshinbot.automation.hooking
             public bool Down { get; init; }
         }
 
-        public IObservable<MouseEvent> MouseEvents { get; }
+        public IWire<MouseEvent> MouseEvents { get; }
 
 
     }

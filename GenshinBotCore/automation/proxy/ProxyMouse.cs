@@ -1,5 +1,6 @@
 ﻿using genshinbot.automation.input;
 using genshinbot.reactive;
+using genshinbot.reactive.wire;
 using OpenCvSharp;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -8,11 +9,11 @@ namespace genshinbot.automation
 {
     public class ProxyMouse : IMouseSimulator2
     {
-        IObservableValue<bool> enabled;
+        ILiveWire<bool> enabled;
 
         IMouseSimulator2 m;
 
-        public ProxyMouse(IObservableValue<bool> enabled, IMouseSimulator2 m)
+        public ProxyMouse(ILiveWire<bool> enabled, IMouseSimulator2 m)
         {
             this.enabled = enabled;
             this.m = m;

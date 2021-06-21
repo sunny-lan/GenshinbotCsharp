@@ -5,7 +5,6 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
@@ -13,7 +12,7 @@ namespace genshinbot
 {
     namespace reactive
     {
-        public static class Ext
+        public static partial class Ext
         {
             /// <summary>
             /// runs async processing upon a stream, 
@@ -70,24 +69,6 @@ namespace genshinbot
                 if (timeout is TimeSpan d)
                     o = o.Timeout(d);
                 return o.Get();
-            }
-            public class LockInterruptedException : Exception
-            {
-                public LockInterruptedException()
-                {
-                }
-
-                public LockInterruptedException(string message) : base(message)
-                {
-                }
-
-                public LockInterruptedException(string message, Exception innerException) : base(message, innerException)
-                {
-                }
-
-                protected LockInterruptedException(SerializationInfo info, StreamingContext context) : base(info, context)
-                {
-                }
             }
             /// <summary>
             /// Fails a task if observable sends false while task isn't complete

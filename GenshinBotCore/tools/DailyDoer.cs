@@ -3,6 +3,7 @@ using genshinbot.automation.hooking;
 using genshinbot.automation.input;
 using genshinbot.data;
 using genshinbot.reactive;
+using genshinbot.reactive.wire;
 using OpenCvSharp;
 using System.Linq;
 using System.Reactive.Linq;

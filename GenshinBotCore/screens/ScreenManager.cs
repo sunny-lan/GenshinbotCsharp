@@ -1,5 +1,6 @@
 ﻿using genshinbot.automation;
 using genshinbot.reactive;
+using genshinbot.reactive.wire;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -29,14 +30,14 @@ namespace genshinbot.screens
         public PlayingScreen PlayingScreen { get; private init; }
         public MapScreen MapScreen { get; private init; }
 
-        public IObservableValue<IScreen> ActiveScreen { get; private init; }
-        private Subject<IScreen> screen;
+        public ILiveWire<IScreen> ActiveScreen => screen;
+        private LiveWireSource<IScreen> screen;
 
         public ScreenManager(BotIO io)
         {
             this.io = io;
-            screen = new Subject<IScreen>();
-            ActiveScreen = screen.From(null);
+            screen = new LiveWireSource<IScreen>(null);
+            
             PlayingScreen = new PlayingScreen(new ProxyBotIO(ActiveScreen.Select(s => 
             s == PlayingScreen
                 ), io), this);
@@ -45,7 +46,7 @@ namespace genshinbot.screens
         }
         public void ForceScreen(IScreen s)//TODO no async needed
         {
-            screen.OnNext(s);
+            screen.Emit(s);
             Debug.Assert(ActiveScreen.Value == s);
         }
         public async Task ExpectScreen(IScreen s, int timeout = 2000)

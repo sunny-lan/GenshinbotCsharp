@@ -3,6 +3,7 @@ using genshinbot.automation.input;
 using genshinbot.data;
 using genshinbot.diag;
 using genshinbot.reactive;
+using genshinbot.reactive.wire;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -69,19 +70,19 @@ namespace genshinbot.screens
             public CharacterFilter CharFilter { get; set; } = new CharacterFilter();
         }
         public Db db => Db.Instance;
-        private IObservable<Db.RD> rd;
-        public IObservable<Mat> Minimap { get; private init; }
-        public IObservable<Pkt<Mat>> Arrow { get; private init; }
-        public IObservable<Pkt<double>> ArrowDirection { get; private init; }
+        private IWire<Db.RD> rd;
+        public IWire<Mat> Minimap { get; private init; }
+        public IWire<Pkt<Mat>> Arrow { get; private init; }
+        public IWire<Pkt<double>> ArrowDirection { get; private init; }
 
-        public IObservable<Point2d> MinimapPos { get; private init; }
+        public IWire<Point2d> MinimapPos { get; private init; }
 
         /*public enum TrackStatus
         {
             None,
             Tracking
         }
-        public IObservable<TrackStatus> MinimapTrackStatus=>trackStatus;
+        public IWire<TrackStatus> MinimapTrackStatus=>trackStatus;
         private BehaviorSubject<TrackStatus> trackStatus=new BehaviorSubject<TrackStatus>(TrackStatus.None);*/
 
         class MinimapMatchSettingsAdapter : algorithm.MinimapMatch.Settings
@@ -96,7 +97,7 @@ namespace genshinbot.screens
         /// </summary>
         /// <param name="approxPos"></param>
         /// <returns></returns>
-        public IObservable<Point2d> TrackPos(Point2d approxPos)
+        public IWire<Point2d> TrackPos(Point2d approxPos)
         {
 
             algorithm.MinimapMatch.PositionTracker posTrack = null;
@@ -143,9 +144,9 @@ namespace genshinbot.screens
             Arrow = b.W.Screen.Watch(rd.Select(r =>
                 r.MinimapLoc.Center()
                 .RectAround(new Size(db.ArrowRadius * 2, db.ArrowRadius * 2))
-            )).Publish().RefCount();
+            ));
             //TODO handle errors+offload to separate thread!
-            ArrowDirection = Arrow.Select(arrow => arrowDirectionAlg.GetAngle(arrow)).Publish().RefCount();
+            ArrowDirection = Arrow.Select(arrow => arrowDirectionAlg.GetAngle(arrow));
 
         }
 
@@ -166,7 +167,7 @@ namespace genshinbot.screens
             BotIO b = rig.Make();
             var p = new PlayingScreen(b,null);
             using (p.ArrowDirection.Subscribe(
-                onNext: x => Console.WriteLine($"angle={x}")
+                x => Console.WriteLine($"angle={x}")
             ))
             {
                 Console.ReadLine();

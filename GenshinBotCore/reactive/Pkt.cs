@@ -1,4 +1,5 @@
-﻿using System;
+﻿using genshinbot.reactive.wire;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -45,6 +46,60 @@ namespace genshinbot.reactive
         }
     }
 
+
+    public static class PktWireExtensions
+    {
+        public static IWire<Pkt<Out>> ProcessAsync<In, Out>(this IWire<Pkt<In>> observable, Func<In, Out> fn)
+        {
+            return observable.ProcessAsync(x => x.Select(fn));
+        }
+
+
+        /// <summary>
+        /// Performs transformation on stream of packets, keeping the CaptureTime of the packet the same
+        /// </summary>
+        /// <typeparam name="In"></typeparam>
+        /// <typeparam name="Out"></typeparam>
+        /// <param name="observable"></param>
+        /// <param name="fn"></param>
+        /// <returns></returns>
+        public static IWire<Pkt<Out>> Select<In, Out>(this IWire<Pkt<In>> observable, Func<In, Out> fn)
+        {
+            return observable.Select((Pkt<In> x) => x.Select(fn));
+        }
+
+        /// <summary>
+        /// Produces a new stream with packet information discarded
+        /// </summary>
+        /// <typeparam name="In"></typeparam>
+        /// <typeparam name="Out"></typeparam>
+        /// <param name="observable"></param>
+        /// <param name="fn"></param>
+        /// <returns></returns>
+        public static IWire<Out> Depacket<In, Out>(this IWire<Pkt<In>> observable, Func<In, Out> fn)
+        {
+            return observable.Select((Pkt<In> x) => fn(x.Value));
+        }
+
+        /// <summary>
+        /// Produces a new stream with packet information discarded
+        /// </summary>
+        public static IWire<In> Depacket<In>(this IWire<Pkt<In>> observable)
+        {
+            return observable.Select((Pkt<In> x) => x.Value);
+        }
+
+        /// <summary>
+        /// Wraps stream in Pkt, at current time
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="observable"></param>
+        /// <returns></returns>
+        public static IWire<Pkt<T>> Packetize<T>(this IWire<T> observable)
+        {
+            return observable.Select(x => new Pkt<T>(x));
+        }
+    }
     public static class PktObservableExtensions
     {
         public static IObservable<Pkt<Out>> ProcessAsync<In, Out>(this IObservable<Pkt<In>> observable, Func<In, Out> fn)

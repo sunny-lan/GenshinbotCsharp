@@ -2,6 +2,7 @@
 using genshinbot.automation.hooking;
 using genshinbot.automation.input;
 using genshinbot.automation.screenshot;
+using genshinbot.reactive.wire;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -61,8 +62,8 @@ namespace genshinbot.diag
         };
 
 
-        public IObservable<Size> Size => size;
-        private BehaviorSubject<Size> size;
+        public IWire<Size> Size => size;
+        private LiveWireSource<Size> size;
 
         public IKeySimulator2 Keys => new MockKeySim(this);
 
@@ -70,7 +71,7 @@ namespace genshinbot.diag
 
         public MockGenshinWindow(Size s)
         {
-            size = new BehaviorSubject<Size>(s);
+            size = new LiveWireSource<Size>(s);
             PlayingScreen.KeyMap[automation.input.Keys.M] = MapScreen;
             MapScreen.KeyMap[automation.input.Keys.M] = PlayingScreen;
             MapScreen.KeyMap[automation.input.Keys.Escape] = PlayingScreen;
@@ -83,17 +84,17 @@ namespace genshinbot.diag
         /// <param name="b"></param>
         public void SetFocus(bool b)
         {
-            focused.OnNext(b);
+            focused.Emit(b);
         }
-        public IObservable<bool> Focused => focused;
+        public ILiveWire<bool> Focused => focused;
 
         public IMouseCapture MouseCap => throw new NotImplementedException();
 
         public IKeyCapture KeyCap => throw new NotImplementedException();
 
-        public IObservable<Rect> ScreenBounds => throw new NotImplementedException();
+        public IWire<Rect> ScreenBounds => throw new NotImplementedException();
 
-        private BehaviorSubject<bool> focused = new BehaviorSubject<bool>(true);
+        private LiveWireSource<bool> focused = new LiveWireSource<bool>(true);
 
         public void TryFocus()
         {

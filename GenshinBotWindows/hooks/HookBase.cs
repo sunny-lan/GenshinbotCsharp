@@ -1,4 +1,6 @@
-﻿using System;
+﻿using genshinbot.reactive.wire;
+using genshinbot.util;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -17,7 +19,7 @@ namespace genshinbot.hooks
     /// Provides a base implementation with a message loop for all hooking classes
     /// </summary>
     /// <typeparam name="T">The event type returned by the hook</typeparam>
-    public abstract class HookBase<T> :IObservable<T>
+    public abstract class HookBase<T>
     {
         protected uint ThreadID { get; private set; }
 
@@ -28,7 +30,7 @@ namespace genshinbot.hooks
         /// <summary>
         /// Note: this event will be raised on the message loop thread
         /// </summary>
-        public event EventHandler<T> OnEvent;
+        public event Action<T> OnEvent;
 
         public bool Running { get; private set; }
 
@@ -45,7 +47,7 @@ namespace genshinbot.hooks
         private void loop()
         {
             ThreadID = Kernel32.GetCurrentThreadId();
-            _ptr=init();
+            _ptr = init();
 
             while (true)
             {
@@ -69,7 +71,7 @@ namespace genshinbot.hooks
             if (Kernel32.GetCurrentThreadId() != ThreadID)
                 throw new Exception("Cross thread call to signal");
 
-            OnEvent?.Invoke(this, evt);
+            OnEvent?.Invoke(evt);
 
         }
 
@@ -82,22 +84,15 @@ namespace genshinbot.hooks
             loopThread.Wait();
         }
 
-        private IObservable<T> events;
-        bool observableMode = false;
-        public IDisposable Subscribe(IObserver<T> observer)
-        {
-            return events.Subscribe(observer);
-        }
+        public IWire<T> Wire { get; private init; }
         public HookBase()
         {
-            events = Observable.FromEventPattern<T>(
-                x => {
-                    OnEvent += x;
-                },
-                x=> {
-                    OnEvent -= x;
-                }
-            ).Publish().RefCount().Select(x=>x.EventArgs);
+            Wire = new Wire<T>(listener =>
+            {
+
+                OnEvent += e => listener(e);
+                return DisposableUtil.From(() => OnEvent -= listener);
+            });
         }
 
         ~HookBase()
@@ -111,7 +106,7 @@ namespace genshinbot.hooks
     /// Provides a base implementation for all hooks using SetWindowsHookEx
     /// </summary>
     /// <typeparam name="T">Type of event returned by the hook</typeparam>
-    public abstract class WindowsHookEx<T> : HookBase<T> 
+    public abstract class WindowsHookEx<T> : HookBase<T>
     {
 
         private User32.SafeHHOOK hookID;
@@ -173,7 +168,7 @@ namespace genshinbot.hooks
     /// Implements boilerplate code for all SetWindowsHookEx
     /// </summary>
     /// <typeparam name="T">Type of events returned</typeparam>
-   public abstract class BasicWindowsHookEx<T>:WindowsHookEx<(IntPtr wParam,T lParam)> 
+    public abstract class BasicWindowsHookEx<T> : WindowsHookEx<(IntPtr wParam, T lParam)>
     {
         protected BasicWindowsHookEx(User32.HookType hooktype) : base(hooktype)
         {
@@ -182,9 +177,9 @@ namespace genshinbot.hooks
 
         protected override void HookProc(IntPtr wParam, IntPtr lParam)
         {
-            signal((wParam,Marshal.PtrToStructure<T>(lParam)));
+            signal((wParam, Marshal.PtrToStructure<T>(lParam)));
         }
     }
 
-    
+
 }

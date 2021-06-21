@@ -1,4 +1,5 @@
 ﻿using genshinbot.reactive;
+using genshinbot.reactive.wire;
 using OpenCvSharp;
 using System;
 using System.Reactive.Linq;
@@ -12,16 +13,16 @@ namespace genshinbot.automation.screenshot
         /// </summary>
         /// <param name="r"></param>
         /// <returns></returns>
-        IObservable<Pkt<Mat>> Watch(Rect r);
+        IWire<Pkt<Mat>> Watch(Rect r);
 
         /// <summary>
         /// Watch a dynamic region
         /// </summary>
         /// <param name="r">The region to watch</param>
         /// <returns></returns>
-        IObservable<Pkt<Mat>> Watch(IObservable<Rect> r)
+        IWire<Pkt<Mat>> Watch(IWire<Rect> r)
         {
-            return r.Select(rec => Watch(rec)).Switch().Publish().RefCount();
+            return r.Select(rec => Watch(rec)).Switch();
         }
 
 
