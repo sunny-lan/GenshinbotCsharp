@@ -1,6 +1,7 @@
 ﻿using OpenCvSharp;
 using System;
 using System.Collections;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -9,6 +10,39 @@ using System.Threading.Tasks;
 
 namespace genshinbot.data.jsonconverters
 {
+    public class MatConverter : JsonConverter<Mat>
+    {
+        struct MatData
+        {
+            public string Path { get; set; }
+        }
+        public override Mat Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            var x = JsonSerializer.Deserialize<MatData>(ref reader, options);
+            return Data.Imread( x.Path,ImreadModes.Unchanged);
+        }
+
+        public override void Write(Utf8JsonWriter writer, Mat value, JsonSerializerOptions options)
+        {
+            
+            var fileName = $"images/{Guid.NewGuid()}.png";
+            Data.Imwrite(fileName, value);
+            JsonSerializer.Serialize(writer, new MatData { Path=fileName }, options);
+        }
+
+        class TestCls
+        {
+            public Mat bad { get; set; }
+        }
+        public static void Test()
+        {
+            var t = new TestCls { bad = Data.Imread("test/arrow_fail.png") };
+            var v = "test/matsave.json";
+            Data.WriteJson(v, t);
+            t = Data.ReadJson1<TestCls>(v);
+            diag.CvThread.ImShow("test", t.bad);
+        }
+    }
     //TODO make internal classes vector2d and such
     class Point2dConverter : JsonConverter<Point2d>
     {

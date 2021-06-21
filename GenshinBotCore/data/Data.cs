@@ -1,6 +1,7 @@
 ﻿using OpenCvSharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -28,6 +29,7 @@ namespace genshinbot.data
                 new jsonconverters.Rect2dConverter(),
                 new jsonconverters.RectConverter(),
                 new jsonconverters.ScalarConverter(),
+                new jsonconverters.MatConverter(),
 
             },
             IgnoreNullValues = true,
@@ -103,13 +105,14 @@ namespace genshinbot.data
         public static void Imwrite(string name, Mat m, bool createDirs = true)
         {
             var path = Get(name);
+            var dir = Path.GetDirectoryName(path);
             if (createDirs)
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(path));
+                Directory.CreateDirectory(dir);
             }
-            if (!File.Exists(path))
-                throw new Exception("File doesn't exist " + path);
-            Cv2.ImWrite(path, m);
+            if (!Directory.Exists(dir))
+                throw new Exception("Folder doesn't exist " + dir);
+            Debug.Assert(Cv2.ImWrite(path, m),"imwrite failed");
         }
 
     }
