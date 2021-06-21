@@ -186,15 +186,21 @@ namespace genshinbot.tools
             var matFiller = Filler.From<Mat>(async x =>
             {
                 var r = await rectFiller.FillT(default);
-                return await w.Screen.Watch(r).Depacket().Get();
+                overlay.Visible = false;
+                var res= await w.Screen.Watch(r).Depacket().Get();
+                overlay.Visible = true;
+                return res;
             });
             var snapFiller = Filler.From<data.Snap>(async x =>
             {
                 var r = await rectFiller.FillT(x.Region);
+                overlay.Visible = false;
+                var img = await w.Screen.Watch(r).Depacket().Get();
+                overlay.Visible = true;
                 return new data.Snap
                 {
                     //TODO we need to hide the overlay when taking a shot
-                    Image = await w.Screen.Watch(r).Depacket().Get(),
+                    Image = img,
                     Region = r,
                 };
             });

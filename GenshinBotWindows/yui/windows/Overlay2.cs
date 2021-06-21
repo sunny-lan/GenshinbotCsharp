@@ -5,12 +5,29 @@ using System.Collections.Generic;
 
 namespace genshinbot.yui.windows
 {
-    class Overlay2:IDisposable
+    class Overlay2 : IDisposable
     {
         private GraphicsWindow gw;
         private readonly Dictionary<string, SolidBrush> _brushes;
         private readonly Dictionary<string, Font> _fonts;
         private readonly Dictionary<string, Image> _images;
+
+        private bool internalVisible
+        {
+            get => internalVisible1; set
+            {
+                internalVisible1 = value;
+                gw.IsVisible = internalVisible1 && visible;
+            }
+        }
+        public bool Visible
+        {
+            get => visible; set
+            {
+                visible = value;
+                gw.IsVisible = internalVisible1 && visible;
+            }
+        }
 
         public Overlay2()
         {
@@ -29,12 +46,13 @@ namespace genshinbot.yui.windows
             {
                 FPS = 10,
                 IsTopmost = true,
-                IsVisible = true,
-
             };
             gw.SetupGraphics += Gw_SetupGraphics;
             gw.DrawGraphics += Gw_DrawGraphics;
             gw.DestroyGraphics += Gw_DestroyGraphics;
+
+            internalVisible = false;
+            Visible = true;
         }
 
         public IDisposable follow(IObservable<OpenCvSharp.Rect> bounds)
@@ -52,7 +70,7 @@ namespace genshinbot.yui.windows
             return focused.Subscribe(onNext: rr =>
             {
                 Console.WriteLine($"visible: {rr}");
-                gw.IsVisible = rr;
+                internalVisible = rr;
             });
         }
         public void run()
@@ -60,7 +78,7 @@ namespace genshinbot.yui.windows
             gw.Create();
         }
 
-        
+
 
 
         private void Gw_DestroyGraphics(object sender, DestroyGraphicsEventArgs e)
@@ -93,23 +111,26 @@ namespace genshinbot.yui.windows
 
         }
 
-        public  OpenCvSharp.Rect? Rect;
-        public  OpenCvSharp.Point? Point;
-        public Stack<string> Text=new Stack<string>();
+        public OpenCvSharp.Rect? Rect;
+        public OpenCvSharp.Point? Point;
+        public Stack<string> Text = new Stack<string>();
+        private bool visible;
+        private bool internalVisible1;
+
         private void Gw_DrawGraphics(object sender, DrawGraphicsEventArgs e)
         {
             var gfx = e.Graphics;
             gfx.ClearScene();
             int idx = Text.Count;
-            lock(Text)
-            foreach(var entry in Text)
-            {
-                gfx.DrawText(_fonts["consolas"], _brushes["red"], new Point(0, 50*idx), entry);
+            lock (Text)
+                foreach (var entry in Text)
+                {
+                    gfx.DrawText(_fonts["consolas"], _brushes["red"], new Point(0, 50 * idx), entry);
                     idx--;
-            }
+                }
             if (Rect is OpenCvSharp.Rect rr)
                 gfx.DrawRectangle(_brushes["red"], new Rectangle(rr.Left, rr.Top, rr.Right, rr.Bottom), 1);
-            if(Point is OpenCvSharp.Point p)
+            if (Point is OpenCvSharp.Point p)
             {
                 gfx.DrawCircle(_brushes["red"], new Circle(p.X, p.Y, 4), 1);
                 gfx.DrawLine(_brushes["red"], p.X, 0, p.X, gw.Height, 1);
