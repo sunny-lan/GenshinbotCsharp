@@ -31,6 +31,9 @@ namespace genshinbot.screens
                 }
 
                 public CharacterTemplate[] Characters { get; set; } = new CharacterTemplate[4];
+
+                public Snap Swimming { get; set; }
+                public Snap Flying { get; set; }
             }
 
             public Dictionary<Size, RD> R { get; set; } = new Dictionary<Size, RD>

@@ -117,11 +117,27 @@ namespace genshinbot.yui.windows
         public Stack<string> Text = new Stack<string>();
         private bool visible;
         private bool internalVisible1;
+        public OpenCvSharp.Mat Image
+        {
+            get => image; set
+            {
+                if (img!=null) img.Dispose();
+                if (value != null)
+                    img = gw.Graphics.CreateImage(value.ToBytes());
+                else img = null;
+                image = value;
+            }
+        }
+        private GameOverlay.Drawing.Image img;
+        private OpenCvSharp.Mat image;
 
         private void Gw_DrawGraphics(object sender, DrawGraphicsEventArgs e)
         {
             var gfx = e.Graphics;
             gfx.ClearScene();
+            if (img != null)
+                gfx.DrawImage(img, new Point());
+
             int idx = Text.Count;
             lock (Text)
                 foreach (var entry in Text)

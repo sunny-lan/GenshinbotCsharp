@@ -185,28 +185,29 @@ namespace genshinbot.tools
                 var r = await rect2dFiller.FillT(x.cvt());
                 return r.round();
             });
-            var matFiller = Filler.From<Mat>(async x =>
-            {
-                var r = await rectFiller.FillT(default);
-                overlay.Visible = false;
-                var res = await w.Screen.Watch(r).Depacket().Get();
-                overlay.Visible = true;
-                return res;
-            });
             var snapFiller = Filler.From<data.Snap>(async x =>
             {
-                var r = await rectFiller.FillT(x.Region);
                 overlay.Visible = false;
-                var img = await w.Screen.Watch(r).Depacket().Get();
+                var img = await w.Screen.Watch(w.Bounds).Depacket().Get();
                 overlay.Visible = true;
+
+                overlay.Image = img;
+
+                var r = await rectFiller.FillT(x.Region);
+                overlay.Image = null;
+
                 return new data.Snap
                 {
                     //TODO we need to hide the overlay when taking a shot
-                    Image = img,
+                    Image = img[r],
                     Region = r,
                 };
             });
 
+            var matFiller = Filler.From<Mat>(async x =>
+            {
+                return (await snapFiller.FillT(new data.Snap { })).Image;
+            });
             Filler[] fillers1 =
             {
                 rectFiller,
@@ -289,7 +290,7 @@ namespace genshinbot.tools
                 while (true)
                 {
                     var subpath = stuffs[idx].subpath;
-                    Prompt($"{stuffs[idx].t.Name} {subpath} = {stuffs[idx].o()}", 0);
+                    Prompt($"{stuffs[idx].t.Name} {subpath} = {stuffs[idx].o() ?? "null"}", 0);
                     Prompt("Ctrl-[/] to inc/dec. Ctrl-J to select. Ctrl-L to exit.",1);
                     var key = await await Task.WhenAny(
                        kk.KeyCombo(Keys.LControlKey, Keys.J).Select(_ => "select").Get(),
