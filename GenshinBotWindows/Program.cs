@@ -61,8 +61,8 @@ namespace genshinbot
             // automation.screenshot.directx.Test.Run();
             // automation.screenshot.gdi.run();
             //  automation.screenshot.gdi.GDIStream.Test2();
-            automation.windows.WindowAutomator2.Test();
-            //await automation.windows.WindowAutomator2.Test2();
+            //automation.windows.WindowAutomator2.Test();
+            await automation.windows.WindowAutomator2.Test2();
             // await tools.AutofillTool.Test(rig);
             //   automation.windows.WindowAutomator2.Test3();
             //screens.PlayingScreen.test();

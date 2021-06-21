@@ -14,6 +14,7 @@ namespace genshinbot.reactive.wire
 
         /// <summary>
         /// Same as Subscribe, except calls onValue as soon as we are connected
+        /// TODO may double call
         /// </summary>
         /// <param name="onValue"></param>
         /// <returns></returns>

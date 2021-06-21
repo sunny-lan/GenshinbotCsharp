@@ -21,6 +21,7 @@ using genshinbot.automation.screenshot.gdi;
 using genshinbot.diag;
 using genshinbot.automation.hooking;
 using genshinbot.reactive.wire;
+using genshinbot.automation.input.windows;
 
 namespace genshinbot.automation.windows
 {
@@ -176,13 +177,15 @@ namespace genshinbot.automation.windows
         private InputSim iS;
         class InputSim : IMouseSimulator2, IKeySimulator2
         {
-            private InputSimulatorStandard.InputSimulator iS;
+            IMouseSimulator2 ms;
+            IKeySimulator2 ks;
             WindowAutomator2 parent;
 
             internal InputSim(WindowAutomator2 parent)
             {
-
-                iS = new InputSimulatorStandard.InputSimulator();
+                var a = new InputSimulatorStandardAdapter();
+                ms = a;
+                ks = a;
                 this.parent = parent;
             }
 
@@ -197,67 +200,25 @@ namespace genshinbot.automation.windows
 
             public Task Key(input.Keys k, bool down)
             {
-                void _Key()
-                {
-                    if (down)
-                    {
-                        iS.Keyboard.KeyDown((InputSimulatorStandard.Native.VirtualKeyCode)k);
-                    }
-                    else
-                    {
-                        iS.Keyboard.KeyUp((InputSimulatorStandard.Native.VirtualKeyCode)k);
-                    }
-                }
-                return parent.Focused.LockWhile(() => Task.Run(_Key));
+               
+                return parent.Focused.LockWhile(() => ks.Key(k,down));
             }
 
             public Task MouseButton(MouseBtn btn, bool down)
             {
-                void _mouse()
-                {
-                    if (down)
-                    {
-                        if (btn == MouseBtn.Left) iS.Mouse.LeftButtonDown();
-                        else if (btn == MouseBtn.Right) iS.Mouse.RightButtonDown();
-                        else iS.Mouse.MiddleButtonDown();
-                    }
-                    else
-                    {
-                        if (btn == MouseBtn.Left) iS.Mouse.LeftButtonUp();
-                        else if (btn == MouseBtn.Right) iS.Mouse.RightButtonUp();
-                        else iS.Mouse.MiddleButtonUp();
-                    }
-                }
-                return parent.Focused.LockWhile(() => Task.Run(_mouse));
+                
+                return parent.Focused.LockWhile(() => ms.MouseButton(btn,down)  );
             }
 
             public Task MouseMove(Point2d d)
             {
-                void _mouse()
-                {
-                    DPIAware.Use(DPIAware.DPI_AWARENESS_CONTEXT_UNAWARE, () =>
-                    {
-                        var oo = d.Round();
-                        iS.Mouse.MoveMouseBy(oo.X, oo.Y);
-                    });
-                }
-                return parent.Focused.LockWhile(() => Task.Run(_mouse));
+                return parent.Focused.LockWhile(() =>ms.MouseMove(d));
 
             }
 
             public Task<Point2d> MousePos()
             {
-                Point2d _mouse()
-                {
-                    return DPIAware.Use(DPIAware.DPI_AWARENESS_CONTEXT_UNAWARE, () =>
-                    {
-                        var pt = Cursor.Position;
-                        if (!User32.ScreenToClient(parent.hWnd, ref pt))
-                            throw new Exception();
-                        return pt.Cv();
-                    });
-                }
-                return parent.Focused.LockWhile(() => Task.Run(_mouse));
+                return parent.Focused.LockWhile(ms.MousePos);
             }
 
             void cvtPixelToMouse(ref System.Drawing.Point p)
@@ -269,15 +230,13 @@ namespace genshinbot.automation.windows
 
             public Task MouseTo(Point2d p)
             {
-                void _MouseTo()
+                 Task _MouseTo()
                 {
                     var pp = new System.Drawing.Point((int)Math.Round(p.X), (int)Math.Round(p.Y));
-                    DPIAware.Use(DPIAware.DPI_AWARENESS_CONTEXT_UNAWARE, () =>
+                    DPIAware.Use(DPIAware.DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE, () =>
                     {
                         if (!User32.ClientToScreen(parent.hWnd, ref pp))
                             throw new Exception();
-
-                        cvtPixelToMouse(ref pp);
 
                         /*SendMouseInput(new User32.MOUSEINPUT
                         {
@@ -285,11 +244,11 @@ namespace genshinbot.automation.windows
                             dy = pp.Y,
                             dwFlags = (uint)User32.MOUSEEVENTF.MOUSEEVENTF_MOVE | (uint)User32.MOUSEEVENTF.MOUSEEVENTF_ABSOLUTE |(uint)User32.MOUSEEVENTF.MOUSEEVENTF_VIRTUALDESK
                         });*/
-                        iS.Mouse.MoveMouseToPositionOnVirtualDesktop(pp.X, pp.Y);
                     });
+                    return ms.MouseTo(pp.Cv());
                 }
 
-                return parent.Focused.LockWhile(() => Task.Run(_MouseTo));
+                return parent.Focused.LockWhile(_MouseTo);
             }
         }
         #endregion
