@@ -17,6 +17,7 @@ namespace genshinbot.reactive.wire
         Func<Action<T>, IDisposable> Enable;
         object enabled_lock = new object();
         object S_lock = new object();
+        //TODO performance optimization for single subscriber case
 
         public Wire(Func<Action<T>, IDisposable> enable)
         {
@@ -80,7 +81,7 @@ namespace genshinbot.reactive.wire
 
             lock (S_lock)
             {
-              //  subscribers = new List<Action<T>>(subscribers);
+                subscribers = new List<Action<T>>(subscribers);
                 subscribers.Add(onValue);
                 if (subscribers.Count == 1)
                 {

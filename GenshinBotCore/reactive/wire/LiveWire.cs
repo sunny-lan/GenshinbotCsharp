@@ -11,7 +11,7 @@ namespace genshinbot.reactive.wire
         private bool upToDate = false;
         private Func<T> getVal;
         Wire<T> wire;
-        public LiveWire(Func<T> getVal, Func<Action, IDisposable> enable) 
+        public LiveWire(Func<T> getVal, Func<Action, IDisposable> enable, bool checkDistinct=false) 
             
         {
             this.getVal = getVal;
@@ -23,7 +23,7 @@ namespace genshinbot.reactive.wire
                 void onParentChange()
                 {
                     var next = getVal();
-                    if (!EqualityComparer<T>.Default.Equals(last, next))
+                    if (!checkDistinct || !EqualityComparer<T>.Default.Equals(last, next))
                     {
                         last = next;
                         onNext(next);

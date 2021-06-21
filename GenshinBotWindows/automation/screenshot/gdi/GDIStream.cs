@@ -16,6 +16,7 @@ using Vanara.PInvoke;
 using genshinbot.reactive;
 using System.Reactive.Subjects;
 using genshinbot.reactive.wire;
+using genshinbot.util;
 
 namespace genshinbot.automation.screenshot.gdi
 {
@@ -172,19 +173,18 @@ namespace genshinbot.automation.screenshot.gdi
         {
             if (!cache.ContainsKey(r))
             {
-                //a dummy observable to update the list of rects
-                var boundsCalcer = Observable.FromEvent<Snap>(h =>
-                {
+                cache[r] = poller.Wire.OnSubscribe(()=> {
                     listeningRects[r] = default;
                     Console.WriteLine($"gdi begin {r}");
                     RecalculateStrategy();
-                }, h =>
-                {
-                    Console.WriteLine($"gdi stop {r}");
-                    Debug.Assert(listeningRects.Remove(r, out var _));
-                    RecalculateStrategy();
-                });
-                cache[r] = poller.Wire.Select(m => m[r]);
+                    return DisposableUtil.From(() =>
+                    {
+
+                        Console.WriteLine($"gdi stop {r}");
+                        Debug.Assert(listeningRects.Remove(r, out var _));
+                        RecalculateStrategy();
+                    });
+                }).Select(m => m[r]);
 
             }
             return cache[r];

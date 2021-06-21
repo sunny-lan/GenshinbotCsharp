@@ -131,6 +131,10 @@ namespace genshinbot.reactive.wire
         {
             return t.Where(x => control.Value);
         }
+        public static ILiveWire<T> DistinctUntilChanged<T>(this ILiveWire<T> t)
+        {
+            return new LiveWire<T>(()=>t.Value, onChange => t.Subscribe(_ => onChange()),true);
+        }
         public static ILiveWire<T> ToLive<T, _>(this IWire<_> t, Func<T> get)
         {
             return new LiveWire<T>(get, onChange => t.Subscribe(_ => onChange()));

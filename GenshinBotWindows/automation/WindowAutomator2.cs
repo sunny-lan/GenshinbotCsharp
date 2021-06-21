@@ -64,6 +64,7 @@ namespace genshinbot.automation.windows
                 .Where(e => e.hwnd == hWnd && e.idObject == User32.ObjectIdentifiers.OBJID_WINDOW)
                 //.Do(e=>Console.WriteLine($"e={e.idObject} {e.hwnd.DangerousGetHandle()}"))
                 .ToLive(() => GetRectDirect())
+                .DistinctUntilChanged()
                 //.Do(x=>Console.WriteLine($"cliArea={x}"))
                 ;
             locationChangeHook.Start();
@@ -79,16 +80,18 @@ namespace genshinbot.automation.windows
                     .Wire
                     .Where(e => e.idObject == User32.ObjectIdentifiers.OBJID_WINDOW)
                     .ToLive(() => IsForegroundWindow())
-               // .Do(x =>
-                 //   Console.WriteLine($"fore={x} "))
+                    .DistinctUntilChanged()
+                // .Do(x =>
+                //   Console.WriteLine($"fore={x} "))
                 ;
             foregroundChangeHook.Start();
 
 
 
-            Focused = Wire.Combine(foregroundStream, clientAreaStream,(foreground, clientArea) =>
-                        foreground && clientArea.Width > 0 && clientArea.Height > 0)
-             //   .Do(x => Console.WriteLine($"foc={x}"))
+            Focused = Wire.Combine(foregroundStream, clientAreaStream, (foreground, clientArea) =>
+                         foreground && clientArea.Width > 0 && clientArea.Height > 0)
+                .DistinctUntilChanged()
+                //   .Do(x => Console.WriteLine($"foc={x}"))
                 ;
 
             Size = clientAreaStream
@@ -106,8 +109,8 @@ namespace genshinbot.automation.windows
 
             Screen = new ScreenshotAdapter(this);
             iS = new InputSim(this);
-            mouseCap = new Lazy<MouseHookAdapter>(() => new MouseHookAdapter(Focused, 
-                pt=>ScreenToClient(pt)));
+            mouseCap = new Lazy<MouseHookAdapter>(() => new MouseHookAdapter(Focused,
+                pt => ScreenToClient(pt)));
             keyCap = new Lazy<KbdHookAdapter>(() => new KbdHookAdapter(Focused));
 
         }
@@ -200,19 +203,19 @@ namespace genshinbot.automation.windows
 
             public Task Key(input.Keys k, bool down)
             {
-               
-                return parent.Focused.LockWhile(() => ks.Key(k,down));
+
+                return parent.Focused.LockWhile(() => ks.Key(k, down));
             }
 
             public Task MouseButton(MouseBtn btn, bool down)
             {
-                
-                return parent.Focused.LockWhile(() => ms.MouseButton(btn,down)  );
+
+                return parent.Focused.LockWhile(() => ms.MouseButton(btn, down));
             }
 
             public Task MouseMove(Point2d d)
             {
-                return parent.Focused.LockWhile(() =>ms.MouseMove(d));
+                return parent.Focused.LockWhile(() => ms.MouseMove(d));
 
             }
 
@@ -230,7 +233,7 @@ namespace genshinbot.automation.windows
 
             public Task MouseTo(Point2d p)
             {
-                 Task _MouseTo()
+                Task _MouseTo()
                 {
                     var pp = new System.Drawing.Point((int)Math.Round(p.X), (int)Math.Round(p.Y));
                     DPIAware.Use(DPIAware.DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE, () =>
@@ -391,7 +394,7 @@ namespace genshinbot.automation.windows
                 input.Keys.LControlKey,
                 input.Keys.B,
             }).Subscribe(
-                x => Console.WriteLine($"key combo")
+                x => Console.WriteLine($"key combo {x}")
                 ))
             {
                 Console.ReadLine();
