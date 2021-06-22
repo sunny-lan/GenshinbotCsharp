@@ -2,6 +2,7 @@
 using genshinbot.diag;
 using genshinbot.reactive;
 using genshinbot.reactive.wire;
+using genshinbot.util;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -17,12 +18,12 @@ using Vanara.PInvoke;
 
 namespace genshinbot.yui.windows
 {
-    public partial class Overlay : Form
+    public partial class aRRO : Form
     {
         private ITestingRig rig;
         private Chart chart;
 
-        public Overlay(ITestingRig r)
+        public aRRO(ITestingRig r)
         {
             this.rig = r;
             InitializeComponent();
@@ -47,7 +48,7 @@ namespace genshinbot.yui.windows
             Controls.Add(chart);
 
         }
-        private void graph(IObservable<Pkt<double>> obs, string legend, AxisType axis=AxisType.Primary)
+        private void graph(IWire<Pkt<double>> obs, string legend, AxisType axis=AxisType.Primary)
         {
             Series arrowAng;
 
@@ -64,7 +65,8 @@ namespace genshinbot.yui.windows
             });
             Queue<Pkt<double>> q = new Queue<Pkt<double>>();
             var interval = TimeSpan.FromSeconds(10);
-            obs.Subscribe(x =>
+            void _graph(Pkt<double> x)
+
             {
                 if (x.Value == 0) return;
                 q.Enqueue(x);
@@ -79,28 +81,37 @@ namespace genshinbot.yui.windows
                         arrowAng.Points.AddXY(x.CaptureTime, deg);
                     }
                 });
-            });
+            }
+            if (obs is ILiveWire<Pkt<double>> ll)
+                ll.Connect(_graph);
+            else
+                obs.Subscribe(_graph);
         }
         private void load()
         {
             var b = rig.Make();
             var p = new screens.PlayingScreen(b, null);
 
-            var wanted = Observable
-                .FromEventPattern(
-                    x => trackBar1.ValueChanged += x,
-                    x => trackBar1.ValueChanged -= x
-                )
-                .Publish().RefCount()
-                .Select(x => ((double)trackBar1.Value).Radians());
+            var wanted = new LiveWire<double>(
+                () => Convert.ToDouble(Invoke((Func<int>)(()=>trackBar1.Value))).Radians(), onChange =>
+                {
+                    void TrackBar1_ValueChanged(object? sender, EventArgs e)
+                    {
+                        onChange();
+                    }
+                    trackBar1.ValueChanged += TrackBar1_ValueChanged;
+                    return DisposableUtil.From(() => trackBar1.ValueChanged -= TrackBar1_ValueChanged);
+               });
             var wantedPkt = wanted.Packetize();
 
-            var alg = new algorithm.ArrowSteering(p.ArrowDirection.AsObservable(), wanted);
+            var alg = new algorithm.ArrowSteering(p.ArrowDirection, wanted);
             alg.MouseDelta.Subscribe(x => p.Io.M.MouseMove(new OpenCvSharp.Point2d(x, 0)));
 
-            graph(p.ArrowDirection.AsObservable(), "arrow dir");
+            graph(p.ArrowDirection, "arrow dir");
 
         }
+
+        
 
         private void Overlay_Load(object sender, EventArgs e)
         {

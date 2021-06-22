@@ -75,13 +75,13 @@ namespace genshinbot
             //await tools.ScreencoordRecorder.runAsync(new WindowAutomator2("*Untitled - Notepad", null));
             // await tools.ScreencoordRecorder.runAsync(rig.Make().W);
             //// .Show();
-            //Application.Run(new yui.windows.Overlay(rig));
+            Application.Run(new yui.windows.aRRO(rig));
 
             //await tools.DailyDoer.runAsync(rig.Make());
             // await tools.DailyDoer.DispatchCollect(rig.Make());
             //await experiments.RxTest.runAsync();
             //await tools.AutofillTool.ConfigureDailyDoer(rig.Make());
-               await tools.AutofillTool.Test2();
+            //   await tools.AutofillTool.Test2();
             //await tools.AutofillTool.ConfigurePlayingScreen(rig.Make());
             //data.jsonconverters.MatConverter.Test();
             Console.WriteLine("Program ended. Press enter to exit");

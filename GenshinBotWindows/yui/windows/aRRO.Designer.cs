@@ -3,7 +3,7 @@ using System.Windows.Forms.DataVisualization.Charting;
 
 namespace genshinbot.yui.windows
 {
-    partial class Overlay
+    partial class aRRO
     {
         /// <summary>
         /// Required designer variable.

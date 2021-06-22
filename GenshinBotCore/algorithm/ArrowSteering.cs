@@ -1,4 +1,5 @@
 ﻿using genshinbot.reactive;
+using genshinbot.reactive.wire;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,8 +17,8 @@ namespace genshinbot.algorithm
         private double scale = 100, maxDelta = 100;
         TimeSpan recharch = TimeSpan.FromSeconds(1);
 
-        public IObservable<double> MouseDelta { get; init; }
-        public ArrowSteering(IObservable<Pkt<double>> known, IObservable<double> wanted)
+        public IWire<double> MouseDelta { get; init; }
+        public ArrowSteering(IWire<Pkt<double>> known, ILiveWire<double> wanted)
         {
             //TODO more advanced shit
 
@@ -25,13 +26,14 @@ namespace genshinbot.algorithm
             var lastRecharge = DateTime.Now;
             bool? lastSign = null;
 
-            MouseDelta = wanted.Select(wanted => known.Select(known =>
+            MouseDelta = known.Select(known =>
             {
                 double amt = (known.CaptureTime - lastRecharge) / recharch;
                 lastRecharge = known.CaptureTime;
                 limiter = Math.Clamp(limiter + amt, 0, 1);
 
-                var rel = known.Value.RelativeAngle(wanted);
+                var rel = known.Value.RelativeAngle(wanted.Value);
+                //detected oscilation = increase limiter
                 var sign = rel > 0;
                 if (sign != lastSign)
                 {
@@ -42,7 +44,7 @@ namespace genshinbot.algorithm
 
 
                 return Math.Min(maxDelta, rel * scale * limiter);
-            })).Switch().Publish().RefCount();
+            });
         }
     }
 }
