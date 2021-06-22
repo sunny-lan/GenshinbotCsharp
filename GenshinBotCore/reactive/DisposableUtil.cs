@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace genshinbot.util
 {
@@ -25,6 +26,17 @@ namespace genshinbot.util
 
         public static IDisposable Empty = From(() => { });
 
+        /*public static IDisposable Merge(IEnumerable< IDisposable> dispose)
+        {
+            return new Impl
+            {
+                dispose = () =>
+                {
+                    foreach (var disposable in dispose)
+                        disposable.Dispose();
+                }
+            };
+        }*/
         public static IDisposable Merge(params IDisposable[] dispose)
         {
             return new Impl

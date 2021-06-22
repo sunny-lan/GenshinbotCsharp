@@ -56,11 +56,12 @@ namespace genshinbot.automation.windows
             locationChangeHook = new WinEventHook(processOfInterest: pid);
 
             clientAreaStream = locationChangeHook.Wire
+
                 .Where(e => e.hwnd == hWnd && e.idObject == User32.ObjectIdentifiers.OBJID_WINDOW)
                 //.Do(e=>Console.WriteLine($"e={e.idObject} {e.hwnd.DangerousGetHandle()}"))
                 .ToLive(() => GetRectDirect())
                 .DistinctUntilChanged()
-                .Do(x=>Console.WriteLine($"cliArea={x}"))
+                .Debug("clientArea")
                 ;
             locationChangeHook.Start();
 
@@ -71,27 +72,41 @@ namespace genshinbot.automation.windows
                 eventRangeMax: User32.EventConstants.EVENT_SYSTEM_FOREGROUND
             );
 
-            var foregroundStream = foregroundChangeHook
-                    .Wire
-                    .Where(e => e.idObject == User32.ObjectIdentifiers.OBJID_WINDOW)
+            //TODO some weird issue with this stream not working
+            // TODO some sketchy reason, foregroundChangehook doesn't work all the time
+            var foregroundStream = Wire.Merge<NoneT>(
+                    foregroundChangeHook.Wire
+                        .Where(
+                        e => 
+                        e.idObject == User32.ObjectIdentifiers.OBJID_WINDOW).Nonify()
+                        ,
+                        clientAreaStream.Nonify()
+                    )
+                    .Debug("RAW foreground")
                     .ToLive(() => IsForegroundWindow())
+                    .Debug("LIVE foreground")
                     .DistinctUntilChanged()
-                // .Do(x =>
-                //   Console.WriteLine($"fore={x} "))
-                ;
+                 .Debug("foreground");
+            ;
             foregroundChangeHook.Start();
+            //perform merged processing path
+            var combined = Wire.Combine(foregroundStream, clientAreaStream, (foreground, clientArea) =>
+            {
+                var focused = foreground && clientArea.Width > 0 && clientArea.Height > 0;
+                Rect? screenBounds = focused ? clientArea : null;
+                return (focused, screenBounds);
+            }).Debug("combined");
 
+            //split after merged
+            Focused = combined.Select(x => x.focused)
+               .DistinctUntilChanged()
+                .Debug("focused");
+            ;
 
-
-            Focused = Wire.Combine(foregroundStream, clientAreaStream, (foreground, clientArea) =>
-                         foreground && clientArea.Width > 0 && clientArea.Height > 0)
+            ScreenBounds = combined.Select(x => x.screenBounds)
                 .DistinctUntilChanged()
-                .Do(x => Console.WriteLine($"focused={x}"))
-                //   .Do(x => Console.WriteLine($"foc={x}"))
-                ;
-            ScreenBounds = clientAreaStream.Relay3<Rect>(Focused)
-                //.DistinctUntilChanged()
-                .Do(x => Console.WriteLine($"screenbounds={x}"));
+                 .Debug("screenbounds");
+            ;
 
             Size = ScreenBounds
                 .Select(r => r?.Size)
@@ -99,7 +114,6 @@ namespace genshinbot.automation.windows
 
             Bounds = Size.Select(x => x?.Bounds())
                             .DistinctUntilChanged()
-                .Do(x=>Console.WriteLine($"bounds={x}"))
                 ;
 
 

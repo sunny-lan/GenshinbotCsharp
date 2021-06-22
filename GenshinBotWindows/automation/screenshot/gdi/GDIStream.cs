@@ -184,6 +184,7 @@ namespace genshinbot.automation.screenshot.gdi
                         Debug.Assert(listeningRects.Remove(r, out var _));
                         RecalculateStrategy();
                     });
+                    //TODO possible off screen
                 }).Select(m => m[r]);
 
             }

@@ -19,6 +19,11 @@ namespace genshinbot.hooks
         public int idChild;
         public uint idEventThread;
         public uint dwmsEventTime;
+
+        public override string ToString()
+        {
+            return $"HWND={hwnd.DangerousGetHandle()} idObject={idObject}";
+        }
     }
     /// <summary>
     /// Provides hooking using SetWinEventHook

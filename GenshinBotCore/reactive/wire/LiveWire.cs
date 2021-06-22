@@ -9,7 +9,6 @@ namespace genshinbot.reactive.wire
     {
         private T last;
         private bool running;
-        private bool upToDate = false;
         private Func<T> getVal;
         Wire<T> wire;
         public bool ChecksDistinct { get; private init; }
