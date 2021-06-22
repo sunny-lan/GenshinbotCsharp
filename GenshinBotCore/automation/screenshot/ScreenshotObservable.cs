@@ -26,5 +26,18 @@ namespace genshinbot.automation.screenshot
         }
 
 
+        IWire<Pkt<Mat>> Watch(ILiveWire<Rect> r)
+        {
+            return r.Select(rec => Watch(rec)).Switch();
+        }
+
+        IWire<Pkt<Mat>> Watch2(ILiveWire<Rect?> r)
+        {
+            return r.Select(rec => {
+                Console.WriteLine($"watch {rec}" );
+                if (rec is Rect rr) return Watch(rr);
+                else return EmptyWire<Pkt<Mat>>.Instance;
+            }).Switch();
+        }
     }
 }

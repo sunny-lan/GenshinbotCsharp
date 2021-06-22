@@ -44,7 +44,7 @@ namespace genshinbot.tools
                 if (k == take)
                 {
                     var pos = await w.Mouse.MousePos();
-                    var sz = await w.Size.Get();
+                    var sz = await w.Size.Value2();
                     Console.Write("name? ");
                     var name = Console.ReadLine();
 

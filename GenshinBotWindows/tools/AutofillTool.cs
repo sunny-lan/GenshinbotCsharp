@@ -195,7 +195,7 @@ namespace genshinbot.tools
             var snapFiller = Filler.From<data.Snap>(async x =>
             {
                 overlay.Visible = false;
-                var img = await w.Screen.Watch(w.Bounds).Depacket().Get();
+                var img = await w.Screen.Watch2(w.Bounds).Depacket().Get();
                 overlay.Visible = true;
 
                 img = img.Clone();
@@ -348,7 +348,7 @@ namespace genshinbot.tools
                             if (args.Length == 2 && args[0] == typeof(Size))
                             {
 
-                                var sz = await w.Size.Get();
+                                var sz = await w.Size.Value2();
                                 //ensure window size doesn't change while doing RD
                                 await w.Size.Lock(async () =>
                                     {

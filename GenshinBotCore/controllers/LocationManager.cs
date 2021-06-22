@@ -76,7 +76,7 @@ namespace genshinbot.controllers
                 }
             }
             await screens.PlayingScreen.OpenMap();
-            var center = (await map.Io.W.Bounds.Get()).Center();
+            var center = (await map.Io.W.Bounds.Value2()).Center();
             
             var screen2Coord = await map.Screen2Coord.Get();
             var miniLoc = coord2Mini.Transform(screen2Coord.ToCoord(center));

@@ -28,12 +28,19 @@ namespace genshinbot.reactive
               {
                   var ts = new CancellationTokenSource();
                   Task.Run(() => {
+                      Console.WriteLine("begin loop");
                       while (!ts.Token.IsCancellationRequested)
                       {
+                       //   Console.WriteLine(" begin poll");
                           onChange();
                       }
+                      Console.WriteLine("end loop");
                   },ts.Token);
-                  return DisposableUtil.From(ts.Cancel);
+                  return DisposableUtil.From(()=> {
+                      Console.WriteLine("request cancellation");
+                      ts.Cancel();
+
+                  });
               });
 
         }

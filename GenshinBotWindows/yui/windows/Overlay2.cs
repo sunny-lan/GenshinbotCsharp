@@ -56,15 +56,18 @@ namespace genshinbot.yui.windows
             Visible = true;
         }
 
-        public IDisposable follow(IWire<OpenCvSharp.Rect> bounds)
+        public IDisposable follow(ILiveWire<OpenCvSharp.Rect?> bounds)
         {
-            return bounds.Subscribe( rr =>
+            return bounds.Connect( rrr =>
             {
-                Console.WriteLine($"size: {rr}");
-                gw.X = rr.X;
-                gw.Y = rr.Y;
-                gw.Width = rr.Width;
-                gw.Height = rr.Height;
+                if (rrr is OpenCvSharp.Rect rr)
+                {
+                    Console.WriteLine($"size: {rr}");
+                    gw.X = rr.X;
+                    gw.Y = rr.Y;
+                    gw.Width = rr.Width;
+                    gw.Height = rr.Height;
+                }
             });
         }
         public IDisposable follow(IWire<bool> focused)

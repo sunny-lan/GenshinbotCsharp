@@ -19,7 +19,7 @@ namespace genshinbot.tools
         static Folder db = Data.General.Root;
         public static async Task Collect(BotIO b, Point button, Point[] all)
         {
-            var sz = await b.W.Size.Get();
+            var sz = await b.W.Size.Value2();
             var Dispatch = DispatchDb.Instance.Rd[sz];
 
             await b.M.LeftClick(button);
@@ -41,7 +41,7 @@ namespace genshinbot.tools
         }
         public static async Task CollectMondstadt(BotIO b)
         {
-            var sz = await b.W.Size.Get();
+            var sz = await b.W.Size.Value2();
             var Dispatch = DispatchDb.Instance.Rd[sz];
 
             await Collect(b, Dispatch.Mondstadt.Button, Dispatch.Mondstadt.All);
@@ -49,7 +49,7 @@ namespace genshinbot.tools
 
         public static async Task CollectLiyue(BotIO b)
         {
-            var sz = await b.W.Size.Get();
+            var sz = await b.W.Size.Value2();
             var Dispatch = DispatchDb.Instance.Rd[sz];
 
             await Collect(b, Dispatch.Liyue.Button, Dispatch.Liyue.All);
@@ -57,7 +57,7 @@ namespace genshinbot.tools
 
         public static async Task DispatchChara(BotIO b, Point pos, string chara)
         {
-            var sz = await b.W.Size.Get();
+            var sz = await b.W.Size.Value2();
             var Dispatch = DispatchDb.Instance.Rd[sz];
 
             await b.M.LeftClick(pos);
@@ -78,7 +78,7 @@ namespace genshinbot.tools
 
         public static async Task DispatchMondstadt(BotIO b)
         {
-            var sz = await b.W.Size.Get();
+            var sz = await b.W.Size.Value2();
             var Dispatch = DispatchDb.Instance.Rd[sz];
 
             await b.M.LeftClick(Dispatch.Mondstadt.Button);
@@ -91,7 +91,7 @@ namespace genshinbot.tools
 
         public static async Task DispatchLiyue(BotIO b)
         {
-            var sz = await b.W.Size.Get();
+            var sz = await b.W.Size.Value2();
             var Dispatch = DispatchDb.Instance.Rd[sz];
 
             await b.M.LeftClick(Dispatch.Liyue.Button);
@@ -117,7 +117,7 @@ namespace genshinbot.tools
         public static async Task ChatBegin(BotIO b, string name)
         {
             
-            var sz = await b.W.Size.Get();
+            var sz = await b.W.Size.Value2();
 
             await b.K.KeyPress(Keys.F);
             await Task.Delay(2000);
@@ -130,7 +130,7 @@ namespace genshinbot.tools
         }
         public static async Task GetCommissions(BotIO b)
         {
-            var sz = await b.W.Size.Get();
+            var sz = await b.W.Size.Value2();
 
             await ChatBegin(b, "claim_daily_commision");
 

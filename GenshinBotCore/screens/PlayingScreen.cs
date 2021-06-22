@@ -7,6 +7,7 @@ using genshinbot.reactive.wire;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -70,7 +71,7 @@ namespace genshinbot.screens
             public CharacterFilter CharFilter { get; set; } = new CharacterFilter();
         }
         public Db db => Db.Instance;
-        private IWire<Db.RD> rd;
+        private ILiveWire<Db.RD?> rd;
         public IWire<Mat> Minimap { get; private init; }
         public IWire<Pkt<Mat>> Arrow { get; private init; }
         public IWire<Pkt<double>> ArrowDirection { get; private init; }
@@ -139,9 +140,9 @@ namespace genshinbot.screens
 
         public PlayingScreen(BotIO b, ScreenManager screenManager) :base(b, screenManager)
         {
-            rd = b.W.Size.Select(sz => db.R[sz]);
-            Minimap = b.W.Screen.Watch(rd.Select(r => r.MinimapLoc)).Depacket();//TODO
-            Arrow = b.W.Screen.Watch(rd.Select(r =>
+            rd = b.W.Size.Select3(sz => db.R[sz]);
+            Minimap = b.W.Screen.Watch2(rd.Select2(r => r.MinimapLoc)).Depacket();//TODO
+            Arrow = b.W.Screen.Watch2(rd.Select2(r =>
                 r.MinimapLoc.Center()
                 .RectAround(new Size(db.ArrowRadius * 2, db.ArrowRadius * 2))
             ));

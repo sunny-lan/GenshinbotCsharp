@@ -17,7 +17,7 @@ namespace genshinbot.automation
 
         public ILiveWire<bool> Focused { get; private init; }
 
-        public IWire<Size> Size { get; private init; }
+        public ILiveWire<Size?> Size { get; private init; }
 
         public IKeySimulator2 Keys { get; private init; }
 
@@ -29,7 +29,7 @@ namespace genshinbot.automation
 
         public IKeyCapture KeyCap => throw new NotImplementedException();
 
-        public IWire<Rect> ScreenBounds => throw new NotImplementedException();
+        public ILiveWire<Rect?> ScreenBounds => throw new NotImplementedException();
 
         public ProxyWAutomator(ILiveWire<bool> enabled, IWindowAutomator2 w)
         {
@@ -40,7 +40,7 @@ namespace genshinbot.automation
             Screen = new ProxyScreen(enabled, w.Screen);
 
             Focused = w.Focused;//TODO.Relay(enabled);
-            Size = w.Size.Relay(enabled);
+            Size = w.Size.Relay2(enabled);
 
         }
         public void TryFocus()

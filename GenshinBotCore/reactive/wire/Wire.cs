@@ -1,6 +1,7 @@
 ﻿using genshinbot.util;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace genshinbot.reactive.wire
@@ -21,7 +22,6 @@ namespace genshinbot.reactive.wire
             return DisposableUtil.Empty;
         }
     }
-
     public static class Wire
     {
         public static IWire<T> OnSubscribe<T>(this IWire<T> t, Func<IDisposable> f)
@@ -97,12 +97,52 @@ namespace genshinbot.reactive.wire
             }
         }
 
-        public static IWire<T> Switch<T>(this IWire<IWire<T>> t)
+
+        public static IWire<T> Switch<T>(this ILiveWire<IWire<T>> t)
         {
+            var dist = t.DistinctUntilChanged();
             return new Wire<T>(onNext =>
             {
-                IDisposable last = null;
-                var gen= t.Subscribe(wire =>
+                IDisposable? last = null;
+                var gen = dist.Connect(wire =>
+                {
+                    last?.Dispose();
+                    last = wire.Subscribe(onNext);
+                });
+                return DisposableUtil.From(() =>
+                {
+                    gen.Dispose();
+                    last?.Dispose();
+                });
+            });
+        }
+
+
+        public static ILiveWire<T> Switch<T>(this ILiveWire<ILiveWire<T>> t)
+        {
+            var dist = t.DistinctUntilChanged();
+            return new LiveWire<T>(()=> dist.Value.Value,onChange =>
+            {
+                IDisposable? last = null;
+                var gen = dist.Connect(wire =>
+                {
+                    last?.Dispose();
+                    last = wire.Connect(_=>onChange());
+                });
+                return DisposableUtil.From(() =>
+                {
+                    gen.Dispose();
+                    last?.Dispose();
+                });
+            });
+        }
+        public static IWire<T> Switch<T>(this IWire<IWire<T>> t)
+        {
+            var dist = t.DistinctUntilChanged();
+            return new Wire<T>(onNext =>
+            {
+                IDisposable? last = null;
+                var gen= dist.Subscribe(wire =>
                 {
                     last?.Dispose();
                     last = wire.Subscribe(onNext);
@@ -127,12 +167,70 @@ namespace genshinbot.reactive.wire
 
                 ));
         }
+
+        /// <summary>
+        /// Returns the first value from live which isn't null
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="w"></param>
+        /// <returns></returns>
+        public static async Task<T> Value2<T>(this ILiveWire<T?> w) where T:struct
+        {
+            if (w.Value is T t) return t;
+            return await w.NonNull().Get();
+        }
+
+        public static IWire<T> NonNull<T>(this IWire<T?> w) where T : struct
+        {
+            return w.Link<T?, T>((x, next) =>
+            {
+                if (x is T t) next(t);
+            });
+        }
+
+
         public static IWire<T> Relay<T>(this IWire<T> t, ILiveWire<bool> control)
         {
-            return t.Where(x => control.Value);
+            return control.Select(enable => enable ? t : EmptyWire<T>.Instance).Switch();
+        }
+
+        /// <summary>
+        /// Returns a LiveWire which is null upon control=false, but retains the value of the original
+        /// Livewire if true
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="t"></param>
+        /// <param name="control"></param>
+        /// <returns></returns>
+        public static ILiveWire<T?> Relay2<T>(this ILiveWire<T?> t, ILiveWire<bool> control)
+            where T:notnull
+        {
+            var empty = new ConstLiveWire<T?>(default);
+            return control.Select<bool, ILiveWire<T?>>
+                (enable => enable ? t  : empty).Switch();
+        }
+        public static ILiveWire<T?> AsNullable<T>(this ILiveWire<T> t)
+         where T : struct
+        {
+            return t.Select(x => (T?)x);
+        }
+
+        //TODO ugly hack
+        public static ILiveWire<T?> Relay3<T>(this ILiveWire<T> t, ILiveWire<bool> control)
+            where T : struct
+        {
+            var empty = new ConstLiveWire<T?>(null);
+            return control.Select<bool, ILiveWire<T?>>
+                (enable=> 
+                enable ? t.AsNullable() : empty
+                ).Switch();
         }
         public static ILiveWire<T> DistinctUntilChanged<T>(this ILiveWire<T> t)
         {
+            if(t is LiveWire<T> l)
+            {
+                if (l.ChecksDistinct) return l;//performance optimization
+            }
             return new LiveWire<T>(()=>t.Value, onChange => t.Subscribe(_ => onChange()),true);
         }
         public static ILiveWire<T> ToLive<T, _>(this IWire<_> t, Func<T> get)
@@ -172,6 +270,8 @@ namespace genshinbot.reactive.wire
             );
         }
 
+
+
         public static ILiveWire<Out> Select<In, Out>(this ILiveWire<In> w, Func<In, Out> f)
         {
             return new LiveWire<Out>(() => f(w.Value), onChange =>
@@ -179,11 +279,55 @@ namespace genshinbot.reactive.wire
         }
 
 
+        public static ILiveWire<Out?> Select2<In, Out>(this ILiveWire<In?> w, Func<In, Out> f)
+             where In:struct
+            where Out:struct
+
+        {
+            Out? process()
+            {
+                if (w.Value is In i)
+                    return f(i);
+                return default;
+            }
+            return new LiveWire<Out?>(process, onChange =>
+                w.Subscribe(_ => onChange()));
+        }
+        //TODO ugly hack to fix nullable checks
+        public static ILiveWire<Out?> Select3<In, Out>(this ILiveWire<In?> w, Func<In, Out> f)
+            where In : struct
+           where Out : class
+
+        {
+            Out? process()
+            {
+                if (w.Value is In i)
+                    return f(i);
+                return default;
+            }
+            return new LiveWire<Out?>(process, onChange =>
+                w.Subscribe(_ => onChange()));
+        }
+        public static ILiveWire<Out?> Select2<In, Out>(this ILiveWire<In?> w, Func<In, Out> f)
+            where In : class
+           where Out : struct
+
+        {
+            Out? process()
+            {
+                if (w.Value is In i)
+                    return f(i);
+                return default;
+            }
+            return new LiveWire<Out?>(process, onChange =>
+                w.Subscribe(_ => onChange()));
+        }
+
 
         public static IWire<T> DistinctUntilChanged<T>(this IWire<T> w)
         {
             bool first = true;
-            T last = default;
+            T? last = default;
             return w.Where(x =>
             {
                 if (first || !EqualityComparer<T>.Default.Equals(x, last))
@@ -223,6 +367,17 @@ namespace genshinbot.reactive.wire
             {
                 if (f(value)) next(value);
             });
+        }
+        /// <summary>
+        /// Returns a Livewire whose value is null when the function is null
+        /// </summary>
+        /// <typeparam name="In"></typeparam>
+        /// <param name="w"></param>
+        /// <param name="f"></param>
+        /// <returns></returns>
+        public static ILiveWire<In?> Where2<In>(this ILiveWire<In> w, Func<In, bool> f) 
+        {
+            return w.Select<In,In?>((value) =>f(value)?value:default);
         }
         public static IWire<In> ToWire<In>(this IObservable<In> w)
         {

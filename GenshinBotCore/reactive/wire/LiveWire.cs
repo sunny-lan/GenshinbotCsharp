@@ -1,6 +1,7 @@
 ﻿using genshinbot.util;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace genshinbot.reactive.wire
 {
@@ -11,15 +12,17 @@ namespace genshinbot.reactive.wire
         private bool upToDate = false;
         private Func<T> getVal;
         Wire<T> wire;
+        public bool ChecksDistinct { get; private init; }
         public LiveWire(Func<T> getVal, Func<Action, IDisposable> enable, bool checkDistinct=false) 
             
         {
+            this.ChecksDistinct = checkDistinct;
             this.getVal = getVal;
             this.wire=new Wire<T>(onNext =>
             {
                 running = true;
                 
-
+                [DebuggerHidden]
                 void onParentChange()
                 {
                     var next = getVal();
@@ -31,7 +34,7 @@ namespace genshinbot.reactive.wire
                 }
                 var sub = enable(onParentChange);
                 //make sure value is uptodate
-                onParentChange();
+                last = getVal();
                 return DisposableUtil.Merge(DisposableUtil.From( ()=> {
                     running = false;
                 }), sub);

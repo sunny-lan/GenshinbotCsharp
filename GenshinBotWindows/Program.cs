@@ -64,13 +64,13 @@ namespace genshinbot
             //automation.windows.WindowAutomator2.Test();
             //await automation.windows.WindowAutomator2.Test2();
             // await tools.AutofillTool.Test(rig);
-            //   automation.windows.WindowAutomator2.Test3();
+               automation.windows.WindowAutomator2.Test3();
             //screens.PlayingScreen.test();
             //screens.MapScreen.Test2(rig);
             //await controllers.LocationManager.testAsync(rig);
             // await controllers.LocationManager.testAsync3();
             //await screens.MapScreen.Test3Async();
-             automation.windows.WindowAutomator2.Test4();
+            // automation.windows.WindowAutomator2.Test4();
             //Console.WriteLine(Data.General.Root.Find("derpity.derp").Points.Keys);
             //await tools.ScreencoordRecorder.runAsync(new WindowAutomator2("*Untitled - Notepad", null));
             // await tools.ScreencoordRecorder.runAsync(rig.Make().W);

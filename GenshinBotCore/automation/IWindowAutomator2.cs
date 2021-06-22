@@ -24,18 +24,18 @@ namespace genshinbot.automation
         /// <summary>
         /// The size of the window
         /// </summary>
-        IWire<Size> Size { get; }
+        ILiveWire<Size?> Size { get; }
 
         /// <summary>
         /// The bounds of the window
         /// Recommended to override for performance
         /// </summary>
-        IWire<Rect> Bounds => Size.Select(s => s.Bounds());
+        ILiveWire<Rect?> Bounds => Size.Select(s => s?.Bounds());
 
         /// <summary>
         /// The real position of the window on screen
         /// </summary>
-        IWire<Rect> ScreenBounds { get; }
+        ILiveWire<Rect?> ScreenBounds { get; }
 
         /// <summary>
         /// Try to focus the window

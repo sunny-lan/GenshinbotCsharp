@@ -94,7 +94,7 @@ namespace genshinbot.automation.screenshot.gdi
                 foreach (var region in pollRegions)
                 {
                    
-                        Console.WriteLine($"capture {region}");
+                        //Console.WriteLine($"capture {region}");
                         if (!Gdi32.BitBlt(hTmpDC, region.X, region.Y, region.Width, region.Height, hDesktopDC,
                             region.X, region.Y, Gdi32.RasterOperationMode.SRCCOPY
                         ))
@@ -102,7 +102,7 @@ namespace genshinbot.automation.screenshot.gdi
                 }
 
             }
-            Console.WriteLine("flush screenshot");
+            //Console.WriteLine("flush screenshot");
             if (!Gdi32.GdiFlush())
                 throw new Exception("failed performing GdiFlush");
 

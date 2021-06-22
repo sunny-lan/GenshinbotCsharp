@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace genshinbot.reactive.wire
 {
@@ -28,52 +29,56 @@ namespace genshinbot.reactive.wire
         bool _enabled;
         protected virtual void OnEnable(bool e)
         {
-            lock (enabled_lock)
+
+
+            if (e)
+            {
+                Debug.Assert(!_enabled);
+                _enabled = true;
+                enabled = Enable.Invoke(OnNext);
+            }
+            else
             {
 
-                if (e)
-                {
-                    Debug.Assert(!_enabled);
-                    _enabled = true;
-                    enabled = Enable.Invoke(OnNext);
-                }
-                else
-                {
-
-                    Debug.Assert(_enabled);
-                    enabled.Dispose();
-                    enabled = null;
-                    _enabled = false;
-                }
+                Debug.Assert(_enabled);
+                enabled.Dispose();
+                enabled = null;
+                _enabled = false;
             }
         }
 
+        volatile int grace = 0;
         protected virtual void OnNext(T value)
         {
-            lock (enabled_lock)
+            List<Action<T>> tmp;
+
+
+            lock (S_lock)
             {
-                Debug.Assert(_enabled);
-
-
-                lock (S_lock)
+                if (_enabled) Interlocked.Exchange(ref grace, 0);
+                else
                 {
-                    List<Exception> e = null;
-                    foreach (var s in subscribers)
-                    {
-                        try
-                        {
-                            s(value);
-                        }
-                        catch (Exception ee)
-                        {
-                            if (e == null) e = new List<Exception>();
-                            e.Add(ee);
-                        }
-                    }
-                    if (e != null)
-                        throw new AggregateException(e);
+                    Debug.Assert(Interlocked.Increment(ref grace) < 2, "OnNext called when Wire disabled!!!");
+                       
+                }
+                tmp = subscribers;
+            }
+
+            List<Exception> e = null;
+            foreach (var s in tmp)
+            {
+                try
+                {
+                    s(value);
+                }
+                catch (Exception ee)
+                {
+                    if (e == null) e = new List<Exception>();
+                    e.Add(ee);
                 }
             }
+            if (e != null)
+                throw new AggregateException(e);
         }
 
         public IDisposable Subscribe(Action<T> onValue)
@@ -87,19 +92,19 @@ namespace genshinbot.reactive.wire
                 {
                     OnEnable(true);
                 }
-            }
-            return DisposableUtil.From(() =>
-            {
-                lock (S_lock)
+                return DisposableUtil.From(() =>
                 {
-                    subscribers = new List<Action<T>>(subscribers);
-                    subscribers.Remove(onValue);
-                    if (subscribers.Count == 0)
+                    lock (S_lock)
                     {
-                        OnEnable(false);
+                        subscribers = new List<Action<T>>(subscribers);
+                        subscribers.Remove(onValue);
+                        if (subscribers.Count == 0)
+                        {
+                            OnEnable(false);
+                        }
                     }
-                }
-            });
+                });
+            }
         }
 
         public IDisposable Subscribe(IObserver<T> observer)

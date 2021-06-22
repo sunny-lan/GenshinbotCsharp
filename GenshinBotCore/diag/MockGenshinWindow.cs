@@ -62,8 +62,8 @@ namespace genshinbot.diag
         };
 
 
-        public IWire<Size> Size => size;
-        private LiveWireSource<Size> size;
+        public ILiveWire<Size?> Size => size;
+        private LiveWireSource<Size?> size;
 
         public IKeySimulator2 Keys => new MockKeySim(this);
 
@@ -71,7 +71,7 @@ namespace genshinbot.diag
 
         public MockGenshinWindow(Size s)
         {
-            size = new LiveWireSource<Size>(s);
+            size = new LiveWireSource<Size?>(s);
             PlayingScreen.KeyMap[automation.input.Keys.M] = MapScreen;
             MapScreen.KeyMap[automation.input.Keys.M] = PlayingScreen;
             MapScreen.KeyMap[automation.input.Keys.Escape] = PlayingScreen;
@@ -92,7 +92,7 @@ namespace genshinbot.diag
 
         public IKeyCapture KeyCap => throw new NotImplementedException();
 
-        public IWire<Rect> ScreenBounds => throw new NotImplementedException();
+        public ILiveWire<Rect?> ScreenBounds => throw new NotImplementedException();
 
         private LiveWireSource<bool> focused = new LiveWireSource<bool>(true);
 

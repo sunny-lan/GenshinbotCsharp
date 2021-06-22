@@ -33,11 +33,6 @@ namespace genshinbot.automation.windows
 
 
 
-        /// <summary>
-        /// Outputs rects only when the window is focused
-        /// </summary>
-        private IWire<Rect> clientAreaFocused;
-
 
 
         public void TryFocus()
@@ -65,7 +60,7 @@ namespace genshinbot.automation.windows
                 //.Do(e=>Console.WriteLine($"e={e.idObject} {e.hwnd.DangerousGetHandle()}"))
                 .ToLive(() => GetRectDirect())
                 .DistinctUntilChanged()
-                //.Do(x=>Console.WriteLine($"cliArea={x}"))
+                .Do(x=>Console.WriteLine($"cliArea={x}"))
                 ;
             locationChangeHook.Start();
 
@@ -91,21 +86,23 @@ namespace genshinbot.automation.windows
             Focused = Wire.Combine(foregroundStream, clientAreaStream, (foreground, clientArea) =>
                          foreground && clientArea.Width > 0 && clientArea.Height > 0)
                 .DistinctUntilChanged()
+                .Do(x => Console.WriteLine($"focused={x}"))
                 //   .Do(x => Console.WriteLine($"foc={x}"))
                 ;
+            ScreenBounds = clientAreaStream.Relay3<Rect>(Focused)
+                //.DistinctUntilChanged()
+                .Do(x => Console.WriteLine($"screenbounds={x}"));
 
-            Size = clientAreaStream
-                .Select(r => r.Size)
-                .Where(s => s.Width > 0 && s.Height > 0)
+            Size = ScreenBounds
+                .Select(r => r?.Size)
                 .DistinctUntilChanged();
 
-            Bounds = Size.Select(x => x.Bounds());
+            Bounds = Size.Select(x => x?.Bounds())
+                            .DistinctUntilChanged()
+                .Do(x=>Console.WriteLine($"bounds={x}"))
+                ;
 
-            clientAreaFocused = clientAreaStream
-                .Relay(Focused)
-                .DistinctUntilChanged();
 
-            ScreenBounds = clientAreaFocused;
 
             Screen = new ScreenshotAdapter(this);
             iS = new InputSim(this);
@@ -127,8 +124,8 @@ namespace genshinbot.automation.windows
 
         #region Rect
 
-        public IWire<Size> Size { get; private init; }
-        public IWire<Rect> Bounds { get; private init; }
+        public ILiveWire<Size?> Size { get; private init; }
+        public ILiveWire<Rect?> Bounds { get; private init; }
 
         private WinEventHook locationChangeHook;
 
@@ -271,7 +268,7 @@ namespace genshinbot.automation.windows
         private Lazy<MouseHookAdapter> mouseCap;
         public IKeyCapture KeyCap => keyCap.Value;
 
-        public IWire<Rect> ScreenBounds { get; private init; }
+        public ILiveWire<Rect?> ScreenBounds { get; private init; }
 
         private Lazy<KbdHookAdapter> keyCap;
 
@@ -288,7 +285,7 @@ namespace genshinbot.automation.windows
 
             public IWire<Pkt<Mat>> Watch(Rect r)
             {
-                var mappedRectStream = parent.clientAreaFocused
+                var mappedRectStream = parent.ScreenBounds
                     .Select(_ => DPIAware.Use(DPIAware.DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE, () =>
                      {
                          return new Rect(parent.clientToScreen(r.TopLeft), r.Size);
@@ -346,7 +343,7 @@ namespace genshinbot.automation.windows
                         await Task.Delay(100);
 
                     }*/
-                    var sz = await w.Size.Get();
+                    var sz = await w.Size.Value2();
                     Console.WriteLine($"sz={sz}");
                     for (int i = 0; i < 1000; i++)
                     {
@@ -372,7 +369,7 @@ namespace genshinbot.automation.windows
             }*/
 
             Console.WriteLine("follow screen sz");
-            using (w.Screen.Watch(w.Bounds).Subscribe(m =>
+            using (w.Screen.Watch2(w.Bounds).Subscribe(m =>
             {
                 CvThread.ImShow("m", m.Value);
             }))

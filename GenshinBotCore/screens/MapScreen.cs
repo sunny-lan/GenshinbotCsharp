@@ -64,7 +64,7 @@ namespace genshinbot.screens
             locationMatch = new algorithm.MapLocationMatch(Data.MapDb.Features);
             templateMatch = new algorithm.MapTemplateMatch();
 
-            Screen = b.W.Screen.Watch(b.W.Bounds).Depacket().AsObservable();//TODO
+            Screen = b.W.Screen.Watch2(b.W.Bounds).Depacket().AsObservable();//TODO
             Features = Screen.ProcessAsync(map =>
             {
                 var k = templateMatch.FindTeleporters(map).ToList();
@@ -72,7 +72,7 @@ namespace genshinbot.screens
                 return k;
             });
             Screen2Coord = Observable//TODO
-                .CombineLatest(Features, b.W.Size.AsObservable(), (features, size) => (features, size))
+                .CombineLatest(Features, b.W.Size.NonNull().AsObservable(), (features, size) => (features, size))
                 .ProcessAsync(x =>
                 {
                     var (features, size) = x;
