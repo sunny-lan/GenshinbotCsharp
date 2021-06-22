@@ -193,6 +193,34 @@ namespace genshinbot
             return r;
         }
 
+        /// <summary>
+        /// converts value in range 0-1 to range in1-in2
+        /// </summary>
+        /// <param name="v"></param>
+        /// <param name="in1"></param>
+        /// <param name="in2"></param>
+        /// <returns></returns>
+        public static double Denormalize(this double v, double in1, double in2)
+        {
+            return v * (in2 - in1) + in1;
+        }
+
+        /// <summary>
+        ///  converts value in range  in1-in2 to range 0-1
+        /// </summary>
+        /// <param name="v"></param>
+        /// <param name="in1"></param>
+        /// <param name="in2"></param>
+        /// <returns></returns>
+        public static double Normalize(this double v, double in1, double in2)
+        {
+            return (v - in1) / (in2 - in1);
+        }
+        public static double Map(this double v, double in1, double in2, double out1, double out2)
+        {
+            return v.Normalize(in1, in2).Denormalize(out1, out2);
+        }
+
         public static System.Drawing.Bitmap ToBmpFast(this Mat m)
         {
             if (m.Channels() == 3)

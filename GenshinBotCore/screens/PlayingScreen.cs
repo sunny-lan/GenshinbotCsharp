@@ -136,7 +136,7 @@ namespace genshinbot.screens
         }
 
         public IWire<Pkt<double>>[] PlayerHealth { get; private init; } = new IWire<Pkt<double>>[4];
-        
+
 
         public PlayingScreen(BotIO b, ScreenManager screenManager) : base(b, screenManager)
         {
@@ -165,7 +165,8 @@ namespace genshinbot.screens
             var healthAlg = new algorithm.PlayerHealthRead(db.CharFilter);
             for (int i = 0; i < PlayerHealth.Length; i++)
             {
-                PlayerHealth[i] = b.W.Screen.Watch2(rd.Select2(rd => rd.Characters[i].Health))
+                int cpy = i;
+                PlayerHealth[i] = b.W.Screen.Watch2(rd.Select2(rd => rd.Characters[cpy].Health))
                     .Select(healthAlg.ReadHealth);
             }
 
@@ -200,6 +201,24 @@ namespace genshinbot.screens
             throw new NotImplementedException();
         }
 
+        public static async Task Test3Async()
+        {
+            var gw = new MockGenshinWindow(new Size(1680, 1050));
+            gw.MapScreen.Image = Data.Imread("test/map_luhua_1050.png");
+            gw.PlayingScreen.Image = Data.Imread("test/playing_luhua_1050.png");
+            gw.CurrentScreen = gw.PlayingScreen;
+
+
+            var rig1 = new MockTestingRig(gw);
+            await TestReadHealth(rig1);
+        }
+
+        public static async Task TestReadHealth(MockTestingRig rig1)
+        {
+            PlayingScreen p = new PlayingScreen(rig1.Make(), null);
+            for (int i = 0; i < 4; i++)
+                Console.WriteLine(await p.PlayerHealth[i].Get());
+        }
 
         /*
         Mat hrThres = new Mat(), hgThres = new Mat(), hsvHealth = new Mat();

@@ -43,7 +43,7 @@ namespace genshinbot.algorithm
             Cv2.CvtColor(src, hsv1, ColorConversionCodes.BGR2HSV);
             Cv2.InRange(hsv1, hg.Min, hg.Max, gthes1);
             var count = Cv2.CountNonZero(gthes1);
-            var area = rect.Area();
+            double area = rect.Area();
             if (count >MinGreen * area) return count/area;
 
             Cv2.InRange(hsv1, hr.Min, hr.Max, rthes1);

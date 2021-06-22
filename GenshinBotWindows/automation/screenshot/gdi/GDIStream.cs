@@ -90,10 +90,11 @@ namespace genshinbot.automation.screenshot.gdi
         void Poll()
         {
             Debug.Assert(buf != null);
-            List<Action> stuffs;
+            List<Rect> updates;
+            DateTime snapTime;
             lock (pollRegions)
             {
-                stuffs = new List<Action>(pollRegions.Count);
+                updates = new List<Rect>(pollRegions.Count);
                 foreach (var region in pollRegions)
                 {
 
@@ -106,8 +107,7 @@ namespace genshinbot.automation.screenshot.gdi
                         Kernel32.GetLastError().ThrowIfFailed();
                         continue;
                     }
-                    stuffs.Add(() =>
-                    sources[region].Emit(new Snap(buf[region])));
+                    updates.Add(region);
                 }
 
                 //Console.WriteLine("flush screenshot");
@@ -116,9 +116,14 @@ namespace genshinbot.automation.screenshot.gdi
                     Kernel32.GetLastError().ThrowIfFailed();
                     return;
                 }
-
+                snapTime = DateTime.Now;
             }
-            stuffs.ForEach(x => x());
+            
+            foreach (var update in updates)
+            {
+                //TODO possible off screen
+                allSnaps.Emit((update, new Snap(buf[update], snapTime)));
+            }
         }
         private ILiveWire<bool> enable;
 
@@ -134,7 +139,7 @@ namespace genshinbot.automation.screenshot.gdi
         /// cache of IWires for each screen region being watched
         /// </summary>
         Dictionary<Rect, IWire<Snap>> cache = new Dictionary<Rect, IWire<Snap>>();
-        Dictionary<Rect, WireSource<Snap>> sources = new Dictionary<Rect, WireSource<Snap>>();
+        Dictionary<Rect,NoneT> listeningRects = new Dictionary<Rect, NoneT>();
 
         /// <summary>
         /// List of regions to actually poll
@@ -142,11 +147,9 @@ namespace genshinbot.automation.screenshot.gdi
         List<Rect> pollRegions = new List<Rect>();
 
         /// <summary>
-        /// list of rects which are currently being watched
+        /// contains events from all snapping
         /// </summary>
-        ConcurrentDictionary<Rect, Unit> listeningRects = new ConcurrentDictionary<Rect, Unit>();
-        ConcurrentDictionary<Rect, Snap> lastSent = new ConcurrentDictionary<Rect, Snap>();
-
+        WireSource<(Rect r, Snap s)> allSnaps=new WireSource<(Rect r, Snap s)>();
 
         /// <summary>
         /// Reevaluate what strategy is used to screenshot all the rects being watched
@@ -182,22 +185,27 @@ namespace genshinbot.automation.screenshot.gdi
         {
             if (!cache.ContainsKey(r))
             {
-                sources[r] = new WireSource<Snap>();
-                cache[r] = sources[r]
-                    .OnSubscribe(poller.Use)
+                cache[r] = allSnaps
+                    .Link<(Rect r, Snap s),Snap>((snap, next)=> {
+                        if (snap.r.IntersectsWith(r))
+                        {
+                            Snap res = snap.s.Select(x=>x[r]);
+                            next(res);
+                        }
+                    })
                     .OnSubscribe(() =>
                     {
-                        listeningRects[r] = default;
+                        listeningRects[r] = NoneT.V;
                         Console.WriteLine($"gdi begin {r}");
                         RecalculateStrategy();
+                        var pollerRef=poller.Use();//increment poller refcount
                         return DisposableUtil.From(() =>
                         {
-
+                            pollerRef.Dispose();
                             Console.WriteLine($"gdi stop {r}");
                             Debug.Assert(listeningRects.Remove(r, out var _));
                             RecalculateStrategy();
                         });
-                        //TODO possible off screen
                     });
 
             }

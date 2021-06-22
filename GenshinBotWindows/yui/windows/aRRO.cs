@@ -91,9 +91,24 @@ namespace genshinbot.yui.windows
         {
             var b = rig.Make();
             var p = new screens.PlayingScreen(b, null);
+            testHealth(p);
+        }
+
+        private void testHealth(screens.PlayingScreen p)
+        {
+            for(int i = 0; i < 4; i++)
+            {
+                graph(p.PlayerHealth[i]
+                    .Select(x => x.Denormalize(i*360/4, (i+1)*360/4))
+                    , $"player {i}");
+            }
+        }
+
+        private void testArrow(screens.PlayingScreen p)
+        {
 
             var wanted = new LiveWire<double>(
-                () => Convert.ToDouble(Invoke((Func<int>)(()=>trackBar1.Value))).Radians(), onChange =>
+                () => Convert.ToDouble(Invoke((Func<int>)(() => trackBar1.Value))).Radians(), onChange =>
                 {
                     void TrackBar1_ValueChanged(object? sender, EventArgs e)
                     {
@@ -101,17 +116,17 @@ namespace genshinbot.yui.windows
                     }
                     trackBar1.ValueChanged += TrackBar1_ValueChanged;
                     return DisposableUtil.From(() => trackBar1.ValueChanged -= TrackBar1_ValueChanged);
-               });
+                });
             var wantedPkt = wanted.Packetize();
 
             var alg = new algorithm.ArrowSteering(p.ArrowDirection, wanted);
             alg.MouseDelta.Subscribe(x => p.Io.M.MouseMove(new OpenCvSharp.Point2d(x, 0)));
 
+
+
             graph(p.ArrowDirection, "arrow dir");
-
-        }
-
-        
+            graph(wantedPkt, "wanted");
+        }        
 
         private void Overlay_Load(object sender, EventArgs e)
         {
