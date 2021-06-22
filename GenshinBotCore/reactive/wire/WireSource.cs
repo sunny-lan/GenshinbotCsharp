@@ -5,11 +5,13 @@ namespace genshinbot.reactive.wire
 {
     public class WireSource<T> : IWire<T>
     {
+        private bool _allowSallow;
         Wire<T> wire;
-        private Action<T> _onNext;
+        private Action<T>? _onNext;
 
-        public WireSource()
+        public WireSource(bool allowSwallow=true)
         {
+            _allowSallow = allowSwallow;
             wire = new Wire<T>(onNext =>
             {
                 this._onNext = onNext;
@@ -17,7 +19,12 @@ namespace genshinbot.reactive.wire
             });
         }
 
-        public void Emit(T v) => _onNext?.Invoke(v);
+        public void Emit(T v)
+        {
+            if (!_allowSallow && _onNext == null)
+                throw new Exception("Value swallowed by WireSource!");
+            _onNext?.Invoke(v);
+        }
 
         public IDisposable Subscribe(Action<T> onValue) => wire.Subscribe(onValue);
     }

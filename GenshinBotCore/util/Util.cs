@@ -12,6 +12,10 @@ namespace genshinbot
 {
     public static class Util
     {
+        public static long Area(this Size sz)
+        {
+            return sz.Width * sz.Height;
+        }
         public static Rect Bounds(this Size sz, Point? topleft=null)
         {
             return new Rect(topleft ?? Util.Origin, sz);

@@ -40,7 +40,7 @@ namespace genshinbot.algorithm
                     lastSign = sign;
                     limiter /= 2;
                 }
-                Console.WriteLine($"limiter={limiter} sign={sign}");
+              //  Console.WriteLine($"limiter={limiter} sign={sign}");
 
 
                 return Math.Min(maxDelta, rel * scale * limiter);

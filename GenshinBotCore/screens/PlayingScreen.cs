@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 
 namespace genshinbot.screens
 {
-    public class PlayingScreen:IScreen
+    public class PlayingScreen : IScreen
     {
         public class Db
         {
@@ -61,14 +61,10 @@ namespace genshinbot.screens
             public int ArrowRadius { get; set; } = 15;
             public int MinBlobArea { get; set; } = 20;
             public int MinAliveWidth { get; set; } = 10;
-            public class CharacterFilter
-            {
-                public double? NumberSatMax { get; set; }
-                public ColorRange? HealthRed { get; set; }
-                public ColorRange? HealthGreen { get; set; }
-            }
 
-            public CharacterFilter CharFilter { get; set; } = new CharacterFilter();
+
+            public algorithm.PlayerHealthRead.CharacterFilter CharFilter { get; set; }
+                = new algorithm.PlayerHealthRead.CharacterFilter();
         }
         public Db db => Db.Instance;
         private ILiveWire<Db.RD?> rd;
@@ -110,7 +106,7 @@ namespace genshinbot.screens
                 if (posTrack == null)
                 {
                     //scale not known yet
-                    
+
                     var res1 = scaleMatcher.FindScale(approxPos, x, out var posMatch);
                     if (res1 is Point2d r1)
                     {
@@ -135,10 +131,14 @@ namespace genshinbot.screens
 
                 approxPos = res;
                 return res;
-            });
+            },
+                error => Console.WriteLine($"ERROR! {error}"));
         }
 
-        public PlayingScreen(BotIO b, ScreenManager screenManager) :base(b, screenManager)
+        public IWire<Pkt<double>>[] PlayerHealth { get; private init; } = new IWire<Pkt<double>>[4];
+        
+
+        public PlayingScreen(BotIO b, ScreenManager screenManager) : base(b, screenManager)
         {
             rd = b.W.Size.Select3(sz => db.R[sz]);
             Minimap = b.W.Screen.Watch2(rd.Select2(r => r.MinimapLoc)).Depacket();//TODO
@@ -147,7 +147,27 @@ namespace genshinbot.screens
                 .RectAround(new Size(db.ArrowRadius * 2, db.ArrowRadius * 2))
             ));
             //TODO handle errors+offload to separate thread!
-            ArrowDirection = Arrow.Select(arrow => arrowDirectionAlg.GetAngle(arrow));
+            ArrowDirection = Arrow
+                // .Debug("arrow IMG")
+                .Select(
+                    arrow =>
+                    {
+                        //  Console.WriteLine("begin detect");
+                        var res = arrowDirectionAlg.GetAngle(arrow);
+                        //  Console.WriteLine("end detect");
+                        return res;
+                    }
+                    //,error => Console.WriteLine($"ERROR! {error}")
+                )
+                //.Debug("arrow DIR")
+                ;
+
+            var healthAlg = new algorithm.PlayerHealthRead(db.CharFilter);
+            for (int i = 0; i < PlayerHealth.Length; i++)
+            {
+                PlayerHealth[i] = b.W.Screen.Watch2(rd.Select2(rd => rd.Characters[i].Health))
+                    .Select(healthAlg.ReadHealth);
+            }
 
         }
 
@@ -166,7 +186,7 @@ namespace genshinbot.screens
         public static void test(ITestingRig rig)
         {
             BotIO b = rig.Make();
-            var p = new PlayingScreen(b,null);
+            var p = new PlayingScreen(b, null);
             using (p.ArrowDirection.Subscribe(
                 x => Console.WriteLine($"angle={x}")
             ))
@@ -180,30 +200,8 @@ namespace genshinbot.screens
             throw new NotImplementedException();
         }
 
+
         /*
-
-        Mat hsv1 = new Mat(), rthes1 = new Mat(), gthes1 = new Mat();
-        public bool ReadSideAlive(int idx)
-        {
-            var r = db.R[b.W.GetSize()];
-            var rect = r.Characters[idx].Health;
-            var hr = db.CharFilter.HealthRed.Expect();
-            var hg = db.CharFilter.HealthGreen.Expect();
-
-            rect.Width = db.MinAliveWidth;
-            var src = b.W.Screenshot(rect);
-
-            Cv2.CvtColor(src, hsv1, ColorConversionCodes.BGR2HSV);
-            Cv2.InRange(hsv1, hg.Min, hg.Max, gthes1);
-            var count = Cv2.CountNonZero(gthes1);
-            if (count > 0.5 * rect.Area()) return true;
-
-            Cv2.InRange(hsv1, hr.Min, hr.Max, rthes1);
-            count = Cv2.CountNonZero(gthes1);
-            if (count > 0.5 * rect.Area()) return true;
-            return false;
-        }
-
         Mat hrThres = new Mat(), hgThres = new Mat(), hsvHealth = new Mat();
         /// <summary>
         /// Read health of player from side bar

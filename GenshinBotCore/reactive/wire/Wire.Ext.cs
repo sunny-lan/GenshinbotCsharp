@@ -11,7 +11,7 @@ namespace genshinbot.reactive.wire
 
     public static class Wire
     {
-        
+
         /// <summary>
         /// Subscribe to wire without using the callback
         /// </summary>
@@ -28,7 +28,7 @@ namespace genshinbot.reactive.wire
         /// <param name="a"></param>
         /// <param name="delay"></param>
         /// <returns></returns>
-        public static IWire<NoneT> InfiniteLoop(Action a,int? delay = null)
+        public static IWire<NoneT> InfiniteLoop(Action a, int? delay = null)
         {
             return new Wire<NoneT>(_ => Poller.InfiniteLoop(a, delay));
         }
@@ -37,9 +37,9 @@ namespace genshinbot.reactive.wire
         /// </summary>
         /// <param name="delay">If null, goes in a fastest infinite loop</param>
         /// <returns></returns>
-        public static IWire<NoneT> Interval(int? delay=null)
+        public static IWire<NoneT> Interval(int? delay = null)
         {
-            return new Wire<NoneT>(onNext=>Poller.InfiniteLoop(()=>onNext(NoneT.V),delay));
+            return new Wire<NoneT>(onNext => Poller.InfiniteLoop(() => onNext(NoneT.V), delay));
         }
         public static IWire<T> OnSubscribe<T>(this IWire<T> t, Func<IDisposable> f)
         {
@@ -77,14 +77,14 @@ namespace genshinbot.reactive.wire
         }
         public static async Task Lock<T>(this IWire<T> o, Func<Task> t, T v)
         {
-           
+
 
             var taskCompletionSource = new TaskCompletionSource<NoneT>();
 
             using (o.Subscribe(
                 x =>
                 {
-                    if (!EqualityComparer<T>.Default.Equals(x,v))
+                    if (!EqualityComparer<T>.Default.Equals(x, v))
                         taskCompletionSource.SetException(
                             new LockInterruptedException("value changed while running task"));
                 }
@@ -138,20 +138,20 @@ namespace genshinbot.reactive.wire
         public static ILiveWire<T> Switch<T>(this ILiveWire<ILiveWire<T>> t)
         {
             var dist = t.DistinctUntilChanged();
-            return new LiveWire<T>(()=> dist.Value.Value,onChange =>
-            {
-                IDisposable? last = null;
-                var gen = dist.Connect(wire =>
-                {
-                    last?.Dispose();
-                    last = wire.Connect(_=>onChange());
-                });
-                return DisposableUtil.From(() =>
-                {
-                    gen.Dispose();
-                    last?.Dispose();
-                });
-            });
+            return new LiveWire<T>(() => dist.Value.Value, onChange =>
+              {
+                  IDisposable? last = null;
+                  var gen = dist.Connect(wire =>
+                  {
+                      last?.Dispose();
+                      last = wire.Connect(_ => onChange());
+                  });
+                  return DisposableUtil.From(() =>
+                  {
+                      gen.Dispose();
+                      last?.Dispose();
+                  });
+              });
         }
         public static IWire<T> Switch<T>(this IWire<IWire<T>> t)
         {
@@ -159,58 +159,61 @@ namespace genshinbot.reactive.wire
             return new Wire<T>(onNext =>
             {
                 IDisposable? last = null;
-                var gen= dist.Subscribe(wire =>
-                {
-                    last?.Dispose();
-                    last = wire.Subscribe(onNext);
-                });
+                var gen = dist.Subscribe(wire =>
+                 {
+                     last?.Dispose();
+                     last = wire.Subscribe(onNext);
+                 });
                 return DisposableUtil.From(() =>
                 {
                     gen.Dispose();
                     last?.Dispose();
                 });
-            }); 
+            });
         }
 
         public class CombineAsyncOptions
         {
-            public bool Lock=false;
+            public bool Lock = false;
             /// <summary>
             /// Number of milliseconds to debounce
             /// null for no
             /// </summary>
-            public int? Debounce ;
+            public int? Debounce;
         }
-        public static CombineAsyncOptions DefaultCombineOptions=new CombineAsyncOptions();
+        public static CombineAsyncOptions DefaultCombineOptions = new CombineAsyncOptions();
         public static ILiveWire<T> Combine<T, In1, In2>(ILiveWire<In1> t1, ILiveWire<In2> t2,
-            Func<In1, In2, T> f, CombineAsyncOptions? opt = null )
+            Func<In1, In2, T> f, CombineAsyncOptions? opt = null)
         {
-            object? lck=null;
+            object? lck = null;
             var opt2 = opt ?? DefaultCombineOptions;
             if (opt2.Lock) lck = new object();
-            return new LiveWire<T>(() => {
+            return new LiveWire<T>(() =>
+            {
                 if (opt2.Lock) lock (lck) return f(t1.Value, t2.Value);
                 return f(t1.Value, t2.Value);
             },
                 onChange =>
                 {
-                    if(opt2.Debounce is int debounce)
+                    if (opt2.Debounce is int debounce)
                     {
                         long ctr = 0;
                         var onChangeOld = onChange;
-                        onChange = () => {
+                        onChange = () =>
+                        {
                             long curCtr = Interlocked.Increment(ref ctr);
-                            Task.Delay(debounce).ContinueWith(_=> {
+                            Task.Delay(debounce).ContinueWith(_ =>
+                            {
                                 if (ctr == curCtr)
                                     onChangeOld();
                             });
                         };
                     }
-                   return DisposableUtil.Merge(
-                        t1.Subscribe(_ => onChange()),
-                        t2.Subscribe(_ => onChange())
+                    return DisposableUtil.Merge(
+                         t1.Subscribe(_ => onChange()),
+                         t2.Subscribe(_ => onChange())
 
-                    );
+                     );
                 });
         }
 
@@ -220,7 +223,7 @@ namespace genshinbot.reactive.wire
         /// <typeparam name="T"></typeparam>
         /// <param name="w"></param>
         /// <returns></returns>
-        public static async Task<T> Value2<T>(this ILiveWire<T?> w) where T:struct
+        public static async Task<T> Value2<T>(this ILiveWire<T?> w) where T : struct
         {
             if (w.Value is T t) return t;
             return await w.NonNull().Get();
@@ -249,11 +252,11 @@ namespace genshinbot.reactive.wire
         /// <param name="control"></param>
         /// <returns></returns>
         public static ILiveWire<T?> Relay2<T>(this ILiveWire<T?> t, ILiveWire<bool> control)
-            where T:notnull
+            where T : notnull
         {
             var empty = new ConstLiveWire<T?>(default);
             return control.Select<bool, ILiveWire<T?>>
-                (enable => enable ? t  : empty).Switch();
+                (enable => enable ? t : empty).Switch();
         }
         public static ILiveWire<T?> AsNullable<T>(this ILiveWire<T> t)
          where T : struct
@@ -267,17 +270,17 @@ namespace genshinbot.reactive.wire
         {
             var empty = new ConstLiveWire<T?>(null);
             return control.Select<bool, ILiveWire<T?>>
-                (enable=> 
+                (enable =>
                 enable ? t.AsNullable() : empty
                 ).Switch();
         }
         public static ILiveWire<T> DistinctUntilChanged<T>(this ILiveWire<T> t)
         {
-            if(t is LiveWire<T> l)
+            if (t is LiveWire<T> l)
             {
                 if (l.ChecksDistinct) return l;//performance optimization
             }
-            return new LiveWire<T>(()=>t.Value, onChange => t.Subscribe(_ => onChange()),true);
+            return new LiveWire<T>(() => t.Value, onChange => t.Subscribe(_ => onChange()), true);
         }
         public static ILiveWire<T> ToLive<T, _>(this IWire<_> t, Func<T> get)
         {
@@ -288,7 +291,7 @@ namespace genshinbot.reactive.wire
             if (t is Wire<T> tt) return tt;
             return new Wire<T>(t.Subscribe);
         }
-        
+
         public static async Task<T> Get<T>(this IWire<T> t, TimeSpan? timeout = null)
         {
             TaskCompletionSource<T> taskCompletionSource = new TaskCompletionSource<T>();
@@ -326,8 +329,8 @@ namespace genshinbot.reactive.wire
 
 
         public static ILiveWire<Out?> Select2<In, Out>(this ILiveWire<In?> w, Func<In, Out> f)
-             where In:struct
-            where Out:struct
+             where In : struct
+            where Out : struct
 
         {
             Out? process()
@@ -393,7 +396,7 @@ namespace genshinbot.reactive.wire
         {
             return w.Select(x => { f(x); return x; });
         }
-        public static ILiveWire<T> Debug<T>(this ILiveWire<T> w,string tag)
+        public static ILiveWire<T> Debug<T>(this ILiveWire<T> w, string tag)
         {
             void print(string s)
             {
@@ -404,7 +407,8 @@ namespace genshinbot.reactive.wire
                 var res = w.Value;
                 print($"{tag}.getVal() = {res}");
                 return res;
-            }, onChange => {
+            }, onChange =>
+            {
                 print($"{tag}.enable = true");
 
                 var d = w.Subscribe(x =>
@@ -444,7 +448,8 @@ namespace genshinbot.reactive.wire
             {
                 Console.WriteLine($"DBG: {s}");
             }
-            return new Wire<T>( onChange => {
+            return new Wire<T>(onChange =>
+            {
                 print($"{tag}.enable = true");
 
                 var d = w.Subscribe(x =>
@@ -466,21 +471,93 @@ namespace genshinbot.reactive.wire
         }
         public class ProcessAsyncOptions
         {
-            public enum Mode
+            /*  public enum ConcurrentMode
+              {
+                  /// <summary>
+                  /// All async requests are run, with no extra stuff happening
+                  /// </summary>
+                  RunAll,
+
+                  /// <summary>
+                  /// A limited number of async
+                  /// </summary>
+                  Buffered
+              }
+              public ConcurrentMode Mode = ConcurrentMode.RunAll;*/
+
+            /* public enum OverflowMode
+             {
+                 /// <summary>
+                 /// Simply ignore new packets
+                 /// </summary>
+                 Drop,
+             }
+
+             /// <summary>
+             /// what happens when tasks exceed concurrent limit
+             /// </summary>
+             public OverflowMode Overflow=OverflowMode.Drop;*/
+
+            /// <summary>
+            /// The amount of time to wait before dropping a packet
+            /// in the case of exceeding MaxConcurrency
+            /// </summary>
+            public TimeSpan WaitSpot=TimeSpan.Zero;
+
+            /// <summary>
+            /// Max number of tasks allowed to run at same time
+            /// </summary>
+            public int? MaxConcurrency = 1;
+        }
+        public static ProcessAsyncOptions DefaultAsyncOptions = new ProcessAsyncOptions();
+
+        public static IWire<Out> ProcessAsync<In, Out>(this IWire<In> w, Func<In, Task<Out>> f, Action<Exception> onError, ProcessAsyncOptions? opt = null)
+        {
+            var opt2 = opt ?? DefaultAsyncOptions;
+            if (opt2.MaxConcurrency is int mc)
             {
-                RunAll,
-                SkipNewest
+                //System.Diagnostics.Debug.Assert(mc == 1, "MaxConcurrency 1 only supported");
+
+                var limiter = new SemaphoreSlim(mc);
+                return w.Link<In, Out>(async (value, next) =>
+                {
+                    if (await limiter.WaitAsync(opt2.WaitSpot))
+                    {
+                        try
+                        {
+                            next(await f(value));
+
+                        }catch(Exception e)
+                        {
+                            onError(e);
+                        }
+                        finally
+                        {
+                            limiter.Release();
+                        }
+                    }
+
+                });
+
+                
             }
+            else
+                //TODO swallows stuff
+                return w.Link<In, Out>(async(value, next) =>
+                {
+                    try
+                    {
+                        next(await f(value));
+                    }catch(Exception e)
+                    {
+                        onError(e);
+                    }
+                });
         }
-        public static IWire<Out> ProcessAsync<In, Out>(this IWire<In> w, Func<In, Task<Out>> f, ProcessAsyncOptions? opt=null)
+        public static IWire<Out> ProcessAsync<In, Out>(this IWire<In> w, Func<In, Out> f,Action<Exception> onError, ProcessAsyncOptions? opt = null)
         {
             //TODO swallows stuff
-            return w.Link<In, Out>((value, next) => f(value).ContinueWith(t=>next(t.Result)));
-        }
-        public static IWire<Out> ProcessAsync<In, Out>(this IWire<In> w, Func<In, Out> f ,ProcessAsyncOptions? opt = null)
-        {
-            //TODO swallows stuff
-            return ProcessAsync(w, x => Task.Run(() => f(x)), opt);
+            return ProcessAsync(w, x => Task.Run(() => f(x)), onError, opt);
         }
         public static IWire<In> Where<In>(this IWire<In> w, Func<In, bool> f)
         {
@@ -497,9 +574,9 @@ namespace genshinbot.reactive.wire
         /// <param name="f"></param>
         /// <returns></returns>
         public static ILiveWire<In?> Where2<In>(this ILiveWire<In> w, Func<In, bool> f)
-            where In:struct
+            where In : struct
         {
-            return w.Select<In,In?>((value) =>f(value)?value:default);
+            return w.Select<In, In?>((value) => f(value) ? value : default);
         }
         public static IWire<In> ToWire<In>(this IObservable<In> w)
         {

@@ -102,16 +102,21 @@ namespace genshinbot.automation.screenshot.gdi
                     if (!Gdi32.BitBlt(hTmpDC, region.X, region.Y, region.Width, region.Height, hDesktopDC,
                         region.X, region.Y, Gdi32.RasterOperationMode.SRCCOPY
                     ))
-                        throw new Exception("failed performing BitBlt");
+                    {
+                        Kernel32.GetLastError().ThrowIfFailed();
+                        continue;
+                    }
                     stuffs.Add(() =>
                     sources[region].Emit(new Snap(buf[region])));
                 }
 
                 //Console.WriteLine("flush screenshot");
                 if (!Gdi32.GdiFlush())
-                    throw new Exception("failed performing GdiFlush");
+                {
+                    Kernel32.GetLastError().ThrowIfFailed();
+                    return;
+                }
 
-            
             }
             stuffs.ForEach(x => x());
         }

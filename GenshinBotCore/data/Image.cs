@@ -13,6 +13,7 @@ namespace genshinbot.data
 
         private Lazy<Mat> mat;
         private ImreadModes prevMode;
+
         public Mat Load(ImreadModes mode = ImreadModes.Color)
         {
             if (!Data.Exists(Path)) return null;

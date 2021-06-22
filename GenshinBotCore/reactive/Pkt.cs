@@ -44,14 +44,19 @@ namespace genshinbot.reactive
         {
             return new Pkt<U>(transform(Value), CaptureTime);
         }
+
+        public override string ToString()
+        {
+            return $"{CaptureTime}: {Value}";
+        }
     }
 
 
     public static class PktWireExtensions
     {
-        public static IWire<Pkt<Out>> ProcessAsync<In, Out>(this IWire<Pkt<In>> observable, Func<In, Out> fn)
+        public static IWire<Pkt<Out>> ProcessAsync<In, Out>(this IWire<Pkt<In>> observable, Func<In, Out> fn, Action<Exception> onError, Wire.ProcessAsyncOptions ?opt=null)
         {
-            return observable.ProcessAsync(x => x.Select(fn));
+            return observable.ProcessAsync(x => x.Select(fn),onError,opt);
         }
 
 

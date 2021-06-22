@@ -11,5 +11,9 @@ namespace genshinbot.data
     public class SavableMat : SavableMatSubset
     {
         public Mat Value { get; set; }
+        ~SavableMat()
+        {
+            Value?.Dispose();
+        }
     }
 }
