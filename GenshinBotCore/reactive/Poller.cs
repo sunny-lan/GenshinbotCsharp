@@ -12,61 +12,35 @@ using System.Threading.Tasks;
 
 namespace genshinbot.reactive
 {
-    /// <summary>
-    /// Polls the value of a function and outputs it into a stream
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class Poller<T> 
+    public class Poller
     {
-        public ILiveWire<T> Wire => obsSubj;
-        private LiveWire<T> obsSubj;
-        Func<T> poll;
-        public Poller(Func<T> poll)
+        Wire<NoneT> wire;
+        public Poller(Action a, int? delay = null)
         {
-            this.poll = poll;
-            obsSubj = new LiveWire<T>(poll, onChange =>
-              {
-                  var ts = new CancellationTokenSource();
-                  Task.Run(() => {
-                      Console.WriteLine("begin loop");
-                      while (!ts.Token.IsCancellationRequested)
-                      {
-                       //   Console.WriteLine(" begin poll");
-                          onChange();
-                      }
-                      Console.WriteLine("end loop");
-                  },ts.Token);
-                  return DisposableUtil.From(()=> {
-                      Console.WriteLine("request cancellation");
-                      ts.Cancel();
+            wire= new Wire<NoneT>(_ => Poller.InfiniteLoop(a, delay));
+        }
+        public static IDisposable InfiniteLoop(Action a, int? delay=null)
+        {
+            var ts = new CancellationTokenSource();
+            Task.Run(async() => {
+                Console.WriteLine("begin loop");
+                while (!ts.Token.IsCancellationRequested)
+                {
+                    //   Console.WriteLine(" begin poll");
+                    a();
+                    if (delay is int dd)
+                        await Task.Delay(dd, ts.Token);
+                }
+                Console.WriteLine("end loop");
+            }, ts.Token);
+            return DisposableUtil.From(() => {
+                Console.WriteLine("request cancellation");
+                ts.Cancel();
 
-                  });
-              });
-
+            });
         }
 
-
-        /// <summary>
-        /// Polling interval, in milliseconds.
-        /// If 0, the maximum speed possible is used
-        /// </summary>
-        public int Interval
-        {
-            get => 0; set => throw new NotImplementedException();
-        }
-
-        public int MaxInFlight
-        {
-            get => 1; set
-            {
-                if (value != 1) throw new NotImplementedException();
-            }
-        }
-
-    }
-
-    public static class Poller
-    {
+        #region tests
         /// <summary>
         /// No interval, task takes 1000ms
         /// </summary>
@@ -174,5 +148,43 @@ namespace genshinbot.reactive
         {
             Test5();
         }
+        #endregion
     }
+    /// <summary>
+    /// Polls the value of a function and outputs it into a stream
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public class Poller<T> 
+    {
+        public ILiveWire<T> Wire => obsSubj;
+        private LiveWire<T> obsSubj;
+        Func<T> poll;
+      
+        public Poller(Func<T> poll)
+        {
+            this.poll = poll;
+            //  obsSubj = new LiveWire<T>(poll, Poller.InfiniteLoop);
+            throw new NotImplementedException();
+        }
+
+
+        /// <summary>
+        /// Polling interval, in milliseconds.
+        /// If 0, the maximum speed possible is used
+        /// </summary>
+        public int Interval
+        {
+            get => 0; set => throw new NotImplementedException();
+        }
+
+        public int MaxInFlight
+        {
+            get => 1; set
+            {
+                if (value != 1) throw new NotImplementedException();
+            }
+        }
+
+    }
+
 }

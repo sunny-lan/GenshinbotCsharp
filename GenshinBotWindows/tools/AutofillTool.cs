@@ -138,9 +138,9 @@ namespace genshinbot.tools
                 }
 
                 ClearPrompt(1);
+                overlay.Point = null;
                 if (key == Select)
                 {
-                    overlay.Point = null;
                     return pos;
                 }
                 else return x;
@@ -350,7 +350,7 @@ namespace genshinbot.tools
 
                                 var sz = await w.Size.Value2();
                                 //ensure window size doesn't change while doing RD
-                                await w.Size.Lock(async () =>
+                                await w.Size.NonNull().Lock(async () =>
                                     {
                                         var rd = d[sz];
                                         Prompt($"{prop.Name}:{sz.Width}x{sz.Height}", 0);
@@ -384,7 +384,7 @@ namespace genshinbot.tools
             {
                 public Peep peep { get; set; }
 
-                public Mat derp { get; set; }
+                public SavableMat derp { get; set; }
                 public data.Snap derp1 { get; set; }
                 //public Point2d p2d { get; set; }
 
@@ -403,7 +403,7 @@ namespace genshinbot.tools
             await tool.Edit(obj);
             foreach (var val in obj.Rd.Values)
             {
-                CvThread.ImShow("a", val.derp);
+                CvThread.ImShow("a", val.derp.Value);
                 CvThread.ImShow("b", val.derp1.Image.Value);
             }
         }

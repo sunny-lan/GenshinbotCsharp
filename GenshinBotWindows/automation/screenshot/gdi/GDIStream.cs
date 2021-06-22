@@ -53,8 +53,9 @@ namespace genshinbot.automation.screenshot.gdi
             });
 
             this.enable = enable ?? new ConstLiveWire<bool>(true);
-            poller = new Poller<Snap>(Poll);
-            pollerEnable = poller.Wire.Relay(this.enable);
+
+            poller = Wire.InfiniteLoop(Poll)
+                .Relay(this.enable);
         }
 
 
@@ -83,39 +84,41 @@ namespace genshinbot.automation.screenshot.gdi
 
             buf = new Mat(height, width, OpenCvSharp.MatType.CV_8UC4, raw);
             hTmpDC.SelectObject(sec);
-            
+
         }
 
-        Snap Poll()
+        void Poll()
         {
             Debug.Assert(buf != null);
+            List<Action> stuffs;
             lock (pollRegions)
             {
+                stuffs = new List<Action>(pollRegions.Count);
                 foreach (var region in pollRegions)
                 {
-                   
-                        //Console.WriteLine($"capture {region}");
-                        if (!Gdi32.BitBlt(hTmpDC, region.X, region.Y, region.Width, region.Height, hDesktopDC,
-                            region.X, region.Y, Gdi32.RasterOperationMode.SRCCOPY
-                        ))
-                            throw new Exception("failed performing BitBlt");
+
+
+                    //Console.WriteLine($"capture {region}");
+                    if (!Gdi32.BitBlt(hTmpDC, region.X, region.Y, region.Width, region.Height, hDesktopDC,
+                        region.X, region.Y, Gdi32.RasterOperationMode.SRCCOPY
+                    ))
+                        throw new Exception("failed performing BitBlt");
+                    stuffs.Add(() =>
+                    sources[region].Emit(new Snap(buf[region])));
                 }
 
-            }
-            //Console.WriteLine("flush screenshot");
-            if (!Gdi32.GdiFlush())
-                throw new Exception("failed performing GdiFlush");
+                //Console.WriteLine("flush screenshot");
+                if (!Gdi32.GdiFlush())
+                    throw new Exception("failed performing GdiFlush");
 
-            return new Snap(buf);
+            
+            }
+            stuffs.ForEach(x => x());
         }
         private ILiveWire<bool> enable;
 
-        Poller<Snap> poller;
 
-        /// <summary>
-        /// Poller output, filtered through Enable signal
-        /// </summary>
-        IWire<Snap> pollerEnable;
+        IWire<NoneT> poller;
 
         /// <summary>
         /// min number of distinct rects before applying merge algo
@@ -126,6 +129,7 @@ namespace genshinbot.automation.screenshot.gdi
         /// cache of IWires for each screen region being watched
         /// </summary>
         Dictionary<Rect, IWire<Snap>> cache = new Dictionary<Rect, IWire<Snap>>();
+        Dictionary<Rect, WireSource<Snap>> sources = new Dictionary<Rect, WireSource<Snap>>();
 
         /// <summary>
         /// List of regions to actually poll
@@ -173,29 +177,34 @@ namespace genshinbot.automation.screenshot.gdi
         {
             if (!cache.ContainsKey(r))
             {
-                cache[r] = poller.Wire.OnSubscribe(()=> {
-                    listeningRects[r] = default;
-                    Console.WriteLine($"gdi begin {r}");
-                    RecalculateStrategy();
-                    return DisposableUtil.From(() =>
+                sources[r] = new WireSource<Snap>();
+                cache[r] = sources[r]
+                    .OnSubscribe(poller.Use)
+                    .OnSubscribe(() =>
                     {
-
-                        Console.WriteLine($"gdi stop {r}");
-                        Debug.Assert(listeningRects.Remove(r, out var _));
+                        listeningRects[r] = default;
+                        Console.WriteLine($"gdi begin {r}");
                         RecalculateStrategy();
+                        return DisposableUtil.From(() =>
+                        {
+
+                            Console.WriteLine($"gdi stop {r}");
+                            Debug.Assert(listeningRects.Remove(r, out var _));
+                            RecalculateStrategy();
+                        });
+                        //TODO possible off screen
                     });
-                    //TODO possible off screen
-                }).Select(m => m[r]);
 
             }
             return cache[r];
         }
-        public static void Test2()
+        public static async Task Test2()
         {
             //Task.Run(()=> { while (true) Cv2.WaitKey(1); });\
             var enable = new LiveWireSource<bool>(true);
             GDIStream strm = new GDIStream(enable);
-            var poll = strm.Watch(new Rect(0, 0, 1600, 900));
+            var poll = strm.Watch(new Rect(0, 0, 1600, 900));//.Debug("screenshot 1600x900");
+            CvThread.ImShow("a", await poll.Depacket().Get());
             Console.WriteLine("b:");
             Console.ReadLine();//ds
             int fps = 0;
@@ -234,30 +243,30 @@ namespace genshinbot.automation.screenshot.gdi
             }
 
         }
-/*
-        public static void Test()
-        {
-            IWire<Unit> tmp = Observable.FromEvent(
-                h => Console.WriteLine("add"),
-                h => Console.WriteLine("remove")
-            );
-
-            Console.WriteLine("a");
-            Console.ReadKey();
-            Console.WriteLine("b");
-            using (var o = tmp.Subscribe(Observer.Create<Unit>(_ => Console.WriteLine("evt"))))
-            {
-                Console.ReadKey();
-                Console.WriteLine("d");
-                using (var b = tmp.Subscribe(Observer.Create<Unit>(_ => Console.WriteLine("evt"))))
+        /*
+                public static void Test()
                 {
-                    Console.ReadKey();
-                }
-                Console.WriteLine("e");
-                Console.ReadKey();
-            }
-            Console.WriteLine("c");
+                    IWire<Unit> tmp = Observable.FromEvent(
+                        h => Console.WriteLine("add"),
+                        h => Console.WriteLine("remove")
+                    );
 
-        }*/
+                    Console.WriteLine("a");
+                    Console.ReadKey();
+                    Console.WriteLine("b");
+                    using (var o = tmp.Subscribe(Observer.Create<Unit>(_ => Console.WriteLine("evt"))))
+                    {
+                        Console.ReadKey();
+                        Console.WriteLine("d");
+                        using (var b = tmp.Subscribe(Observer.Create<Unit>(_ => Console.WriteLine("evt"))))
+                        {
+                            Console.ReadKey();
+                        }
+                        Console.WriteLine("e");
+                        Console.ReadKey();
+                    }
+                    Console.WriteLine("c");
+
+                }*/
     }
 }

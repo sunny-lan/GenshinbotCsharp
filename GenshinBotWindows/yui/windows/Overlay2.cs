@@ -70,9 +70,9 @@ namespace genshinbot.yui.windows
                 }
             });
         }
-        public IDisposable follow(IWire<bool> focused)
+        public IDisposable follow(ILiveWire<bool> focused)
         {
-            return focused.Subscribe(rr =>
+            return focused.Connect(rr =>
             {
                 Console.WriteLine($"visible: {rr}");
                 internalVisible = rr;

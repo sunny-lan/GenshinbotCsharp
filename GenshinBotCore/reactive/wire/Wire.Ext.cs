@@ -8,8 +8,39 @@ using System.Threading.Tasks;
 
 namespace genshinbot.reactive.wire
 {
+
     public static class Wire
     {
+        
+        /// <summary>
+        /// Subscribe to wire without using the callback
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public static IDisposable Use<T>(this IWire<T> t)
+        {
+            return t.Subscribe(_ => { });
+        }
+        /// <summary>
+        /// Calls function in infinite loop when the wire is suscribed
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="delay"></param>
+        /// <returns></returns>
+        public static IWire<NoneT> InfiniteLoop(Action a,int? delay = null)
+        {
+            return new Wire<NoneT>(_ => Poller.InfiniteLoop(a, delay));
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="delay">If null, goes in a fastest infinite loop</param>
+        /// <returns></returns>
+        public static IWire<NoneT> Interval(int? delay=null)
+        {
+            return new Wire<NoneT>(onNext=>Poller.InfiniteLoop(()=>onNext(NoneT.V),delay));
+        }
         public static IWire<T> OnSubscribe<T>(this IWire<T> t, Func<IDisposable> f)
         {
             return new Wire<T>(onNext =>

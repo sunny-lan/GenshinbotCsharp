@@ -16,7 +16,7 @@ namespace genshinbot
 {
     class Program
     {
-    
+
 
 
         [STAThread]
@@ -60,11 +60,11 @@ namespace genshinbot
             //stream.Poller.Test1();
             // automation.screenshot.directx.Test.Run();
             // automation.screenshot.gdi.run();
-            // automation.screenshot.gdi.GDIStream.Test2();
+            //            await automation.screenshot.gdi.GDIStream.Test2();
             //automation.windows.WindowAutomator2.Test();
             //await automation.windows.WindowAutomator2.Test2();
             // await tools.AutofillTool.Test(rig);
-               automation.windows.WindowAutomator2.Test3();
+            //  automation.windows.WindowAutomator2.Test3();
             //screens.PlayingScreen.test();
             //screens.MapScreen.Test2(rig);
             //await controllers.LocationManager.testAsync(rig);
@@ -81,7 +81,7 @@ namespace genshinbot
             // await tools.DailyDoer.DispatchCollect(rig.Make());
             //await experiments.RxTest.runAsync();
             //await tools.AutofillTool.ConfigureDailyDoer(rig.Make());
-         //   await tools.AutofillTool.Test2();
+               await tools.AutofillTool.Test2();
             //await tools.AutofillTool.ConfigurePlayingScreen(rig.Make());
             //data.jsonconverters.MatConverter.Test();
             Console.WriteLine("Program ended. Press enter to exit");
