@@ -9,6 +9,7 @@ namespace genshinbot.reactive.wire
 {
     public class LiveWire<T> : ILiveWire<T>
     {
+        WireDebug.Info? dbg = WireDebug.Instance.GetDebug();
 
         private T? last;
         private object val_lock = new object();
@@ -18,8 +19,6 @@ namespace genshinbot.reactive.wire
 
         private Func<T> getVal;
         Wire<T> wire;
-        int
-            iid = ID.get();
         public bool ChecksDistinct { get; }
         public LiveWire(Func<T> getVal, Func<Action, IDisposable> enable, bool checkDistinct = false)
 

@@ -11,19 +11,15 @@ namespace genshinbot.reactive.wire
 {
     public class Wire<T> : IWire<T>, IObservable<T>
     {
-#if DEBUG
-        string here = Environment.StackTrace;
-#endif
+        WireDebug.Info? dbg = WireDebug.Instance.GetDebug();
 
         volatile List<Action<T>> subscribers = new List<Action<T>>();
         Func<Action<T>, IDisposable> Enable;
       //  SemaphoreSlim enabled_lock = new SemaphoreSlim(1);
         SemaphoreSlim S_lock = new SemaphoreSlim(1);
         //TODO performance optimization for single subscriber case
-        int iid;
         public Wire(Func<Action<T>, IDisposable> enable)
         {
-            iid = ID.get();
             Enable = enable;
         }
 

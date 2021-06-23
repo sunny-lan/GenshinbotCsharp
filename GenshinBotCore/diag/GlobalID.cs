@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace genshinbot.diag
 {
-    class ID
+    class GlobalID
     {
         static int g_id = 0;
-        public static int get() => Interlocked.Increment(ref g_id);
+        public static string get(string name="") =>$"{name}{Interlocked.Increment(ref g_id)}";
     }
 }
