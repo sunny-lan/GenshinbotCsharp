@@ -12,7 +12,7 @@ namespace genshinbot.automation.hooking
 {
     public class KbdHookAdapter:IKeyCapture
     {
-        public IWire<IKeyCapture.KeyEvent> KeyEvents { get; private init; }
+        public IWire<IKeyCapture.KeyEvent> KeyEvents { get;  }
         public ILiveWire<IReadOnlyDictionary<Keys, bool>> KbdState => kbdState;
 
 

@@ -11,7 +11,7 @@ namespace genshinbot.reactive.wire
         private bool running;
         private Func<T> getVal;
         Wire<T> wire;
-        public bool ChecksDistinct { get; private init; }
+        public bool ChecksDistinct { get;  }
         public LiveWire(Func<T> getVal, Func<Action, IDisposable> enable, bool checkDistinct=false) 
             
         {

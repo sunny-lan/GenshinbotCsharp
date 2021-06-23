@@ -15,7 +15,7 @@ namespace genshinbot.automation.hooking
     public class MouseHookAdapter:IMouseCapture
     {
 
-        public IWire<IMouseCapture.MouseEvent> MouseEvents { get; private init; }
+        public IWire<IMouseCapture.MouseEvent> MouseEvents { get;  }
 
         public MouseHook mouseHook;
 

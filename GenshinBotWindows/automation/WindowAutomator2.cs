@@ -43,7 +43,7 @@ namespace genshinbot.automation.windows
             }
         }
 
-        public ILiveWire<bool> Focused { get; private init; }
+        public ILiveWire<bool> Focused { get;  }
 
         private List<IDisposable> disposeList = new List<IDisposable>();
         public WindowAutomator2(string TITLE, string CLASS)
@@ -138,8 +138,8 @@ namespace genshinbot.automation.windows
 
         #region Rect
 
-        public ILiveWire<Size?> Size { get; private init; }
-        public ILiveWire<Rect?> Bounds { get; private init; }
+        public ILiveWire<Size?> Size { get;  }
+        public ILiveWire<Rect?> Bounds { get;  }
 
         private WinEventHook locationChangeHook;
 
@@ -276,13 +276,13 @@ namespace genshinbot.automation.windows
             return pp.Cv();
         }
 
-        public ScreenshotObservable Screen { get; private init; }
+        public ScreenshotObservable Screen { get;  }
 
         public IMouseCapture MouseCap => mouseCap.Value;
         private Lazy<MouseHookAdapter> mouseCap;
         public IKeyCapture KeyCap => keyCap.Value;
 
-        public ILiveWire<Rect?> ScreenBounds { get; private init; }
+        public ILiveWire<Rect?> ScreenBounds { get;  }
 
         private Lazy<KbdHookAdapter> keyCap;
 

@@ -76,7 +76,8 @@ namespace genshinbot
             // await tools.ScreencoordRecorder.runAsync(rig.Make().W);
             //// .Show();
             //Application.Run(new yui.windows.aRRO(rig));
-            await screens.PlayingScreen.Test3Async();
+            //await screens.PlayingScreen.Test3Async();
+            await screens.PlayingScreen.TestClimb();
             //await tools.DailyDoer.runAsync(rig.Make());
             // await tools.DailyDoer.DispatchCollect(rig.Make());
             //await experiments.RxTest.runAsync();

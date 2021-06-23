@@ -14,8 +14,8 @@ namespace genshinbot.screens
 {
     public abstract class IScreen
     {
-        public BotIO Io { get; private init; }
-        public ScreenManager ScreenManager { get; private init; }
+        public BotIO Io { get;  }
+        public ScreenManager ScreenManager { get;  }
 
         protected IScreen(BotIO b, ScreenManager screenManager)
         {
@@ -27,8 +27,8 @@ namespace genshinbot.screens
     {
         private BotIO io;
 
-        public PlayingScreen PlayingScreen { get; private init; }
-        public MapScreen MapScreen { get; private init; }
+        public PlayingScreen PlayingScreen { get;  }
+        public MapScreen MapScreen { get;  }
 
         public ILiveWire<IScreen> ActiveScreen => screen;
         private LiveWireSource<IScreen> screen;

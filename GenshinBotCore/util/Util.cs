@@ -12,6 +12,10 @@ namespace genshinbot
 {
     public static class Util
     {
+        public static double SumComponents(this Scalar s)
+        {
+            return s.Val0 + s.Val1 + s.Val2 + s.Val3;
+        }
         public static long Area(this Size sz)
         {
             return sz.Width * sz.Height;

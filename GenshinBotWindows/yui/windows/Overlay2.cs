@@ -153,7 +153,7 @@ namespace genshinbot.yui.windows
                 gfx.DrawRectangle(_brushes["red"], new Rectangle(rr.Left, rr.Top, rr.Right, rr.Bottom), 1);
             if (Point is OpenCvSharp.Point p)
             {
-                gfx.DrawCircle(_brushes["red"], new Circle(p.X, p.Y, 4), 0.5f);
+                //gfx.DrawCircle(_brushes["red"], new Circle(p.X, p.Y, 4), 0.5f);
                 gfx.DrawLine(_brushes["red"], p.X, 0, p.X, gw.Height, 0.5f);
                 gfx.DrawLine(_brushes["red"], 0, p.Y, gw.Width, p.Y, 0.5f);
             }

@@ -18,7 +18,7 @@ namespace genshinbot.diag
         {
             public string Name { get; init; }
             public Mat Image;
-            public Dictionary<Keys, MockScreen> KeyMap { get; private init; } = new Dictionary<Keys, MockScreen>();
+            public Dictionary<Keys, MockScreen> KeyMap { get;  } = new Dictionary<Keys, MockScreen>();
         }
 
         class MockKeySim : IKeySimulator2
@@ -38,8 +38,8 @@ namespace genshinbot.diag
             }
         }
 
-        public MockScreen PlayingScreen { get; private init; } = new MockScreen { Name="Playing screen"};
-        public MockScreen MapScreen { get; private init; } = new MockScreen { Name="Map Screen"};
+        public MockScreen PlayingScreen { get;  } = new MockScreen { Name="Playing screen"};
+        public MockScreen MapScreen { get;  } = new MockScreen { Name="Map Screen"};
 
         public MockScreen CurrentScreen
         {

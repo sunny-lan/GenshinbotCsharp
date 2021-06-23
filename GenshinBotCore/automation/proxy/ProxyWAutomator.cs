@@ -15,15 +15,15 @@ namespace genshinbot.automation
         IWindowAutomator2 w;
 
 
-        public ILiveWire<bool> Focused { get; private init; }
+        public ILiveWire<bool> Focused { get;  }
 
-        public ILiveWire<Size?> Size { get; private init; }
+        public ILiveWire<Size?> Size { get;  }
 
-        public IKeySimulator2 Keys { get; private init; }
+        public IKeySimulator2 Keys { get;  }
 
-        public IMouseSimulator2 Mouse { get; private init; }
+        public IMouseSimulator2 Mouse { get;  }
 
-        public ScreenshotObservable Screen { get; private init; }
+        public ScreenshotObservable Screen { get;  }
 
         public IMouseCapture MouseCap => throw new NotImplementedException();
 

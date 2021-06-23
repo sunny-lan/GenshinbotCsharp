@@ -114,8 +114,23 @@ namespace genshinbot.reactive.wire
             }
         }
 
+        /// <summary>
+        /// Switches between multiple wires, if wire is unknown, defaults to Empty wire
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public static IWire<T> Switch2<T>(this ILiveWire<IWire<T>?> t, IWire<T> ?defaultWire=null)
+        {
+            return t.Select(w =>
+            {
+                if (w is null) return defaultWire ?? EmptyWire<T>.Instance;
+                else return w;
+            }).Switch();
+        }
 
-        public static IWire<T> Switch<T>(this ILiveWire<IWire<T>> t)
+            public static IWire<T> Switch<T>(this ILiveWire<IWire<T>> t)
         {
             var dist = t.DistinctUntilChanged();
             return new Wire<T>(onNext =>
@@ -357,6 +372,20 @@ namespace genshinbot.reactive.wire
             return new LiveWire<Out?>(process, onChange =>
                 w.Subscribe(_ => onChange()));
         }
+        public static ILiveWire<Out?> Select3<In, Out>(this ILiveWire<In?> w, Func<In, Out> f)
+           where In : class
+          where Out : class
+
+        {
+            Out? process()
+            {
+                if (w.Value !=null)
+                    return f(w.Value);
+                return default;
+            }
+            return new LiveWire<Out?>(process, onChange =>
+                w.Subscribe(_ => onChange()));
+        }
         public static ILiveWire<Out?> Select2<In, Out>(this ILiveWire<In?> w, Func<In, Out> f)
             where In : class
            where Out : struct
@@ -364,8 +393,8 @@ namespace genshinbot.reactive.wire
         {
             Out? process()
             {
-                if (w.Value is In i)
-                    return f(i);
+                if (w.Value !=null)
+                    return f(w.Value);
                 return default;
             }
             return new LiveWire<Out?>(process, onChange =>

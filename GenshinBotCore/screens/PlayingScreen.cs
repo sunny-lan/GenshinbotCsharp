@@ -68,11 +68,11 @@ namespace genshinbot.screens
         }
         public Db db => Db.Instance;
         private ILiveWire<Db.RD?> rd;
-        public IWire<Mat> Minimap { get; private init; }
-        public IWire<Pkt<Mat>> Arrow { get; private init; }
-        public IWire<Pkt<double>> ArrowDirection { get; private init; }
+        public IWire<Mat> Minimap { get; }
+        public IWire<Pkt<Mat>> Arrow { get; }
+        public IWire<Pkt<double>> ArrowDirection { get; }
 
-        public IWire<Point2d> MinimapPos { get; private init; }
+        public IWire<Point2d> MinimapPos { get; }
 
         /*public enum TrackStatus
         {
@@ -135,8 +135,8 @@ namespace genshinbot.screens
                 error => Console.WriteLine($"ERROR! {error}"));
         }
 
-        public IWire<Pkt<double>>[] PlayerHealth { get; private init; } = new IWire<Pkt<double>>[4];
-
+        public IWire<Pkt<double>>[] PlayerHealth { get; } = new IWire<Pkt<double>>[4];
+        public IWire<Pkt<double>> ClimbingScoreX { get; }
 
         public PlayingScreen(BotIO b, ScreenManager screenManager) : base(b, screenManager)
         {
@@ -170,6 +170,11 @@ namespace genshinbot.screens
                     .Select(healthAlg.ReadHealth);
             }
 
+            ClimbingScoreX = rd.Select3(rd =>
+            {
+                return b.W.Screen.Watch(rd.ClimbingX.Region).Select(rd.ClimbingX.Compare);
+            }).Switch2();
+
         }
 
 
@@ -177,6 +182,7 @@ namespace genshinbot.screens
         {
             await Io.K.KeyPress(Keys.M);
             await ScreenManager.ExpectScreen(ScreenManager.MapScreen);
+
         }
 
 
@@ -218,8 +224,23 @@ namespace genshinbot.screens
             PlayingScreen p = new PlayingScreen(rig1.Make(), null);
             for (int i = 0; i < 4; i++)
                 Console.WriteLine($"p[{i}] = {await p.PlayerHealth[i].Get()}");
-        }
 
+
+            Console.WriteLine($"climb = {await p.ClimbingScoreX.Get()}");
+        }
+        public static async Task TestClimb()
+        {
+            var gw = new MockGenshinWindow(new Size(1440, 900));
+            //gw.MapScreen.Image = Data.Imread("test/map_luhua_1050.png");
+            gw.PlayingScreen.Image = Data.Imread("test/playing_luhua_1050.png");
+            gw.CurrentScreen = gw.PlayingScreen;
+
+            var rig1 = new MockTestingRig(gw);
+            PlayingScreen p = new PlayingScreen(rig1.Make(), null);
+
+
+            Console.WriteLine($"climb = {await p.ClimbingScoreX.Get()}");
+        }
         /*
         Mat hrThres = new Mat(), hgThres = new Mat(), hsvHealth = new Mat();
         /// <summary>

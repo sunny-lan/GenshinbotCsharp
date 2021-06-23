@@ -53,9 +53,9 @@ namespace genshinbot.screens
         algorithm.MapLocationMatch locationMatch;
         algorithm.MapTemplateMatch templateMatch;
 
-        public IObservable<Mat> Screen { get; private init; }
-        public IObservable<List<algorithm.MapTemplateMatch.Result>> Features { get; private init; }
-        public IObservable<algorithm.MapLocationMatch.Result> Screen2Coord { get; private init; }
+        public IObservable<Mat> Screen { get;  }
+        public IObservable<List<algorithm.MapTemplateMatch.Result>> Features { get;  }
+        public IObservable<algorithm.MapLocationMatch.Result> Screen2Coord { get;  }
 
 
         public MapScreen(BotIO b, ScreenManager screenManager) : base(b, screenManager)

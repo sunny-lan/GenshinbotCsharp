@@ -8,10 +8,10 @@ namespace genshinbot.automation
     {
         ILiveWire<bool> enabled;
 
-        public IWindowAutomator2 W { get; private init; }
+        public IWindowAutomator2 W { get;  }
 
-        public IMouseSimulator2 M { get; private init; }
-        public IKeySimulator2 K { get; private init; }
+        public IMouseSimulator2 M { get;  }
+        public IKeySimulator2 K { get; }
 
         public ProxyBotIO(ILiveWire<bool> enabled, BotIO io)
         {

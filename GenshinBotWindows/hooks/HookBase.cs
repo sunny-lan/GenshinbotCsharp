@@ -84,7 +84,7 @@ namespace genshinbot.hooks
             loopThread.Wait();
         }
 
-        public IWire<T> Wire { get; private init; }
+        public IWire<T> Wire { get;  }
         public HookBase()
         {
             Wire = new Wire<T>(listener =>
