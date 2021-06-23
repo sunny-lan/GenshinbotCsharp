@@ -63,24 +63,32 @@ namespace genshinbot.yui.windows
             {
                 chart.Series.Add(arrowAng);
             });
-            Queue<Pkt<double>> q = new Queue<Pkt<double>>();
+            var q = new Queue<Pkt<double>>();
             var interval = TimeSpan.FromSeconds(10);
+            Pkt<double> ?last=null;
             void _graph(Pkt<double> x)
 
             {
-                if (x.Value == 0) return;
-                q.Enqueue(x);
-                while (q.Count > 0 && DateTime.Now - q.Peek().CaptureTime > interval)
-                    q.Dequeue();
-                Invoke((MethodInvoker)delegate
+                lock (q)
                 {
-                    arrowAng.Points.Clear();
-                    foreach (var x in q)
+                    if (last == null || last!.CaptureTime < x.CaptureTime)
                     {
-                        var deg = x.Value.ConfineAngle() * 180 / Math.PI;
-                        arrowAng.Points.AddXY(x.CaptureTime, deg);
+                        q.Enqueue(x);
+                        last = x;
                     }
-                });
+
+                    while (q.Count > 0 && DateTime.Now - q.Peek().CaptureTime > interval)
+                        q.Dequeue();
+
+                    Invoke((MethodInvoker)delegate
+                    {
+                        arrowAng.Points.Clear();
+                        foreach (var x in q)
+                        {
+                            arrowAng.Points.AddXY(x.CaptureTime, x.Value);
+                        }
+                    });
+                }
             }
             if (obs is ILiveWire<Pkt<double>> ll)
                 ll.Connect(_graph);
@@ -96,10 +104,13 @@ namespace genshinbot.yui.windows
 
         private void testHealth(screens.PlayingScreen p)
         {
-            for(int i = 0; i < 4; i++)
+            for(int _i = 0; _i < 4; _i++)
             {
+                int i = _i;
                 graph(p.PlayerHealth[i]
-                    .Select(x => x.Denormalize(i*360/4, (i+1)*360/4))
+                    .Debug($"player {i}")
+                    .Select(x => x.Denormalize(i*360.0/4, (i+1)*360.0/4))
+                    .Debug($"player {i} ANLGE")
                     , $"player {i}");
             }
         }
@@ -124,8 +135,8 @@ namespace genshinbot.yui.windows
 
 
 
-            graph(p.ArrowDirection, "arrow dir");
-            graph(wantedPkt, "wanted");
+            graph(p.ArrowDirection.Select(x=> x.ConfineAngle().Degrees()), "arrow dir");
+            graph(wantedPkt.Select(x => x.ConfineAngle().Degrees()), "wanted");
         }        
 
         private void Overlay_Load(object sender, EventArgs e)

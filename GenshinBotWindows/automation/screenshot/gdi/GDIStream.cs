@@ -104,25 +104,23 @@ namespace genshinbot.automation.screenshot.gdi
                         region.X, region.Y, Gdi32.RasterOperationMode.SRCCOPY
                     ))
                     {
-                        Kernel32.GetLastError().ThrowIfFailed();
-                        continue;
+                        throw new Exception("Failed bitblt", Kernel32.GetLastError().GetException());
                     }
                     updates.Add(region);
-                }
+                } 
 
                 //Console.WriteLine("flush screenshot");
                 if (!Gdi32.GdiFlush())
                 {
-                    Kernel32.GetLastError().ThrowIfFailed();
-                    return;
+                    throw new Exception("Failed gdiflush", Kernel32.GetLastError().GetException());
                 }
                 snapTime = DateTime.Now;
             }
             
             foreach (var update in updates)
             {
-                //TODO possible off screen
-                allSnaps.Emit((update, new Snap(buf[update], snapTime)));
+                //TODO bad!
+                allSnaps.Emit((update, new Snap(buf, snapTime)));
             }
         }
         private ILiveWire<bool> enable;

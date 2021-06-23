@@ -125,12 +125,28 @@ namespace genshinbot.tools
                 Prompt($"{Select.Description} to select, {Cancel.Description} to cancel", 1);
                 Point2d pos = x;
                 KeyComb key;
+                Point2d? last=null;
                 using (w.MouseCap.MouseEvents.Subscribe( evt =>
                 {
+                    //ignore if alt is not pressed!
+                    if(w.KeyCap.KbdState.Value.GetValueOrDefault(Keys.Alt))
                     if (evt is IMouseCapture.MoveEvent mEvt)
                     {
+
+                            pos = mEvt.Position;
+
                         overlay.Point = pos.Round();
-                        pos = mEvt.Position;
+                    }
+                }))
+                using (w.KeyCap.KeyEvents.Subscribe(st =>
+                {
+                    if (st.Down)
+                    {
+                        if (st.Key == Keys.Left) pos += new Point2d(-1, 0);
+                        if (st.Key == Keys.Right) pos += new Point2d(1, 0);
+                        if (st.Key == Keys.Up) pos += new Point2d(0, -1);
+                        if (st.Key == Keys.Down) pos += new Point2d(0, 1);
+                        overlay.Point = pos.Round();
                     }
                 }))
                 {

@@ -92,7 +92,7 @@ namespace genshinbot.automation.windows
             //perform merged processing path
             var combined = Wire.Combine(foregroundStream, clientAreaStream, (foreground, clientArea) =>
             {
-                var focused = foreground && clientArea.Width > 0 && clientArea.Height > 0;
+                var focused = foreground && clientArea.X>=0 && clientArea.Y>=0 && clientArea.Width > 0 && clientArea.Height > 0;
                 Rect? screenBounds = focused ? clientArea : null;
                 return (focused, screenBounds);
             }).Debug("combined");

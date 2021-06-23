@@ -17,7 +17,7 @@ namespace genshinbot.reactive
     ///  - Lock/refcount?
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class Pkt<T>
+    public class Pkt<T>:IComparable<Pkt<T>>
     {
         public T Value { get; init; }
 
@@ -48,6 +48,11 @@ namespace genshinbot.reactive
         public override string ToString()
         {
             return $"{CaptureTime}: {Value}";
+        }
+
+        public int CompareTo(Pkt<T>? other)
+        {
+            return CaptureTime.CompareTo(other.CaptureTime);
         }
     }
 

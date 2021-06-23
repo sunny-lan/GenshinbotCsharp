@@ -47,7 +47,7 @@ namespace genshinbot.algorithm
             if (count >MinGreen * area) return count/area;
 
             Cv2.InRange(hsv1, hr.Min, hr.Max, rthes1);
-            count = Cv2.CountNonZero(gthes1);
+            count = Cv2.CountNonZero(rthes1);
             return count / area;
         }
 

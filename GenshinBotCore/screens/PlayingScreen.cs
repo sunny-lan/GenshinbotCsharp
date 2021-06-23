@@ -203,9 +203,9 @@ namespace genshinbot.screens
 
         public static async Task Test3Async()
         {
-            var gw = new MockGenshinWindow(new Size(1680, 1050));
-            gw.MapScreen.Image = Data.Imread("test/map_luhua_1050.png");
-            gw.PlayingScreen.Image = Data.Imread("test/playing_luhua_1050.png");
+            var gw = new MockGenshinWindow(new Size(1440, 900));
+            //gw.MapScreen.Image = Data.Imread("test/map_luhua_1050.png");
+            gw.PlayingScreen.Image = Data.Imread("test/guyun_playing_screen_1440x900.png");
             gw.CurrentScreen = gw.PlayingScreen;
 
 
@@ -217,7 +217,7 @@ namespace genshinbot.screens
         {
             PlayingScreen p = new PlayingScreen(rig1.Make(), null);
             for (int i = 0; i < 4; i++)
-                Console.WriteLine(await p.PlayerHealth[i].Get());
+                Console.WriteLine($"p[{i}] = {await p.PlayerHealth[i].Get()}");
         }
 
         /*
