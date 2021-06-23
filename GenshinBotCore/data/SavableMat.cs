@@ -1,4 +1,5 @@
 ﻿using OpenCvSharp;
+using System;
 using System.Text.Json.Serialization;
 
 namespace genshinbot.data
@@ -10,7 +11,24 @@ namespace genshinbot.data
     }
     public class SavableMat : SavableMatSubset
     {
-        public Mat Value { get; set; }
+        private Mat? _value;
+        public Mat Value
+        {
+            get
+            {
+                if (_value is Mat m) return _value;
+                else
+                {
+                    _value = Data.Imread(this.Path, this.ImreadMode);
+                    return _value;
+                }
+            }
+            set
+            {
+                _value?.Dispose();
+                _value = value;
+            }
+        }
         ~SavableMat()
         {
             Value?.Dispose();

@@ -21,7 +21,6 @@ namespace genshinbot.data.jsonconverters
             {
                 Path = x.Path,
                 ImreadMode = x.ImreadMode,
-                Value = Data.Imread(x.Path, x.ImreadMode),
             };
         }
 
