@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace genshinbot.util
 {
@@ -8,10 +9,10 @@ namespace genshinbot.util
         class Impl : IDisposable
         {
             public Action dispose { get; init; }
-            private bool disposed = false;
+            private int disposed = 0;
             public void Dispose()
             {
-                if (!disposed) dispose();
+                if (Interlocked.Exchange(ref disposed, 1)==0) dispose();
             }
 
             ~Impl()

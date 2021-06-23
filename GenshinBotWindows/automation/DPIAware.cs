@@ -8,7 +8,7 @@ using static Vanara.PInvoke.User32;
 
 namespace genshinbot.automation
 {
-    static class DPIAware
+    public static class DPIAware
     {/// <summary>
      /// Gets the predefined DPI_AWARENESS_CONTEXT handle for DPI unaware mode. These windows do not scale
      /// for DPI changes and are always assumed to have a scale factor of 100% (96 DPI). They will be automatically scaled by

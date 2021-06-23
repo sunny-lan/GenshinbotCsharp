@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Runtime.InteropServices;
@@ -84,17 +85,22 @@ namespace genshinbot.hooks
             loopThread.Wait();
         }
 
-        public IWire<T> Wire { get;  }
+        public IWire<T> Wire { get; }
+
         public HookBase()
         {
             Wire = new Wire<T>(listener =>
             {
                 Action<T> bad = e => listener(e);
+
                 OnEvent += bad;
                 return DisposableUtil.From(
-                    () => 
-                    OnEvent -= bad
+                    () =>
+                    {
+                        OnEvent -= bad;
+                    }
                     );
+
             });
         }
 

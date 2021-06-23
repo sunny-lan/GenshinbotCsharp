@@ -61,7 +61,7 @@ namespace genshinbot.automation.windows
                 //.Do(e=>Console.WriteLine($"e={e.idObject} {e.hwnd.DangerousGetHandle()}"))
                 .ToLive(() => GetRectDirect())
                 .DistinctUntilChanged()
-                .Debug("clientArea")
+             //   .Debug("clientArea")
                 ;
             locationChangeHook.Start();
 
@@ -82,30 +82,32 @@ namespace genshinbot.automation.windows
                         ,
                         clientAreaStream.Nonify()
                     )
-                    .Debug("RAW foreground")
+                  //  .Debug("RAW foreground")
                     .ToLive(() => IsForegroundWindow())
-                    .Debug("LIVE foreground")
+                  //  .Debug("LIVE foreground")
                     .DistinctUntilChanged()
-                 .Debug("foreground");
+             //    .Debug("foreground");
             ;
             foregroundChangeHook.Start();
             //perform merged processing path
             var combined = Wire.Combine(foregroundStream, clientAreaStream, (foreground, clientArea) =>
             {
-                var focused = foreground && clientArea.X>=0 && clientArea.Y>=0 && clientArea.Width > 0 && clientArea.Height > 0;
+                var focused = foreground && clientArea.X >= 0 && clientArea.Y >= 0 && clientArea.Width > 0 && clientArea.Height > 0;
                 Rect? screenBounds = focused ? clientArea : null;
                 return (focused, screenBounds);
-            }).Debug("combined");
+            })
+                //.Debug("combined")
+                ;
 
             //split after merged
             Focused = combined.Select(x => x.focused)
                .DistinctUntilChanged()
-                .Debug("focused");
+            //    .Debug("focused");
             ;
 
             ScreenBounds = combined.Select(x => x.screenBounds)
                 .DistinctUntilChanged()
-                 .Debug("screenbounds");
+               //  .Debug("screenbounds");
             ;
 
             Size = ScreenBounds

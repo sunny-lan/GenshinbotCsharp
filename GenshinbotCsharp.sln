@@ -11,6 +11,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Data", "Data\Data.shproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{327442DE-FE02-4EBD-A61E-E4FF384AC2F9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestWindows", "TestWindows\TestWindows.csproj", "{F325E66D-AE84-43E4-BF18-4DA2F5328BD7}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Data\Data.projitems*{5e67ad56-2f6e-4b7f-9c06-3627fc65682f}*SharedItemsImports = 5
@@ -62,6 +64,18 @@ Global
 		{327442DE-FE02-4EBD-A61E-E4FF384AC2F9}.Release|x64.Build.0 = Release|Any CPU
 		{327442DE-FE02-4EBD-A61E-E4FF384AC2F9}.Release|x86.ActiveCfg = Release|Any CPU
 		{327442DE-FE02-4EBD-A61E-E4FF384AC2F9}.Release|x86.Build.0 = Release|Any CPU
+		{F325E66D-AE84-43E4-BF18-4DA2F5328BD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F325E66D-AE84-43E4-BF18-4DA2F5328BD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F325E66D-AE84-43E4-BF18-4DA2F5328BD7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F325E66D-AE84-43E4-BF18-4DA2F5328BD7}.Debug|x64.Build.0 = Debug|Any CPU
+		{F325E66D-AE84-43E4-BF18-4DA2F5328BD7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F325E66D-AE84-43E4-BF18-4DA2F5328BD7}.Debug|x86.Build.0 = Debug|Any CPU
+		{F325E66D-AE84-43E4-BF18-4DA2F5328BD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F325E66D-AE84-43E4-BF18-4DA2F5328BD7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F325E66D-AE84-43E4-BF18-4DA2F5328BD7}.Release|x64.ActiveCfg = Release|Any CPU
+		{F325E66D-AE84-43E4-BF18-4DA2F5328BD7}.Release|x64.Build.0 = Release|Any CPU
+		{F325E66D-AE84-43E4-BF18-4DA2F5328BD7}.Release|x86.ActiveCfg = Release|Any CPU
+		{F325E66D-AE84-43E4-BF18-4DA2F5328BD7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

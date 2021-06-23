@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace genshinbot.util
 {
-    class TestingRig : ITestingRig
+    public class TestingRig : ITestingRig
     {
         class Bb : BotIO
         {

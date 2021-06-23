@@ -241,6 +241,16 @@ namespace genshinbot.screens
 
             Console.WriteLine($"climb = {await p.ClimbingScoreX.Get()}");
         }
+        public static void TestClimb2(ITestingRig rig1)
+        {
+
+            PlayingScreen p = new PlayingScreen(rig1.Make(), null);
+
+            using (p.ClimbingScoreX.Debug("Climbing").Use())
+            {
+                Console.ReadLine();
+            }
+        }
         /*
         Mat hrThres = new Mat(), hgThres = new Mat(), hsvHealth = new Mat();
         /// <summary>

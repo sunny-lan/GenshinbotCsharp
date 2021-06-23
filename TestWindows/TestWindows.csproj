@@ -1,13 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net5.0-windows</TargetFramework>
 
     <LangVersion>9.0</LangVersion>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
-
-    <RootNamespace>GenshinBotTests</RootNamespace>
+    <RootNamespace>GenshinBotTests.windows</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GenshinBotCore\GenshinBotCore.csproj" />
+    <ProjectReference Include="..\GenshinBotWindows\GenshinBotWindows.csproj" />
   </ItemGroup>
 
 </Project>
