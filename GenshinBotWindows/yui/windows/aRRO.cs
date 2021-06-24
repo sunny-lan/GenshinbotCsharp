@@ -99,9 +99,19 @@ namespace genshinbot.yui.windows
         {
             var b = rig.Make();
             var p = new screens.PlayingScreen(b, null);
-            testHealth(p);
+            testSelect(p);
         }
 
+        private void testSelect(screens.PlayingScreen p)
+        {
+            for (int _i = 0; _i < 4; _i++)
+            {
+                int i = _i;
+                graph(p.PlayerSelect[i]
+                    .Select(x => x?i*360/4:(i+1)*360.0/4)
+                    , $"player {i}");
+            }
+        }
         private void testHealth(screens.PlayingScreen p)
         {
             for(int _i = 0; _i < 4; _i++)

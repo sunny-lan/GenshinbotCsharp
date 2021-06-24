@@ -28,6 +28,11 @@
     <None Remove="data\test\minimap_test.png" />
     <None Remove="data\test\minimap_test_whole.png" />
     <None Remove="data\test\moretext.png" />
+    <None Remove="data\test\p1_selected_1050.png" />
+    <None Remove="data\test\p1_selected_1600.png" />
+    <None Remove="data\test\p2_selected_bright_1050.png" />
+    <None Remove="data\test\p4_selected_1050.png" />
+    <None Remove="data\test\p4_selected_1600.png" />
     <None Remove="data\test\palette1.png" />
     <None Remove="data\test\palette2.png" />
     <None Remove="data\test\text.png" />
@@ -80,6 +85,21 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="data\test\moretext.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\p1_selected_1050.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\p1_selected_1600.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\p2_selected_bright_1050.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\p4_selected_1050.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\p4_selected_1600.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="data\test\palette1.png">

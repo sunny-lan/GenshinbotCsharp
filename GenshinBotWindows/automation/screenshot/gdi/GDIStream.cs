@@ -83,7 +83,7 @@ namespace genshinbot.automation.screenshot.gdi
                 Kernel32.GetLastError().ThrowIfFailed("failed creating dib section");
 
             buf = new Mat(height, width, OpenCvSharp.MatType.CV_8UC3, raw);
-            hTmpDC.SelectObject(sec);
+            hTmpDC.SelectObject(sec);   
 
         }
 
@@ -98,13 +98,14 @@ namespace genshinbot.automation.screenshot.gdi
                 foreach (var region in pollRegions)
                 {
 
-
+                    //TODO this keeps failing!
                     //Console.WriteLine($"capture {region}");
                     if (!Gdi32.BitBlt(hTmpDC, region.X, region.Y, region.Width, region.Height, hDesktopDC,
                         region.X, region.Y, Gdi32.RasterOperationMode.SRCCOPY
                     ))
                     {
-                        throw new Exception("Failed bitblt", Kernel32.GetLastError().GetException());
+                        Debug.Assert(false, "Failed bitblt");
+                        continue;
                     }
                     updates.Add(region);
                 } 

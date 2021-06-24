@@ -138,6 +138,7 @@ namespace genshinbot.screens
         }
 
         public IWire<Pkt<double>>[] PlayerHealth { get; } = new IWire<Pkt<double>>[4];
+        public IWire<Pkt<bool>>[] PlayerSelect { get; } = new IWire<Pkt<bool>>[4];
         public IWire<Pkt<double>> ClimbingScoreX { get; }
         public IWire<Pkt<bool>> IsClimbing { get; }
 
@@ -169,8 +170,24 @@ namespace genshinbot.screens
             for (int i = 0; i < PlayerHealth.Length; i++)
             {
                 int cpy = i;
-                PlayerHealth[i] = b.W.Screen.Watch2(rd.Select2(rd => rd.Characters[cpy].Health))
+                PlayerHealth[i] = b.W.Screen
+                    .Watch2(rd.Select2(rd => rd.Characters[cpy].Health))
                     .Select(healthAlg.ReadHealth);
+
+                PlayerSelect[i] = b.W.Screen
+                    .Watch2(rd.Select2(rd =>
+                        //only check the single pixel in the middle, for efficiency
+                        rd.Characters[cpy].Number.Center().RectAround(new Size(2,2))
+                    ))
+                    .Select(img =>
+                    {
+                        var color = img.Mean();
+                        var sMax = db.CharFilter.NumberSatMax!;
+
+                        var hsv = color.CvtColor(ColorConversionCodes.BGR2HSV);
+                        return (hsv.Val1 > sMax);
+                    });
+                   
             }
 
 
