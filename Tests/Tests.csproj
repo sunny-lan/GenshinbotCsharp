@@ -11,7 +11,94 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="data\guyun_playing_climbing_1050.png" />
+    <None Remove="data\guyun_playing_screen_1440x900.png" />
+    <None Remove="data\mondstadt_playing_climbing_1050.png" />
+    <None Remove="data\mondstadt_playing_climbing_2_1050.png" />
+    <None Remove="data\mondstadt_playing_walking_1050.png" />
+    <None Remove="data\playing_luhua_1050.png" />
+    <None Remove="data\test\arrow_fail.png" />
+    <None Remove="data\test\arrow_fail_2.png" />
+    <None Remove="data\test\bad arrow.png" />
+    <None Remove="data\test\map_a.png" />
+    <None Remove="data\test\map_b.png" />
+    <None Remove="data\test\map_c.png" />
+    <None Remove="data\test\map_D.png" />
+    <None Remove="data\test\map_luhua_1050.png" />
+    <None Remove="data\test\minimap_test.png" />
+    <None Remove="data\test\minimap_test_whole.png" />
+    <None Remove="data\test\moretext.png" />
+    <None Remove="data\test\palette1.png" />
+    <None Remove="data\test\palette2.png" />
+    <None Remove="data\test\text.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="data\test\arrow_fail.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\arrow_fail_2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\bad arrow.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\guyun_playing_climbing_1050.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\guyun_playing_screen_1440x900.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\map_a.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\map_b.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\map_c.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\map_D.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\map_luhua_1050.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\minimap_test.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\minimap_test_whole.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\mondstadt_playing_climbing_1050.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\mondstadt_playing_climbing_2_1050.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\mondstadt_playing_walking_1050.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\moretext.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\palette1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\palette2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\playing_luhua_1050.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\text.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
+    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.5.2.20210404" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

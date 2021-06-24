@@ -7,6 +7,7 @@ using genshinbot.reactive.wire;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive.Linq;
@@ -62,6 +63,7 @@ namespace genshinbot.screens
             public int MinBlobArea { get; set; } = 20;
             public int MinAliveWidth { get; set; } = 10;
 
+            public double ClimbingXThreshold { get; set; } = 3000000;
 
             public algorithm.PlayerHealthRead.CharacterFilter CharFilter { get; set; }
                 = new algorithm.PlayerHealthRead.CharacterFilter();
@@ -137,6 +139,7 @@ namespace genshinbot.screens
 
         public IWire<Pkt<double>>[] PlayerHealth { get; } = new IWire<Pkt<double>>[4];
         public IWire<Pkt<double>> ClimbingScoreX { get; }
+        public IWire<Pkt<bool>> IsClimbing { get; }
 
         public PlayingScreen(BotIO b, ScreenManager screenManager) : base(b, screenManager)
         {
@@ -170,11 +173,15 @@ namespace genshinbot.screens
                     .Select(healthAlg.ReadHealth);
             }
 
+
             ClimbingScoreX = rd.Select3(rd =>
             {
-                return b.W.Screen.Watch(rd.ClimbingX.Region).Select(rd.ClimbingX.Compare);
+                Debug.Assert(rd.ClimbingX is not null, 
+                    $"ClimbingX is not configured in settings for size {b.W.Size.Value}");
+                var comparer = new algorithm.NormComparer(rd.ClimbingX);
+                return b.W.Screen.Watch(rd.ClimbingX.Region).Select(comparer.Compare);
             }).Switch2();
-
+            IsClimbing = ClimbingScoreX.Select(x => x < db.ClimbingXThreshold);
         }
 
 
@@ -207,46 +214,21 @@ namespace genshinbot.screens
             throw new NotImplementedException();
         }
 
-        public static async Task Test3Async()
-        {
-            var gw = new MockGenshinWindow(new Size(1440, 900));
-            //gw.MapScreen.Image = Data.Imread("test/map_luhua_1050.png");
-            gw.PlayingScreen.Image = Data.Imread("test/guyun_playing_screen_1440x900.png");
-            gw.CurrentScreen = gw.PlayingScreen;
-
-
-            var rig1 = new MockTestingRig(gw);
-            await TestReadHealth(rig1);
-        }
-
+       
         public static async Task TestReadHealth(MockTestingRig rig1)
         {
             PlayingScreen p = new PlayingScreen(rig1.Make(), null);
             for (int i = 0; i < 4; i++)
                 Console.WriteLine($"p[{i}] = {await p.PlayerHealth[i].Get()}");
 
-
-            Console.WriteLine($"climb = {await p.ClimbingScoreX.Get()}");
         }
-        public static async Task TestClimb()
-        {
-            var gw = new MockGenshinWindow(new Size(1440, 900));
-            //gw.MapScreen.Image = Data.Imread("test/map_luhua_1050.png");
-            gw.PlayingScreen.Image = Data.Imread("test/playing_luhua_1050.png");
-            gw.CurrentScreen = gw.PlayingScreen;
-
-            var rig1 = new MockTestingRig(gw);
-            PlayingScreen p = new PlayingScreen(rig1.Make(), null);
-
-
-            Console.WriteLine($"climb = {await p.ClimbingScoreX.Get()}");
-        }
+      
         public static void TestClimb2(ITestingRig rig1)
         {
 
             PlayingScreen p = new PlayingScreen(rig1.Make(), null);
 
-            using (p.ClimbingScoreX.Debug("Climbing").Use())
+            using (p.ClimbingScoreX.Subscribe(Console.WriteLine))
             {
                 Console.ReadLine();
             }

@@ -46,7 +46,7 @@ namespace genshinbot.screens
         }
         public void ForceScreen(IScreen s)//TODO no async needed
         {
-            screen.Emit(s);
+            screen.SetValue(s);
             Debug.Assert(ActiveScreen.Value == s);
         }
         public async Task ExpectScreen(IScreen s, int timeout = 2000)

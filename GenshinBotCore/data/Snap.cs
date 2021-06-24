@@ -15,17 +15,6 @@ namespace genshinbot.data
         public SavableMat Image { get; set; }
         public Rect Region { get; set; }
 
-        private Mat tmp = new Mat();
-        public double Compare(Mat screen)
-        {
-            Cv2.Absdiff(screen, Image.Value,tmp);
-            Cv2.Multiply(tmp, tmp, tmp);
-            return Cv2.Sum(tmp).SumComponents();
-        }
-
-         ~Snap()
-        {
-            tmp.Dispose();
-        }
+       
     }
 }

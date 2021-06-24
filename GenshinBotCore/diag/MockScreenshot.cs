@@ -11,13 +11,13 @@ namespace genshinbot.diag
     public class MockScreenshot : ScreenshotObservable
     {
         public TimeSpan FrameInterval { get; init; }
-        public Mat Image { get; set; }
+        public Func<Mat> GetImg { get; init; }
 
         public IWire<Pkt<Mat>> Watch(Rect r)
         {
             return Observable.Interval(FrameInterval)
                 .ToWire()
-                .Select(_ => Image[r])
+                .Select(_ => GetImg()[r])
                 .Packetize();
         }
     }

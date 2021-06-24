@@ -240,6 +240,7 @@ namespace genshinbot.tools
                 point2DFiller,
                 matFiller,
                 snapFiller
+                //TODO enum
             };
             fillers = new Dictionary<Type, Filler>();
             foreach (var filler in fillers1)

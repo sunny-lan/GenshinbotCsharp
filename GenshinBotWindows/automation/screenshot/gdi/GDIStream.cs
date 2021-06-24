@@ -71,7 +71,7 @@ namespace genshinbot.automation.screenshot.gdi
                 biWidth = width,
                 biHeight = -height,
                 biPlanes = 1,
-                biBitCount = 32,
+                biBitCount = 24,
                 biCompression = Gdi32.BitmapCompressionMode.BI_RGB,
                 biSize = Marshal.SizeOf(bi.bmiHeader)
             };
@@ -82,7 +82,7 @@ namespace genshinbot.automation.screenshot.gdi
             if (sec.IsInvalid)
                 Kernel32.GetLastError().ThrowIfFailed("failed creating dib section");
 
-            buf = new Mat(height, width, OpenCvSharp.MatType.CV_8UC4, raw);
+            buf = new Mat(height, width, OpenCvSharp.MatType.CV_8UC3, raw);
             hTmpDC.SelectObject(sec);
 
         }
@@ -249,7 +249,7 @@ namespace genshinbot.automation.screenshot.gdi
                     Console.ReadLine();
                     v = !v;
                     Console.WriteLine($"enable={v}");
-                    enable.Emit(v);
+                    enable.SetValue(v);
                 }
             }
 

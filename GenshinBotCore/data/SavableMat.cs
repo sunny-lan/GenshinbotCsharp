@@ -7,7 +7,7 @@ namespace genshinbot.data
     public class SavableMatSubset
     {
         public string Path { get; set; }
-        public ImreadModes ImreadMode { get; set; } = ImreadModes.Unchanged;
+        public ImreadModes? ImreadMode { get; set; }
     }
     public class SavableMat : SavableMatSubset
     {
@@ -16,10 +16,11 @@ namespace genshinbot.data
         {
             get
             {
-                if (_value is Mat m) return _value;
+                //TODO double read may occur
+                if (_value is not null) return _value;
                 else
                 {
-                    _value = Data.Imread(this.Path, this.ImreadMode);
+                    _value = Data.Imread(this.Path, this.ImreadMode ?? ImreadModes.Color);
                     return _value;
                 }
             }

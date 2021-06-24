@@ -64,7 +64,7 @@ namespace genshinbot
             //automation.windows.WindowAutomator2.Test();
             //await automation.windows.WindowAutomator2.Test2();
             // await tools.AutofillTool.Test(rig);
-             automation.windows.WindowAutomator2.Test3();
+          //   automation.windows.WindowAutomator2.Test3();
             //screens.PlayingScreen.test();
             //screens.MapScreen.Test2(rig);
             //await controllers.LocationManager.testAsync(rig);
@@ -78,7 +78,7 @@ namespace genshinbot
             //Application.Run(new yui.windows.aRRO(rig));
             //await screens.PlayingScreen.Test3Async();
             //await screens.PlayingScreen.TestClimb();
-           // screens.PlayingScreen.TestClimb2(rig);
+            screens.PlayingScreen.TestClimb2(rig);
             //await tools.DailyDoer.runAsync(rig.Make());
             // await tools.DailyDoer.DispatchCollect(rig.Make());
             //await experiments.RxTest.runAsync();
@@ -86,6 +86,7 @@ namespace genshinbot
             //   await tools.AutofillTool.Test2();
             //await tools.AutofillTool.ConfigurePlayingScreen(rig.Make());
             //data.jsonconverters.MatConverter.Test();
+
             Console.WriteLine("Program ended. Press enter to exit");
             Console.ReadLine();
             CvThread.Stop();

@@ -6,7 +6,7 @@ namespace genshinbot.reactive.wire
     public class LiveWireSource<T> : ILiveWire<T>
     {
         LiveWire<T> wire;
-        private Action _onChange;
+        private Action? _onChange;
         T _v;
         public LiveWireSource(T v)
         {
@@ -20,7 +20,7 @@ namespace genshinbot.reactive.wire
 
         public T Value => _v;
 
-        public void Emit(T v)
+        public void SetValue(T v)
         {
             _v = v;
             _onChange?.Invoke();

@@ -49,18 +49,15 @@ namespace genshinbot.diag
                 currentScreen = value;
 
                 Console.WriteLine($"Switch to {currentScreen.Name}");
-                screen.Image = currentScreen.Image;
+                //screen.Image = currentScreen.Image;
             }
         }
         private MockScreen currentScreen;
 
         //For now do a consistent 20fps
         public ScreenshotObservable Screen => screen;
-        private MockScreenshot screen = new MockScreenshot
-        {
-            FrameInterval = TimeSpan.FromSeconds(1) / 20
-        };
-
+        private MockScreenshot screen;
+        //TODO make into full observable 
 
         public ILiveWire<Size?> Size => size;
         private LiveWireSource<Size?> size;
@@ -71,6 +68,12 @@ namespace genshinbot.diag
 
         public MockGenshinWindow(Size s)
         {
+            screen = new MockScreenshot
+            {
+                FrameInterval = TimeSpan.FromSeconds(1) / 20,
+                GetImg=()=> CurrentScreen.Image
+            };
+
             size = new LiveWireSource<Size?>(s);
             PlayingScreen.KeyMap[automation.input.Keys.M] = MapScreen;
             MapScreen.KeyMap[automation.input.Keys.M] = PlayingScreen;
@@ -84,7 +87,7 @@ namespace genshinbot.diag
         /// <param name="b"></param>
         public void SetFocus(bool b)
         {
-            focused.Emit(b);
+            focused.SetValue(b);
         }
         public ILiveWire<bool> Focused => focused;
 

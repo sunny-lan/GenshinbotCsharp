@@ -1,1 +1,192 @@
-{"R":{"1440x900":{"MinimapLoc":{"X":46,"Y":13,"Width":161,"Height":161},"Characters":[{"Health":{"X":1268,"Y":300,"Width":53,"Height":5},"Number":{"X":1392,"Y":277,"Width":23,"Height":31}},{"Health":{"X":1267,"Y":372,"Width":55,"Height":5},"Number":{"X":1392,"Y":347,"Width":23,"Height":34}},{"Health":{"X":1268,"Y":444,"Width":54,"Height":6},"Number":{"X":1392,"Y":421,"Width":23,"Height":29}},{"Health":{"X":1268,"Y":516,"Width":53,"Height":5},"Number":{"X":1392,"Y":490,"Width":23,"Height":33}}]},"1680x1050":{"MinimapLoc":{"X":53,"Y":15,"Width":189,"Height":189},"Characters":[{"Health":{"X":1480,"Y":351,"Width":60,"Height":4},"Number":{"X":1625,"Y":331,"Width":26,"Height":19}},{"Health":{"X":1479,"Y":435,"Width":61,"Height":4},"Number":{"X":1626,"Y":415,"Width":25,"Height":19}},{"Health":{"X":1480,"Y":519,"Width":60,"Height":4},"Number":{"X":1626,"Y":499,"Width":25,"Height":19}},{"Health":{"X":1480,"Y":603,"Width":60,"Height":4},"Number":{"X":1625,"Y":583,"Width":26,"Height":19}}],"ClimbingX":{"Image":{"Path":"images/80c8ddfa-7308-416f-a7cd-ca7fe46f62c3.png","ImreadMode":-1},"Region":{"X":1504,"Y":1003,"Width":30,"Height":21}},"FlyingSpace":{"Image":{"Path":"images/1c63fa27-c166-409e-b054-11fbe1b35658.png","ImreadMode":-1},"Region":{"X":1585,"Y":1002,"Width":56,"Height":25}}}},"ArrowRadius":15,"MinBlobArea":20,"MinAliveWidth":10,"CharFilter":{"NumberSatMax":0,"HealthRed":{"Min":[0,141,202,0],"Max":[6,162,255,0]},"HealthGreen":{"Min":[37,190,197,0],"Max":[42,219,229,0]}}}
+{
+    "R": {
+        "1440x900": {
+            "MinimapLoc": {
+                "X": 46,
+                "Y": 13,
+                "Width": 161,
+                "Height": 161
+            },
+            "Characters": [
+                {
+                    "Health": {
+                        "X": 1268,
+                        "Y": 300,
+                        "Width": 53,
+                        "Height": 5
+                    },
+                    "Number": {
+                        "X": 1392,
+                        "Y": 277,
+                        "Width": 23,
+                        "Height": 31
+                    }
+                },
+                {
+                    "Health": {
+                        "X": 1267,
+                        "Y": 372,
+                        "Width": 55,
+                        "Height": 5
+                    },
+                    "Number": {
+                        "X": 1392,
+                        "Y": 347,
+                        "Width": 23,
+                        "Height": 34
+                    }
+                },
+                {
+                    "Health": {
+                        "X": 1268,
+                        "Y": 444,
+                        "Width": 54,
+                        "Height": 6
+                    },
+                    "Number": {
+                        "X": 1392,
+                        "Y": 421,
+                        "Width": 23,
+                        "Height": 29
+                    }
+                },
+                {
+                    "Health": {
+                        "X": 1268,
+                        "Y": 516,
+                        "Width": 53,
+                        "Height": 5
+                    },
+                    "Number": {
+                        "X": 1392,
+                        "Y": 490,
+                        "Width": 23,
+                        "Height": 33
+                    }
+                }
+            ]
+        },
+        "1680x1050": {
+            "MinimapLoc": {
+                "X": 53,
+                "Y": 15,
+                "Width": 189,
+                "Height": 189
+            },
+            "Characters": [
+                {
+                    "Health": {
+                        "X": 1480,
+                        "Y": 351,
+                        "Width": 60,
+                        "Height": 4
+                    },
+                    "Number": {
+                        "X": 1625,
+                        "Y": 331,
+                        "Width": 26,
+                        "Height": 19
+                    }
+                },
+                {
+                    "Health": {
+                        "X": 1479,
+                        "Y": 435,
+                        "Width": 61,
+                        "Height": 4
+                    },
+                    "Number": {
+                        "X": 1626,
+                        "Y": 415,
+                        "Width": 25,
+                        "Height": 19
+                    }
+                },
+                {
+                    "Health": {
+                        "X": 1480,
+                        "Y": 519,
+                        "Width": 60,
+                        "Height": 4
+                    },
+                    "Number": {
+                        "X": 1626,
+                        "Y": 499,
+                        "Width": 25,
+                        "Height": 19
+                    }
+                },
+                {
+                    "Health": {
+                        "X": 1480,
+                        "Y": 603,
+                        "Width": 60,
+                        "Height": 4
+                    },
+                    "Number": {
+                        "X": 1625,
+                        "Y": 583,
+                        "Width": 26,
+                        "Height": 19
+                    }
+                }
+            ],
+            "ClimbingX": {
+                "Image": {
+                    "Path": "images/31ac85f2-38ed-4810-9f89-8794e275d160.png"
+                },
+                "Region": {
+                    "X": 1504,
+                    "Y": 1003,
+                    "Width": 30,
+                    "Height": 21
+                }
+            },
+            "FlyingSpace": {
+                "Image": {
+                    "Path": "images/f636bb25-8aa7-4afc-8414-5f8b29fdfb55.png"
+                },
+                "Region": {
+                    "X": 1585,
+                    "Y": 1002,
+                    "Width": 56,
+                    "Height": 25
+                }
+            }
+        }
+    },
+    "ArrowRadius": 15,
+    "MinBlobArea": 20,
+    "MinAliveWidth": 10,
+    "CharFilter": {
+        "NumberSatMax": 0,
+        "HealthRed": {
+            "Min": [
+                0,
+                141,
+                202,
+                0
+            ],
+            "Max": [
+                6,
+                162,
+                255,
+                0
+            ]
+        },
+        "HealthGreen": {
+            "Min": [
+                37,
+                190,
+                197,
+                0
+            ],
+            "Max": [
+                42,
+                219,
+                229,
+                0
+            ]
+        }
+    }
+}
