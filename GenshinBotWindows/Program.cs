@@ -75,7 +75,7 @@ namespace genshinbot
             //await tools.ScreencoordRecorder.runAsync(new WindowAutomator2("*Untitled - Notepad", null));
             // await tools.ScreencoordRecorder.runAsync(rig.Make().W);
             //// .Show();
-            Application.Run(new yui.windows.aRRO(rig));
+            Application.Run(new yui.windows.aRRO());
             //await screens.PlayingScreen.Test3Async();
             //await screens.PlayingScreen.TestClimb();
            // screens.PlayingScreen.TestClimb2(rig);

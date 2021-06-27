@@ -194,8 +194,10 @@ namespace genshinbot.reactive.wire
 
         void Dispose()
         {
-            if (enabled != null)
-                OnEnable(false);
+            /*lock(S_lock)
+            if (_enabled )
+                OnEnable(false);*/
+            //TODO
         }
 
         ~Wire()

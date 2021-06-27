@@ -20,12 +20,13 @@ namespace genshinbot.yui.windows
 {
     public partial class aRRO : Form
     {
-        private ITestingRig rig;
         private Chart chart;
 
-        public aRRO(ITestingRig r)
+        public static aRRO Instance=new aRRO();
+        public ILiveWire<Pkt<double>> wantedPkt;
+
+        public aRRO()
         {
-            this.rig = r;
             InitializeComponent();
             IntPtr handle = this.Handle;
 
@@ -47,8 +48,23 @@ namespace genshinbot.yui.windows
 
             Controls.Add(chart);
 
+            var wanted = new LiveWire<double>(
+                () => Convert.ToDouble(
+                    Invoke((Func<int>)(() => trackBar1.Value)))
+                    .Normalize(trackBar1.Minimum,trackBar1.Maximum)
+                , onChange =>
+                {
+                    void TrackBar1_ValueChanged(object? sender, EventArgs e)
+                    {
+                        onChange();
+                    }
+                    trackBar1.ValueChanged += TrackBar1_ValueChanged;
+                    return DisposableUtil.From(() => trackBar1.ValueChanged -= TrackBar1_ValueChanged);
+                });
+            wantedPkt = wanted.Packetize();
+
         }
-        private void graph(IWire<Pkt<double>> obs, string legend, AxisType axis=AxisType.Primary)
+        public void graph(IWire<Pkt<double>> obs, string legend, AxisType axis=AxisType.Primary)
         {
             Series arrowAng;
 
@@ -97,6 +113,7 @@ namespace genshinbot.yui.windows
         }
         private void load()
         {
+            var rig = new TestingRig();
             var b = rig.Make();
             var p = new screens.PlayingScreen(b, null);
             testSelect(p);
@@ -108,7 +125,7 @@ namespace genshinbot.yui.windows
             {
                 int i = _i;
                 graph(p.PlayerSelect[i]
-                    .Select(x => x?i*360/4:(i+1)*360.0/4)
+                    .Select(x => !x?i*360/4:(i+1)*360.0/4)
                     , $"player {i}");
             }
         }
@@ -128,25 +145,14 @@ namespace genshinbot.yui.windows
         private void testArrow(screens.PlayingScreen p)
         {
 
-            var wanted = new LiveWire<double>(
-                () => Convert.ToDouble(Invoke((Func<int>)(() => trackBar1.Value))).Radians(), onChange =>
-                {
-                    void TrackBar1_ValueChanged(object? sender, EventArgs e)
-                    {
-                        onChange();
-                    }
-                    trackBar1.ValueChanged += TrackBar1_ValueChanged;
-                    return DisposableUtil.From(() => trackBar1.ValueChanged -= TrackBar1_ValueChanged);
-                });
-            var wantedPkt = wanted.Packetize();
-
-            var alg = new algorithm.ArrowSteering(p.ArrowDirection, wanted);
+            var wanted = this.wantedPkt.Select(x => x * Math.PI * 2);
+            var alg = new algorithm.ArrowSteering(p.ArrowDirection, wanted.Depacket());
             alg.MouseDelta.Subscribe(x => p.Io.M.MouseMove(new OpenCvSharp.Point2d(x, 0)));
 
 
 
             graph(p.ArrowDirection.Select(x=> x.ConfineAngle().Degrees()), "arrow dir");
-            graph(wantedPkt.Select(x => x.ConfineAngle().Degrees()), "wanted");
+            graph(wanted.Select(x => x.ConfineAngle().Degrees()), "wanted");
         }        
 
         private void Overlay_Load(object sender, EventArgs e)

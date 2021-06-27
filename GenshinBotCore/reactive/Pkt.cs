@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace genshinbot.reactive
@@ -19,6 +20,7 @@ namespace genshinbot.reactive
     /// <typeparam name="T"></typeparam>
     public class Pkt<T>:IComparable<Pkt<T>>
     {
+        static DateTime ProgramStart=DateTime.Now;
         public T Value { get; init; }
 
         public DateTime CaptureTime { get; init; }
@@ -47,18 +49,62 @@ namespace genshinbot.reactive
 
         public override string ToString()
         {
-            return $"{CaptureTime}: {Value}";
+            var diff = CaptureTime - ProgramStart;
+            return $"{diff} {Value}";
         }
 
         public int CompareTo(Pkt<T>? other)
         {
-            return CaptureTime.CompareTo(other.CaptureTime);
+            return CaptureTime.CompareTo(other?.CaptureTime);
         }
     }
 
 
-    public static class PktWireExtensions
+    public static class Pkt
     {
+        public static void Emit<T>(this WireSource<Pkt<T>> t, T v)
+        {
+            t.Emit(new Pkt<T>(v));
+        }
+        public static IWire<Pkt<bool>> AllLatest(this IWire<Pkt<bool>>[] t,
+  Wire.CombineAsyncOptions? opt = null)
+        {
+            return CombineLatest(t, v => v.All(x => x), opt);
+        }
+        //TODO debounce based on packet time
+        public static IWire<Pkt<T>> CombineLatest<T, In1>(this IWire<Pkt<In1>>[] t,
+          Func<In1[], T> f, Wire.CombineAsyncOptions? opt = null)
+        {
+            int count = 0;
+            bool[] bad = new bool[t.Length];
+            In1[] last = new In1[t.Length];
+            var thing = Wire.Merge(
+                t.Select((wire, index) =>
+                    wire.Do(val => {
+                        if (!bad[index] ) Interlocked.Increment( ref count);
+                        last[index] = val.Value;
+                        bad[index] = true;
+                       //Debug.WriteLine($"last={string.Join(',', last)}");
+                    })
+                )
+            );
+
+            object? lck = null;
+            var opt2 = opt ?? Wire.DefaultCombineOptions;
+            if (opt2.Lock) lck = new object();
+
+            if (opt2.Debounce is int dd)
+                thing = thing.Debounce(dd);
+
+            return thing
+                //.Do(_=>Debug.WriteLine($"badcount={Thread.VolatileRead(ref count)}"))
+                .Where(_=>Thread.VolatileRead(ref count)==t.Length)
+                .Select(_ =>
+                {
+                    if (lck is null) return f(last!);
+                    lock (lck) return f(last);
+                });
+        }
         public static IWire<Pkt<Out>> ProcessAsync<In, Out>(this IWire<Pkt<In>> observable, Func<In, Out> fn, Action<Exception> onError, Wire.ProcessAsyncOptions ?opt=null)
         {
             return observable.ProcessAsync(x => x.Select(fn),onError,opt);
@@ -74,6 +120,10 @@ namespace genshinbot.reactive
         /// <param name="fn"></param>
         /// <returns></returns>
         public static IWire<Pkt<Out>> Select<In, Out>(this IWire<Pkt<In>> observable, Func<In, Out> fn)
+        {
+            return observable.Select((Pkt<In> x) => x.Select(fn));
+        }
+        public static ILiveWire<Pkt<Out>> Select<In, Out>(this ILiveWire<Pkt<In>> observable, Func<In, Out> fn)
         {
             return observable.Select((Pkt<In> x) => x.Select(fn));
         }
@@ -98,6 +148,10 @@ namespace genshinbot.reactive
         {
             return observable.Select((Pkt<In> x) => x.Value);
         }
+        public static ILiveWire<In> Depacket<In>(this ILiveWire<Pkt<In>> observable)
+        {
+            return observable.Select((Pkt<In> x) => x.Value);
+        }
 
         /// <summary>
         /// Wraps stream in Pkt, at current time
@@ -106,6 +160,10 @@ namespace genshinbot.reactive
         /// <param name="observable"></param>
         /// <returns></returns>
         public static IWire<Pkt<T>> Packetize<T>(this IWire<T> observable)
+        {
+            return observable.Select(x => new Pkt<T>(x));
+        }
+        public static ILiveWire<Pkt<T>> Packetize<T>(this ILiveWire<T> observable)
         {
             return observable.Select(x => new Pkt<T>(x));
         }

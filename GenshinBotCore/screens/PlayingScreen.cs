@@ -67,6 +67,7 @@ namespace genshinbot.screens
 
             public algorithm.PlayerHealthRead.CharacterFilter CharFilter { get; set; }
                 = new algorithm.PlayerHealthRead.CharacterFilter();
+            public double MinAliveHealth { get; set; } = 0.02;
         }
         public Db db => Db.Instance;
         private ILiveWire<Db.RD?> rd;
@@ -142,6 +143,12 @@ namespace genshinbot.screens
         public IWire<Pkt<double>> ClimbingScoreX { get; }
         public IWire<Pkt<bool>> IsClimbing { get; }
 
+        /// <summary>
+        /// Not neccearily meaning dead
+        /// Also is true when players are disabled (jumping, falling, climbing)
+        /// </summary>
+        public IWire<Pkt<bool>> IsAllDead { get; }
+
         public PlayingScreen(BotIO b, ScreenManager screenManager) : base(b, screenManager)
         {
             rd = b.W.Size.Select3(sz => db.R[sz]);
@@ -166,9 +173,10 @@ namespace genshinbot.screens
                 //.Debug("arrow DIR")
                 ;
 
-            var healthAlg = new algorithm.PlayerHealthRead(db.CharFilter);
             for (int i = 0; i < PlayerHealth.Length; i++)
             {
+                //we need to make 1 alg per player for memory thread safety
+                var healthAlg = new algorithm.PlayerHealthRead(db.CharFilter);
                 int cpy = i;
                 PlayerHealth[i] = b.W.Screen
                     .Watch2(rd.Select2(rd => rd.Characters[cpy].Health))
@@ -176,8 +184,9 @@ namespace genshinbot.screens
 
                 PlayerSelect[i] = b.W.Screen
                     .Watch2(rd.Select2(rd =>
+                        //TODO sometimes false positive
                         //only check the single pixel in the middle, for efficiency
-                        rd.Characters[cpy].Number.Center().RectAround(new Size(2,2))
+                        rd.Characters[cpy].Number.Center().RectAround(new Size(1,1))
                     ))
                     .Select(img =>
                     {
@@ -199,6 +208,15 @@ namespace genshinbot.screens
                 return b.W.Screen.Watch(rd.ClimbingX.Region).Select(comparer.Compare);
             }).Switch2();
             IsClimbing = ClimbingScoreX.Select(x => x < db.ClimbingXThreshold);
+
+            IsAllDead = PlayerHealth.Select((wire, idx) =>
+                    wire.Select(
+                        health =>
+                        health < db.MinAliveHealth)
+                   // .Debug($"p{idx}")
+                )
+                .ToArray()
+                .AllLatest();//TODO not sure if debounce needed
         }
 
 

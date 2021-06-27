@@ -121,7 +121,7 @@ namespace genshinbot.reactive.wire
         /// <typeparam name="T"></typeparam>
         /// <param name="t"></param>
         /// <returns></returns>
-        public static IWire<T> Switch2<T>(this ILiveWire<IWire<T>?> t, IWire<T> ?defaultWire=null)
+        public static IWire<T> Switch2<T>(this ILiveWire<IWire<T>?> t, IWire<T>? defaultWire = null)
         {
             return t.Select(w =>
             {
@@ -130,7 +130,7 @@ namespace genshinbot.reactive.wire
             }).Switch();
         }
 
-            public static IWire<T> Switch<T>(this ILiveWire<IWire<T>> t)
+        public static IWire<T> Switch<T>(this ILiveWire<IWire<T>> t)
         {
             var dist = t.DistinctUntilChanged();
             return new Wire<T>(onNext =>
@@ -197,6 +197,89 @@ namespace genshinbot.reactive.wire
             public int? Debounce;
         }
         public static CombineAsyncOptions DefaultCombineOptions = new CombineAsyncOptions();
+
+        public static IWire<bool> AllLatest(this IWire<bool>[] t,
+          CombineAsyncOptions? opt = null)
+        {
+            return CombineLatest(t, v => v.All(x => x), opt);
+        }
+        public static IWire<T> CombineLatest<T, In1>(this IWire<In1>[] t,
+          Func<In1[], T> f, CombineAsyncOptions? opt = null)
+        {
+            int count = 0;
+            In1?[] last = new In1?[t.Length];
+            var thing = Wire.Merge(
+                t.Select((wire, index) =>
+                    wire.Do(val => {
+                        if (last[index] == null) count++;
+                        last[index] = val;
+                    })
+                )
+            );
+
+            object? lck = null;
+            var opt2 = opt ?? Wire.DefaultCombineOptions;
+            if (opt2.Lock) lck = new object();
+
+            if (opt2.Debounce is int dd)
+                thing = thing.Debounce(dd);
+
+            return thing
+                .Where(_ => count == t.Length)
+                .Select(_ =>
+                {
+                    if (lck is null) return f(last!);
+                    lock (lck) return f(last!);
+                });
+        }
+
+
+        public static IWire<T> Merge<T>(this IEnumerable<IWire<T>> t)
+        {
+            return new Wire<T>(onNext =>
+            {
+                var dispose = t.Select(w => w.Subscribe(onNext)).ToArray();
+                return DisposableUtil.Merge(dispose);
+            });
+        }
+        public static IWire<T> Debounce<T>(this IWire<T> t, int debounce)
+        {
+            return new Wire<T>(onChangeOld =>
+            {
+                long ctr = 0;
+                Action<T> onChange = (v) =>
+                {
+                    long startCtr = Interlocked.Increment(ref ctr);
+                    Task.Delay(debounce).ContinueWith(_ =>
+                    {
+                        var val = Thread.VolatileRead(ref ctr);
+                        if (val==startCtr)
+                            onChangeOld(v);
+                    });
+                };
+                return t.Subscribe(onChange);
+            });
+        }
+
+        public static ILiveWire<T> Debounce<T>(this ILiveWire<T> t, int debounce)
+        {
+            throw new NotImplementedException();
+           /* return new LiveWire<T>(() => t.Value, onChangeOld =>
+              {
+                  long ctr = 0;
+                  Action onChange = () =>
+                  {
+                      long curCtr = Interlocked.Increment(ref ctr);
+                      Task.Delay(debounce).ContinueWith(_ =>
+                      {
+                          if (ctr == curCtr)
+                              onChangeOld();
+                      });
+                  };
+                  return t.Subscribe(_ => onChange());
+              });*/
+        }
+
         public static ILiveWire<T> Combine<T, In1, In2>(ILiveWire<In1> t1, ILiveWire<In2> t2,
             Func<In1, In2, T> f, CombineAsyncOptions? opt = null)
         {
@@ -205,7 +288,7 @@ namespace genshinbot.reactive.wire
             if (opt2.Lock) lck = new object();
             return new LiveWire<T>(() =>
             {
-                if (opt2.Lock) lock (lck) return f(t1.Value, t2.Value);
+                if (opt2.Lock) lock (lck!) return f(t1.Value, t2.Value);
                 return f(t1.Value, t2.Value);
             },
                 onChange =>
@@ -310,8 +393,14 @@ namespace genshinbot.reactive.wire
         public static async Task<T> Get<T>(this IWire<T> t, TimeSpan? timeout = null)
         {
             TaskCompletionSource<T> taskCompletionSource = new TaskCompletionSource<T>();
+            
             using (t.Subscribe(o =>
              {
+                 if (taskCompletionSource.Task.IsCompleted)
+                 {
+                     System.Diagnostics.Debug.WriteLine("bad");
+                     return;
+                 }
                  taskCompletionSource.SetResult(o);
              }))
             {
@@ -379,7 +468,7 @@ namespace genshinbot.reactive.wire
         {
             Out? process()
             {
-                if (w.Value !=null)
+                if (w.Value != null)
                     return f(w.Value);
                 return default;
             }
@@ -393,7 +482,7 @@ namespace genshinbot.reactive.wire
         {
             Out? process()
             {
-                if (w.Value !=null)
+                if (w.Value != null)
                     return f(w.Value);
                 return default;
             }
@@ -475,7 +564,7 @@ namespace genshinbot.reactive.wire
         {
             void print(string s)
             {
-                Console.WriteLine($"DBG: {s}");
+                System.Diagnostics.Debug.WriteLine($"DBG: {s}");
             }
             return new Wire<T>(onChange =>
             {
@@ -531,7 +620,7 @@ namespace genshinbot.reactive.wire
             /// The amount of time to wait before dropping a packet
             /// in the case of exceeding MaxConcurrency
             /// </summary>
-            public TimeSpan WaitSpot=TimeSpan.Zero;
+            public TimeSpan WaitSpot = TimeSpan.Zero;
 
             /// <summary>
             /// Max number of tasks allowed to run at same time
@@ -556,7 +645,8 @@ namespace genshinbot.reactive.wire
                         {
                             next(await f(value));
 
-                        }catch(Exception e)
+                        }
+                        catch (Exception e)
                         {
                             onError(e);
                         }
@@ -568,22 +658,23 @@ namespace genshinbot.reactive.wire
 
                 });
 
-                
+
             }
             else
                 //TODO swallows stuff
-                return w.Link<In, Out>(async(value, next) =>
+                return w.Link<In, Out>(async (value, next) =>
                 {
                     try
                     {
                         next(await f(value));
-                    }catch(Exception e)
+                    }
+                    catch (Exception e)
                     {
                         onError(e);
                     }
                 });
         }
-        public static IWire<Out> ProcessAsync<In, Out>(this IWire<In> w, Func<In, Out> f,Action<Exception> onError, ProcessAsyncOptions? opt = null)
+        public static IWire<Out> ProcessAsync<In, Out>(this IWire<In> w, Func<In, Out> f, Action<Exception> onError, ProcessAsyncOptions? opt = null)
         {
             //TODO swallows stuff
             return ProcessAsync(w, x => Task.Run(() => f(x)), onError, opt);

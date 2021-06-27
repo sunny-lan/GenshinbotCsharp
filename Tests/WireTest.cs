@@ -1,14 +1,20 @@
+using genshinbot.reactive;
 using genshinbot.reactive.wire;
 using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace GenshinBotTests
 {
-    public class WireTest
+    public class WireTest:MakeConsoleWork
     {
+        public WireTest(ITestOutputHelper output) : base(output)
+        {
+        }
+
         [Fact(Timeout =1000)]
         public void Circular()
         {
@@ -48,6 +54,133 @@ namespace GenshinBotTests
                 subsp.Dispose();
             }
             await a;
+        }
+
+        [Fact]
+        public async Task Debounce()
+        {
+            WireSource<int> w = new WireSource<int>();
+            int x=0;
+            using(w
+                .Debug("not debounced")
+                .Debounce(100).Debug("debounced")
+                .Subscribe(_=>Interlocked.Increment(ref x)))
+            {
+                w.Emit(1);
+                await Task.Delay(20);
+                w.Emit(2);
+                await Task.Delay(100);
+            }
+            Assert.Equal(1,x);
+        }
+
+        [Fact]
+        public async Task DebounceMultithread()
+        {
+            WireSource<int> w = new WireSource<int>();
+            int x = 0;
+            using (w
+                .Debug("not debounced")
+                .Debounce(1).Debug("debounced")
+                .Subscribe(_ => Interlocked.Increment(ref x)))
+            {
+                TaskCompletionSource fence = new TaskCompletionSource();
+                for (int i = 0; i < 5; i++)
+                {
+                    int ii = i;
+                    _ = Task.Run(async () =>
+                    {
+                        await fence.Task;
+                        w.Emit(ii);
+                    });
+                }
+                Console.WriteLine("stting result");
+                fence.SetResult();
+                Console.WriteLine("sat result");
+                await Task.Delay(100);
+                Console.WriteLine("exiting");
+            }
+            Assert.Equal(1, x);
+        }
+        [Fact]
+        public async Task AllPkt()
+        {
+            WireSource<Pkt<bool>>[] w = new WireSource<Pkt<bool>>[4];
+            for (int i = 0; i < 4; i++)
+                w[i] = new WireSource<Pkt<bool>>();
+            var all = w.AllLatest(new Wire.CombineAsyncOptions
+            {
+                Debounce=1//performance limit
+            });
+            var b = all.Get();
+            Pkt<bool>? last = null ;
+            for (int i = 0; i < 4; i++)
+            {
+                last = new Pkt<bool>(false);
+                w[i].Emit(last);
+            }
+            var val = await b;
+            Debug.WriteLine(val);
+            Assert.Equal(last, val);
+            Assert.False(val.Value);
+
+            b = all.Get();
+            for (int i = 0; i < 4; i++)
+            {
+                last = new Pkt<bool>(true);
+                w[i].Emit(last);
+            }
+
+             val = await b;
+            Debug.WriteLine(val);
+            Assert.Equal(last, val);
+            Assert.True(val.Value);
+        }
+
+        [Fact(Timeout=1000)]
+        public async Task AllPktMultithread()
+        {
+            WireSource<Pkt<bool>>[] w = new WireSource<Pkt<bool>>[4];
+            for (int i = 0; i < 4; i++)
+                w[i] = new WireSource<Pkt<bool>>();
+            var all = w.AllLatest(new Wire.CombineAsyncOptions
+            {
+                Debounce = 1//performance limit
+            });
+            var b = all.Get();
+            TaskCompletionSource fence=new TaskCompletionSource();
+            Pkt<bool>? last = null;
+            for (int i = 0; i < 4; i++)
+            {
+                last = new Pkt<bool>(false);
+                _ = Task.Run(async () =>
+                  {
+                      await fence.Task;
+                      w[i].Emit(last);
+                  });
+            }
+            fence.SetResult();
+            var val = await b;
+            Debug.WriteLine(val);
+            Assert.Equal(last, val);
+            Assert.False(val.Value);
+
+            b = all.Get(); fence = new TaskCompletionSource();
+            for (int i = 0; i < 4; i++)
+            {
+                last = new Pkt<bool>(true);
+                _ = Task.Run(async () =>
+                {
+                    await fence.Task;
+                    w[i].Emit(last);
+                });
+            }
+            fence.SetResult();
+
+            val = await b;
+            Debug.WriteLine(val);
+            Assert.Equal(last, val);
+            Assert.True(val.Value);
         }
     }
 }

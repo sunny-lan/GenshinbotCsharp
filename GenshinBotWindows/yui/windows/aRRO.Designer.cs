@@ -38,19 +38,19 @@ namespace genshinbot.yui.windows
             // trackBar1
             // 
             this.trackBar1.Location = new System.Drawing.Point(730, 12);
-            this.trackBar1.Maximum = 360;
+            this.trackBar1.Maximum = 1000;
             this.trackBar1.Name = "trackBar1";
             this.trackBar1.Orientation = System.Windows.Forms.Orientation.Vertical;
             this.trackBar1.Size = new System.Drawing.Size(69, 426);
             this.trackBar1.TabIndex = 0;
             // 
-            // Overlay
+            // aRRO
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.trackBar1);
-            this.Name = "Overlay";
+            this.Name = "aRRO";
             this.Text = "Overlay";
             this.Load += new System.EventHandler(this.Overlay_Load);
             ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).EndInit();
