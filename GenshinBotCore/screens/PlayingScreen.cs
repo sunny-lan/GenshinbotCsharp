@@ -93,14 +93,16 @@ namespace genshinbot.screens
         algorithm.MinimapMatch.ScaleMatcher scaleMatcher = new algorithm.MinimapMatch.ScaleMatcher(new MinimapMatchSettingsAdapter());
 
         /// <summary>
-        /// the observable will end once the current approxPos is invalid
+        /// it is up to the user to not call this concurrently
+        /// It is expected as soon as a tracking error happens, 
+        /// the wire returned will never be used again
         /// </summary>
         /// <param name="approxPos"></param>
         /// <returns></returns>
-        public IWire<Point2d> TrackPos(Point2d approxPos)
+        public IWire<Point2d> TrackPos(Point2d approxPos,Action<Exception> onError)
         {
 
-            algorithm.MinimapMatch.PositionTracker posTrack = null;
+            algorithm.MinimapMatch.PositionTracker? posTrack = null;
 
             return Minimap.ProcessAsync(x =>
             {
@@ -135,7 +137,7 @@ namespace genshinbot.screens
                 approxPos = res;
                 return res;
             },
-                error => Console.WriteLine($"ERROR! {error}"));
+                onError);
         }
 
         public IWire<Pkt<double>>[] PlayerHealth { get; } = new IWire<Pkt<double>>[4];

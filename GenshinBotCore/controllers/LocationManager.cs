@@ -57,7 +57,12 @@ namespace genshinbot.controllers
             };
         }
 
-        public async Task<IWire<Point2d>> TrackPos()
+        /// <summary>
+        /// it is up to the user to call this in the correct timing! (aka no concurrent calls)
+        /// </summary>
+        /// <param name="onError"></param>
+        /// <returns></returns>
+        public async Task<IWire<Point2d>> TrackPos(Action<Exception> onError)
         {
             var db = Data.MapDb;
             var coord2Mini = db.Coord2Minimap.Expect();
@@ -81,7 +86,7 @@ namespace genshinbot.controllers
             var screen2Coord = await map.Screen2Coord.Get();
             var miniLoc = coord2Mini.Transform(screen2Coord.Value.ToCoord(center));
             await map.Close();
-            return screens.PlayingScreen.TrackPos(miniLoc)
+            return screens.PlayingScreen.TrackPos(miniLoc, onError)
                 .Select(x => coord2Mini.Inverse(x));
         }
 
@@ -287,7 +292,7 @@ namespace genshinbot.controllers
             ScreenManager mgr = new ScreenManager(b);
             mgr.ForceScreen(mgr.PlayingScreen);
             LocationManager lm = new LocationManager(mgr);
-            var trackin= await lm.TrackPos();
+            var trackin= await lm.TrackPos(onError:Console.WriteLine);
             Console.WriteLine("trakin begin");
 
             using (trackin.Subscribe(
