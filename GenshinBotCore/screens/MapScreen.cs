@@ -53,10 +53,10 @@ namespace genshinbot.screens
         algorithm.MapLocationMatch locationMatch;
         algorithm.MapTemplateMatch templateMatch;
 
-        public IObservable<Mat> Screen { get;  }
-        public IObservable<List<algorithm.MapTemplateMatch.Result>> Features { get;  }
-        public IObservable<algorithm.MapLocationMatch.Result> Screen2Coord { get;  }
-
+        public IWire<Pkt<Mat>> Screen { get; }
+        public IWire<Pkt<List<algorithm.MapTemplateMatch.Result>>> Features { get; }
+        public IWire<Pkt<algorithm.MapLocationMatch.Result>> Screen2Coord { get; }
+        
 
         public MapScreen(BotIO b, ScreenManager screenManager) : base(b, screenManager)
         {
@@ -64,29 +64,22 @@ namespace genshinbot.screens
             locationMatch = new algorithm.MapLocationMatch(Data.MapDb.Features);
             templateMatch = new algorithm.MapTemplateMatch();
 
-            Screen = b.W.Screen.Watch2(b.W.Bounds).Depacket().AsObservable();//TODO
-            Features = Screen.ProcessAsync(map =>
-            {
-                var k = templateMatch.FindTeleporters(map).ToList();
-                Debug.Assert(k.Count > 0);//TODO
-                return k;
-            });
-            Screen2Coord = Observable//TODO
-                .CombineLatest(Features, b.W.Size.NonNull().AsObservable(), (features, size) => (features, size))
-                .ProcessAsync(x =>
+            Screen = b.W.Screen.Watch2(b.W.Bounds);//TODO
+            Features = Screen.ProcessAsync(
+                (Mat map) =>
                 {
-                    var (features, size) = x;
-                    try
-                    {
-                        return locationMatch.FindLocation2(features, size, ExpectUnknown);
-                    }
-                    catch (algorithm.MapLocationMatch.NoSolutionException e)
-                    {
-                        Debug.Assert(false);//TODO
-                        return null;
-                    }
-                })
-                .NonNull();
+                    var k = templateMatch.FindTeleporters(map).ToList();
+                    Debug.Assert(k.Count > 0);//TODO
+                    return k;
+                },
+                error => throw error//todo
+            );
+            Screen2Coord = b.W.Size.Select3((Size size) =>
+                Features.ProcessAsync(
+                    features => locationMatch.FindLocation2(features, size, ExpectUnknown),
+                    error => throw error//todo
+                )
+            ).Switch2();
 
 
         }

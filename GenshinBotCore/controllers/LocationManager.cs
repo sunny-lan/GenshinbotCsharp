@@ -63,7 +63,7 @@ namespace genshinbot.controllers
             var coord2Mini = db.Coord2Minimap.Expect();
 
             var map = screens.MapScreen;
-            var screen=await screens.ActiveScreen.Get();
+            var screen=screens.ActiveScreen.Value;
             if (screen != screens.PlayingScreen)
             {
                 if(screen == map)
@@ -79,7 +79,7 @@ namespace genshinbot.controllers
             var center = (await map.Io.W.Bounds.Value2()).Center();
             
             var screen2Coord = await map.Screen2Coord.Get();
-            var miniLoc = coord2Mini.Transform(screen2Coord.ToCoord(center));
+            var miniLoc = coord2Mini.Transform(screen2Coord.Value.ToCoord(center));
             await map.Close();
             return screens.PlayingScreen.TrackPos(miniLoc)
                 .Select(x => coord2Mini.Inverse(x));
@@ -303,15 +303,6 @@ namespace genshinbot.controllers
             }
         }
 
-        public static async Task testAsync3()
-        {
-            var gw = new MockGenshinWindow(new Size(1680, 1050));
-            gw.MapScreen.Image = Data.Imread("test/map_luhua_1050.png");
-            gw.PlayingScreen.Image = Data.Imread("test/playing_luhua_1050.png");
-            gw.CurrentScreen = gw.PlayingScreen;
-
-            var rig1 = new MockTestingRig(gw);
-            await testAsync(rig1);
-        }
+        
     }
 }

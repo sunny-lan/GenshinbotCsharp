@@ -30,13 +30,13 @@ namespace genshinbot.screens
         public PlayingScreen PlayingScreen { get;  }
         public MapScreen MapScreen { get;  }
 
-        public ILiveWire<IScreen> ActiveScreen => screen;
-        private LiveWireSource<IScreen> screen;
+        public ILiveWire<IScreen?> ActiveScreen => screen;
+        private LiveWireSource<IScreen?> screen;
 
         public ScreenManager(BotIO io)
         {
             this.io = io;
-            screen = new LiveWireSource<IScreen>(null);
+            screen = new LiveWireSource<IScreen?>(null);
             
             PlayingScreen = new PlayingScreen(new ProxyBotIO(ActiveScreen.Select(s => 
             s == PlayingScreen
@@ -44,10 +44,9 @@ namespace genshinbot.screens
             MapScreen = new MapScreen(new ProxyBotIO(ActiveScreen.Select(s => s == MapScreen), io), this);
 
         }
-        public void ForceScreen(IScreen s)//TODO no async needed
+        public void ForceScreen(IScreen? s)//TODO no async needed
         {
             screen.SetValue(s);
-            Debug.Assert(ActiveScreen.Value == s);
         }
         public async Task ExpectScreen(IScreen s, int timeout = 2000)
         {

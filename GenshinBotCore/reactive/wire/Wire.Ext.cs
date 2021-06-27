@@ -350,7 +350,7 @@ namespace genshinbot.reactive.wire
         /// <param name="control"></param>
         /// <returns></returns>
         public static ILiveWire<T?> Relay2<T>(this ILiveWire<T?> t, ILiveWire<bool> control)
-            where T : notnull
+            where T : struct
         {
             var empty = new ConstLiveWire<T?>(default);
             return control.Select<bool, ILiveWire<T?>>

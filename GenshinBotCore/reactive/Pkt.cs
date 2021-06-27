@@ -62,6 +62,10 @@ namespace genshinbot.reactive
 
     public static class Pkt
     {
+        public static IDisposable Subscribe<T>(this IWire<Pkt<T>> t, Action<T> v)
+        {
+            return t.Subscribe(pkt => v(pkt.Value));
+        }
         public static void Emit<T>(this WireSource<Pkt<T>> t, T v)
         {
             t.Emit(new Pkt<T>(v));
