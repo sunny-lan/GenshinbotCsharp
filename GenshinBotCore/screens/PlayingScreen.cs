@@ -217,6 +217,8 @@ namespace genshinbot.screens
                 )
                 .ToArray()
                 .AllLatest();//TODO not sure if debounce needed
+
+            
         }
 
 
