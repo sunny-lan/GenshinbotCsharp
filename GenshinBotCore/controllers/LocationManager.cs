@@ -62,7 +62,7 @@ namespace genshinbot.controllers
         /// </summary>
         /// <param name="onError"></param>
         /// <returns></returns>
-        public async Task<IWire<Point2d>> TrackPos(Action<Exception> onError)
+        public async Task<IWire<Pkt<Point2d>>> TrackPos(Action<Exception> onError)
         {
             var db = Data.MapDb;
             var coord2Mini = db.Coord2Minimap.Expect();
@@ -286,7 +286,7 @@ namespace genshinbot.controllers
           }*/
 
 
-        public static async Task testAsync(ITestingRig rig)
+        public static async Task TestTrackAsync(ITestingRig rig)
         {
             BotIO b = rig.Make();
             ScreenManager mgr = new ScreenManager(b);
@@ -299,10 +299,10 @@ namespace genshinbot.controllers
                x=>Console.WriteLine(x)//,
              //   onError:x=>Console.WriteLine(x)
             ))
-            using(mgr.PlayingScreen.ArrowDirection.Subscribe(
+           /* using(mgr.PlayingScreen.ArrowDirection.Subscribe(
 
                 x => Console.WriteLine(x)
-                ))
+                ))*/
             {
                 Console.ReadLine();
             }

@@ -416,11 +416,33 @@ namespace genshinbot.reactive.wire
             if (t.Value) return;
             while (!await t.Get(timeout)) ;
         }
-        public static IWire<Out> Link<In, Out>(this IWire<In> w, Action<In, Action<Out>> f)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="In"></typeparam>
+        /// <typeparam name="Out"></typeparam>
+        /// <param name="w"></param>
+        /// <param name="f"></param>
+        /// <param name="protect">If true, ignores calls to next when not subscribed</param>
+        /// <returns></returns>
+        public static IWire<Out> Link<In, Out>(this IWire<In> w, Action<In, Action<Out>> f,bool protect=false)
         {
             return new Wire<Out>(onNext =>
-                  w.Subscribe(value => f(value, onNext))
-            );
+            {
+                bool disposed=false;
+                void next(Out v)
+                {
+                    if (protect)
+                        if (disposed) return;
+                    onNext(v);
+                }
+                var dis = w.Subscribe(value => f(value, next));
+                return DisposableUtil.From(() =>
+                {
+                    disposed = true; dis.Dispose();
+                });
+            });
         }
 
 
@@ -626,6 +648,8 @@ namespace genshinbot.reactive.wire
             /// Max number of tasks allowed to run at same time
             /// </summary>
             public int? MaxConcurrency = 1;
+
+            public bool IgnoreLateResults = true;
         }
         public static ProcessAsyncOptions DefaultAsyncOptions = new ProcessAsyncOptions();
 
@@ -656,7 +680,7 @@ namespace genshinbot.reactive.wire
                         }
                     }
 
-                });
+                }, opt2.IgnoreLateResults);
 
 
             }
@@ -672,7 +696,7 @@ namespace genshinbot.reactive.wire
                     {
                         onError(e);
                     }
-                });
+                }, opt2.IgnoreLateResults);
         }
         public static IWire<Out> ProcessAsync<In, Out>(this IWire<In> w, Func<In, Out> f, Action<Exception> onError, ProcessAsyncOptions? opt = null)
         {

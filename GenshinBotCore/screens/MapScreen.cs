@@ -64,20 +64,20 @@ namespace genshinbot.screens
             locationMatch = new algorithm.MapLocationMatch(Data.MapDb.Features);
             templateMatch = new algorithm.MapTemplateMatch();
 
-            Screen = b.W.Screen.Watch2(b.W.Bounds);//TODO
-            Features = Screen.ProcessAsync(
+            Screen = b.W.Screen.Watch2(b.W.Bounds);//TODO async
+            Features = Screen.Select(
                 (Mat map) =>
                 {
                     var k = templateMatch.FindTeleporters(map).ToList();
                     Debug.Assert(k.Count > 0);//TODO
                     return k;
-                },
-                error => throw error//todo
+                }
+                //,error => throw error//todo
             );
             Screen2Coord = b.W.Size.Select3((Size size) =>
-                Features.ProcessAsync(
-                    features => locationMatch.FindLocation2(features, size, ExpectUnknown),
-                    error => throw error//todo
+                Features.Select(
+                    features => locationMatch.FindLocation2(features, size, ExpectUnknown)
+                    //,error => throw error//todo
                 )
             ).Switch2();
 

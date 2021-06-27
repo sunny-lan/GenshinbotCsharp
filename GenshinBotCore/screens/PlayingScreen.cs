@@ -71,7 +71,7 @@ namespace genshinbot.screens
         }
         public Db db => Db.Instance;
         private ILiveWire<Db.RD?> rd;
-        public IWire<Mat> Minimap { get; }
+        public IWire<Pkt<Mat>> Minimap { get; }
         public IWire<Pkt<Mat>> Arrow { get; }
         public IWire<Pkt<double>> ArrowDirection { get; }
 
@@ -99,12 +99,13 @@ namespace genshinbot.screens
         /// </summary>
         /// <param name="approxPos"></param>
         /// <returns></returns>
-        public IWire<Point2d> TrackPos(Point2d approxPos,Action<Exception> onError)
+        public IWire<Pkt<Point2d>> TrackPos(Point2d approxPos,Action<Exception> onError)
         {
 
             algorithm.MinimapMatch.PositionTracker? posTrack = null;
 
-            return Minimap.ProcessAsync(x =>
+            //TODO async
+            return Minimap.Select((Mat x) =>
             {
             begin:
                 Point2d res;
@@ -136,8 +137,9 @@ namespace genshinbot.screens
 
                 approxPos = res;
                 return res;
-            },
-                onError);
+            }
+            //,    onError
+            );
         }
 
         public IWire<Pkt<double>>[] PlayerHealth { get; } = new IWire<Pkt<double>>[4];
@@ -154,7 +156,7 @@ namespace genshinbot.screens
         public PlayingScreen(BotIO b, ScreenManager screenManager) : base(b, screenManager)
         {
             rd = b.W.Size.Select3(sz => db.R[sz]);
-            Minimap = b.W.Screen.Watch2(rd.Select2(r => r.MinimapLoc)).Depacket();//TODO
+            Minimap = b.W.Screen.Watch2(rd.Select2(r => r.MinimapLoc));//TODO
             Arrow = b.W.Screen.Watch2(rd.Select2(r =>
                 r.MinimapLoc.Center()
                 .RectAround(new Size(db.ArrowRadius * 2, db.ArrowRadius * 2))

@@ -24,7 +24,10 @@ namespace genshinbot.data
             }
             if (mat == null)
             {
-                mat = new Lazy<Mat>(() => Data.Imread(Path, mode));
+                mat = new Lazy<Mat>(() => {
+                    Console.WriteLine($"load image {Path}");
+                    return Data.Imread(Path, mode);
+                });
             }
             return mat.Value;
         }
