@@ -70,7 +70,7 @@ namespace GenshinBotTests
                 Debug.WriteLine($"{img}, approx={approxPos} found={res}");
                 double lim = 1;
                 if (pos is Point2d pp)
-                    Assert.True(res.DistanceTo(pp) < lim);
+                    Assert.True(res.Value.DistanceTo(pp) < lim);
             }
             await testAsync("guyun_playing_screen_1440x900", new Point2d (4038,4361),
                 new Point2d(x: 4037.29252119009, y: 4364.061027347406));

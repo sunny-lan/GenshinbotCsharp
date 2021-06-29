@@ -6,30 +6,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace genshinbot.algorithm
 {
-    public class AlgorithmFailedException : Exception
-    {
-        public AlgorithmFailedException()
-        {
-        }
-
-        public AlgorithmFailedException(string? message) : base(message)
-        {
-        }
-
-        public AlgorithmFailedException(string? message, Exception? innerException) : base(message, innerException)
-        {
-        }
-
-        protected AlgorithmFailedException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
-    }
     public class ArrowDirectionDetect
     {
         class Settings

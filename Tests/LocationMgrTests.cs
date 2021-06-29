@@ -46,7 +46,7 @@ namespace GenshinBotTests
                 Debug.WriteLine($"{playingImg},{mapImg}  found={res}");
                 double lim = 2;
                 if (pos is Point2d pp)
-                    Assert.True(res.DistanceTo(pp) < lim);
+                    Assert.True(res.Value.DistanceTo(pp) < lim);
             }
             await testAsync("playing_luhua_1050", "map_luhua_1050",
                 new Point2d(x: 942.1884150177244, y: 1177.772114829629));

@@ -146,7 +146,7 @@ namespace genshinbot.yui.windows
         {
 
             var wanted = this.wantedPkt.Select(x => x * Math.PI * 2);
-            var alg = new algorithm.ArrowSteering(p.ArrowDirection, wanted.Depacket());
+            var alg = new algorithm.ArrowSteering(p.ArrowDirection, wanted.Depacket().AsNullable());
             alg.MouseDelta.Subscribe(x => p.Io.M.MouseMove(new OpenCvSharp.Point2d(x, 0)));
 
 

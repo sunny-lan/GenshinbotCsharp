@@ -131,6 +131,10 @@ namespace genshinbot.reactive
         {
             return observable.Select((Pkt<In> x) => x.Select(fn));
         }
+        public static IWire<Pkt<In>> Do<In>(this IWire<Pkt<In>> observable, Action<In> fn)
+        {
+            return observable.Do((Pkt<In> x) => fn(x.Value));
+        }
 
         /// <summary>
         /// Produces a new stream with packet information discarded
@@ -192,6 +196,7 @@ namespace genshinbot.reactive
         {
             return observable.Select((Pkt<In> x) => x.Select(fn));
         }
+
 
         /// <summary>
         /// Produces a new stream with packet information discarded

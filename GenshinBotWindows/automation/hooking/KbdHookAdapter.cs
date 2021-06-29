@@ -1,8 +1,7 @@
 ﻿using genshinbot.automation.input;
+using genshinbot.data.events;
 using genshinbot.hooks;
-using genshinbot.reactive;
 using genshinbot.reactive.wire;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
@@ -12,7 +11,7 @@ namespace genshinbot.automation.hooking
 {
     public class KbdHookAdapter:IKeyCapture
     {
-        public IWire<IKeyCapture.KeyEvent> KeyEvents { get;  }
+        public IWire<KeyEvent> KeyEvents { get;  }
         public ILiveWire<IReadOnlyDictionary<Keys, bool>> KbdState => kbdState;
 
 
@@ -25,7 +24,7 @@ namespace genshinbot.automation.hooking
 
             KeyEvents = kbdHook.Wire
                 .Relay(enabled)
-                .Select(x => new IKeyCapture.KeyEvent
+                .Select(x => new KeyEvent
                 {
                     Down = (User32.WindowMessage)x.wParam == User32.WindowMessage.WM_KEYDOWN,
                     Key = (input.Keys)x.lParam.vkCode,

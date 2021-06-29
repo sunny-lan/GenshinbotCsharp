@@ -1,4 +1,5 @@
 ﻿using genshinbot.util;
+using OneOf;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -9,9 +10,89 @@ using System.Threading.Tasks;
 namespace genshinbot.reactive.wire
 {
 
-    public static class Wire
+    public static partial class LiveWire
     {
+        public static ILiveWire<T> Create<T>(T init,Func<Action<T>,IDisposable> enable)
+        {
+            T val = init;
+            return new LiveWire<T>(()=>val,onChange =>
+            {
+                return enable(v =>
+                {
+                    val = v;
+                    onChange();
+                });
+            });
+        }
+    }
+    public static partial class Wire
+    {
+        /// <summary>
+        /// Means that all dependencies must be subscribed to for this to work
+        /// </summary>
+        /// <typeparam name="U"></typeparam>
+        /// <param name="w"></param>
+        /// <param name="dependency"></param>
+        /// <returns></returns>
+        public static ILiveWire<U> DependsOn<U>(this ILiveWire<U> w,params IWire<object>[] dependency)
+        {
+            return w.OnSubscribe<U>(dependency
+                .Select<IWire<object>,Func<IDisposable>>(d => d.Use)
+                .ToArray());
+        }
 
+        public static IWire<V> As<U,V>(this IWire<U> w) where U:V 
+        {
+            return w.Select(x => (V)x );
+        }
+
+
+        public static IWire<Out> CombineLatest<In1, In2,In3, Out>(
+            IWire<In1> t,
+            IWire<In2> t2,
+            IWire<In3> t3,
+            Func<In1, In2, In3,Out> f
+        )
+        {
+            return CombineLatest(t, CombineLatest(t2, t3, (t2, t3) => (t2, t3)), (t, a) =>
+              {
+                  return f(t, a.t2, a.t3);
+              });
+        }
+
+        /// <summary>
+        /// provids an efficient way to do x.select(x=>y.select()).switch()
+        /// </summary>
+        /// <typeparam name="In1"></typeparam>
+        /// <typeparam name="In2"></typeparam>
+        /// <typeparam name="Out"></typeparam>
+        /// <param name="t"></param>
+        /// <param name="t2"></param>
+        /// <param name="f"></param>
+        /// <returns></returns>
+        public static IWire<Out> CombineLatest<In1,In2,Out>(
+            IWire<In1> t,
+            IWire<In2> t2,
+            Func<In1,In2,Out> f
+        )
+        {
+            return new Wire<Out>(onNext =>
+            {
+                OneOf< In1,NoneT> p1 = NoneT.V;
+                OneOf< In2,NoneT> p2 = NoneT.V;
+                void onUpdate()
+                {
+                    if(p1.IsT0 && p2.IsT0)
+                    {
+                        onNext(f(p1.AsT0, p2.AsT0));
+                    }
+                }
+                return DisposableUtil.Merge(
+                    t.Subscribe(x=> { p1 = x;onUpdate(); })        ,
+                    t2.Subscribe(x=> { p2 = x;onUpdate(); })        
+                );
+            });
+        }
         /// <summary>
         /// Subscribe to wire without using the callback
         /// </summary>
@@ -41,11 +122,24 @@ namespace genshinbot.reactive.wire
         {
             return new Wire<NoneT>(onNext => Poller.InfiniteLoop(() => onNext(NoneT.V), delay));
         }
-        public static IWire<T> OnSubscribe<T>(this IWire<T> t, Func<IDisposable> f)
+        public static IWire<T> OnSubscribe<T>(this IWire<T> t, params Func<IDisposable>[] f)
         {
             return new Wire<T>(onNext =>
             {
-                return DisposableUtil.Merge(t.Subscribe(onNext), f());
+                return DisposableUtil.Merge(
+                    t.Subscribe(onNext), 
+                    DisposableUtil.Merge(f.Select(x => x()).ToArray())
+                );
+            });
+        }
+        public static ILiveWire<T> OnSubscribe<T>(this ILiveWire<T> t, params Func<IDisposable>[] f)
+        {
+            return new LiveWire<T>(()=>t.Value, onNext =>
+            {
+                return DisposableUtil.Merge(
+                    t.Subscribe(_=>onNext()),
+                    DisposableUtil.Merge(f.Select(x => x()).ToArray())
+                );
             });
         }
         /// <summary>
@@ -384,6 +478,17 @@ namespace genshinbot.reactive.wire
         {
             return new LiveWire<T>(get, onChange => t.Subscribe(_ => onChange()));
         }
+
+        /// <summary>
+        /// A live wire who 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public static ILiveWire<T> ToLive_WARNING<T>(this IWire<T> t, T intial)
+        {
+            return new LiveWireSource<T>(intial);
+        }
         public static IObservable<T> AsObservable<T>(this IWire<T> t)
         {
             if (t is Wire<T> tt) return tt;
@@ -453,6 +558,13 @@ namespace genshinbot.reactive.wire
                 w.Subscribe(_ => onChange()));
         }
 
+        public static IWire<Out?> Select2<In, Out>(this IWire<In?> w, Func<In, Out> f)
+     where In : struct
+    where Out : struct
+
+        {
+            return w.Select<In?,Out?>(x => x is null ? null : f(x.Expect()));
+        }
 
         public static ILiveWire<Out?> Select2<In, Out>(this ILiveWire<In?> w, Func<In, Out> f)
              where In : struct
@@ -652,6 +764,44 @@ namespace genshinbot.reactive.wire
             public bool IgnoreLateResults = true;
         }
         public static ProcessAsyncOptions DefaultAsyncOptions = new ProcessAsyncOptions();
+
+
+        public static IWire<Out> LinkAsync<In, Out>(this IWire<In> w, 
+            Func<In, Action<Out>,Task> f,
+            Action<Exception> onError,
+            ProcessAsyncOptions? opt = null)
+        {
+            var opt2 = opt ?? DefaultAsyncOptions;
+            if (opt2.MaxConcurrency is int mc)
+            {
+                //System.Diagnostics.Debug.Assert(mc == 1, "MaxConcurrency 1 only supported");
+
+                var limiter = new SemaphoreSlim(mc);
+                return w.Link<In, Out>(async (value, next) =>
+                {
+                    if (await limiter.WaitAsync(opt2.WaitSpot))
+                    {
+                        try
+                        {
+                            await f(value,next);
+
+                        }
+                        catch (Exception e)
+                        {
+                            onError(e);
+                        }
+                        finally
+                        {
+                            limiter.Release();
+                        }
+                    }
+
+                }, opt2.IgnoreLateResults);
+
+
+            }
+            else throw new NotSupportedException();
+        }
 
         public static IWire<Out> ProcessAsync<In, Out>(this IWire<In> w, Func<In, Task<Out>> f, Action<Exception> onError, ProcessAsyncOptions? opt = null)
         {

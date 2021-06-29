@@ -7,7 +7,14 @@ namespace genshinbot.reactive.wire
     /// 
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface ILiveWire<out T> : IWire<T>
+    public interface ILiveWire<out T> : ILiveWire_WARNING<T> { }
+
+    /// <summary>
+    /// A subset of LiveWire which MUST be subscribed to function
+    /// Temporary workaround
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public interface ILiveWire_WARNING<out T> : IWire<T>
     {
         public T Value { get; }
 
@@ -20,7 +27,7 @@ namespace genshinbot.reactive.wire
         /// <returns></returns>
         IDisposable Connect(Action<T> onValue)
         {
-            var res=Subscribe(onValue);
+            var res = Subscribe(onValue);
             onValue(Value);
             return res;
         }

@@ -146,6 +146,7 @@ namespace genshinbot.screens
         public IWire<Pkt<bool>>[] PlayerSelect { get; } = new IWire<Pkt<bool>>[4];
         public IWire<Pkt<double>> ClimbingScoreX { get; }
         public IWire<Pkt<bool>> IsClimbing { get; }
+        public IWire<Pkt<bool>> IsFlying { get; }
 
         /// <summary>
         /// Not neccearily meaning dead
@@ -212,6 +213,15 @@ namespace genshinbot.screens
                 return b.W.Screen.Watch(rd.ClimbingX.Region).Select(comparer.Compare);
             }).Switch2();
             IsClimbing = ClimbingScoreX.Select(x => x < db.ClimbingXThreshold);
+
+            var FlyingScoreX = rd.Select3(rd =>
+            {
+                Debug.Assert(rd.FlyingSpace is not null,
+                    $"ClimbingX is not configured in settings for size {b.W.Size.Value}");
+                var comparer = new algorithm.NormComparer(rd.FlyingSpace);
+                return b.W.Screen.Watch(rd.FlyingSpace.Region).Select(comparer.Compare);
+            }).Switch2();
+            IsFlying = FlyingScoreX.Select(x => x < db.ClimbingXThreshold);
 
             IsAllDead = PlayerHealth.Select((wire, idx) =>
                     wire.Select(

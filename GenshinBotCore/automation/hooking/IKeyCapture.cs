@@ -1,4 +1,5 @@
 ﻿using genshinbot.automation.input;
+using genshinbot.data.events;
 using genshinbot.reactive.wire;
 using System;
 using System.Collections.Generic;
@@ -10,11 +11,6 @@ namespace genshinbot.automation.hooking
 {
     public interface IKeyCapture
     {
-        public record KeyEvent
-        {
-            public Keys Key { get; init; }
-            public bool Down { get; init; }
-        }
 
         public IWire<KeyEvent> KeyEvents { get; }
         public ILiveWire<IReadOnlyDictionary<Keys, bool>> KbdState => KeyEvents.KbdState();
@@ -22,7 +18,7 @@ namespace genshinbot.automation.hooking
 
     public static class KeyExt
     {
-        public static ILiveWire<IReadOnlyDictionary<Keys,bool>> KbdState(this IWire<IKeyCapture.KeyEvent> o)
+        public static ILiveWire<IReadOnlyDictionary<Keys,bool>> KbdState(this IWire<KeyEvent> o)
         {
             Dictionary<Keys, bool> d = new Dictionary<Keys, bool>();
             return o

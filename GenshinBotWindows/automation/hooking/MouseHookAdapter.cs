@@ -1,4 +1,5 @@
-﻿using genshinbot.hooks;
+﻿using genshinbot.data.events;
+using genshinbot.hooks;
 using genshinbot.reactive;
 using genshinbot.reactive.wire;
 using OpenCvSharp;
@@ -15,7 +16,7 @@ namespace genshinbot.automation.hooking
     public class MouseHookAdapter:IMouseCapture
     {
 
-        public IWire<IMouseCapture.MouseEvent> MouseEvents { get;  }
+        public IWire<MouseEvent> MouseEvents { get;  }
 
         public MouseHook mouseHook;
 
@@ -25,7 +26,7 @@ namespace genshinbot.automation.hooking
 
             MouseEvents = mouseHook.Wire
                 .Relay(enable)
-                .Link<(IntPtr wParam,User32.MOUSEHOOKSTRUCT lParam),IMouseCapture.MouseEvent>(( x, next) =>
+                .Link<(IntPtr wParam,User32.MOUSEHOOKSTRUCT lParam),MouseEvent>(( x, next) =>
                 {
                     
                     var k = x.lParam;
@@ -34,7 +35,7 @@ namespace genshinbot.automation.hooking
                     if (map != null) pt = map(pt);
                     if (msg == User32.WindowMessage.WM_LBUTTONDOWN)
                     {
-                         next(new IMouseCapture.ClickEvent
+                         next(new ClickEvent
                         {
                             Button = automation.input.MouseBtn.Left,
                             Down = true,
@@ -43,14 +44,14 @@ namespace genshinbot.automation.hooking
                     }
                     else if (msg == User32.WindowMessage.WM_MOUSEMOVE)
                     {
-                         next(new IMouseCapture.MoveEvent
+                         next(new MoveEvent
                         {
                             Position = pt
                         });
                     }
                     else if (msg == User32.WindowMessage.WM_LBUTTONUP)
                     {
-                         next(new IMouseCapture.ClickEvent
+                         next(new ClickEvent
                         {
                             Button = automation.input.MouseBtn.Left,
                             Down = true,

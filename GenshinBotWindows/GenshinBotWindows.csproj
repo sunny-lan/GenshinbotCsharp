@@ -11,6 +11,7 @@
   <PropertyGroup>
     <LangVersion>9.0</LangVersion>
     <Nullable>enable</Nullable>
+    <AssemblyName>AHK</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,10 +32,6 @@
     <PackageReference Include="Vanara.PInvoke.Kernel32" Version="3.3.8" />
     <PackageReference Include="Vanara.PInvoke.SHCore" Version="3.3.8" />
     <PackageReference Include="Vanara.PInvoke.User32" Version="3.3.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\GenshinBotCore\GenshinBotCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -90,6 +87,10 @@
     <Folder Include="badui\" />
     <Folder Include="controllers\" />
     <Folder Include="data\map\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GenshinBotCore\GenshinBotCore.csproj" />
   </ItemGroup>
 
   <Import Project="..\Data\Data.projitems" Label="Shared" />
