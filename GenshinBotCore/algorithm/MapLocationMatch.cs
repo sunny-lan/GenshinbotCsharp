@@ -92,7 +92,7 @@ namespace genshinbot.algorithm
         const double COORD_DIST_TOLERANCE =100;
         const double MIN_ACCEPTABLE_SCORE = 0.9;
         public const int MAX_EXPECTED_FALSE_POSITIVES = 2;
-        public const double MAX_EXPECTED_FALSE_NEGATIVE_RATE =0.7;
+        public const double MAX_EXPECTED_FALSE_NEGATIVE_RATE =0.5;
         //required difference between score of best solution and second best
         const double REQUIRED_SOLUTION_UNIQUENESS=0.05;
         public MapLocationMatch() { }
@@ -138,7 +138,7 @@ namespace genshinbot.algorithm
             {
                 return;
             }
-            if(matched / (double)inRect < MAX_EXPECTED_FALSE_NEGATIVE_RATE)
+            if(matched / (double)inRect < 1-MAX_EXPECTED_FALSE_NEGATIVE_RATE)
             {
                 return;
             }

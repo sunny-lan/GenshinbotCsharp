@@ -90,7 +90,48 @@ namespace genshinbot.controllers
                 .Select(x => coord2Mini.Inverse(x));
         }
 
-
+        public async Task WalkTo(Point2d dst, Action<Exception> onError, bool expectClimb=false)
+        {
+            var pos = await TrackPos(onError);
+            var dest = new LiveWireSource<Point2d?>(null);
+            var alg = new algorithm.WalkingAlgorithm(
+                    pos,
+                    screens.PlayingScreen.ArrowDirection,
+                    screens.PlayingScreen.IsFlying,
+                    screens.PlayingScreen.IsClimbing,
+                    screens.PlayingScreen.IsAllDead,
+                    dest
+                );
+            using (alg.KeyboardOut.Subscribe(x =>
+            {
+                if (x == algorithm.WalkingAlgorithm.KeyAction.BeginWalk)
+                {
+                    screens.PlayingScreen.Io.K.KeyDown(automation.input.Keys.W);
+                }
+                if (x == algorithm.WalkingAlgorithm.KeyAction.EndWalk)
+                {
+                    screens.PlayingScreen.Io.K.KeyUp(automation.input.Keys.W);
+                }
+                if (x == algorithm.WalkingAlgorithm.KeyAction.Drop)
+                {
+                    _ = screens.PlayingScreen.Io.K.KeyPress(automation.input.Keys.X);
+                }
+                if (x == algorithm.WalkingAlgorithm.KeyAction.Jump)
+                {
+                    _ = screens.PlayingScreen.Io.K.KeyPress(automation.input.Keys.Space);
+                }
+            }))
+            using (alg.MouseMovements.Subscribe(x =>
+            {
+                screens.PlayingScreen.Io.M.MouseMove(new Point2d(x, 0));
+            }))
+            {
+                await Task.Delay(100);
+                dest.SetValue(dst);
+                await pos.Where(p => p.Value.DistanceTo(dst) < 1).Get();
+               await screens.PlayingScreen.Io.K.KeyUp(automation.input.Keys.W);
+            }
+        }
         /*  public void TeleportTo(Feature waypoint)
          {
              Debug.Assert(waypoint.Type == FeatureType.Teleporter);
@@ -308,6 +349,19 @@ namespace genshinbot.controllers
             }
         }
 
-        
+        public static async Task TestGoto(ITestingRig rig)
+        {
+            //Point2d dst = new Point2d(x: 1956.43237304688, y: -303.038940429688);
+            Point2d dst = new Point2d(x: 2207.3157080477517 ,y: -595.0791251572828);
+            BotIO b = rig.Make();
+            ScreenManager mgr = new ScreenManager(b);
+            mgr.ForceScreen(mgr.PlayingScreen);
+            LocationManager lm = new LocationManager(mgr);
+            while (true)
+            {
+                await lm.WalkTo(dst, Console.WriteLine);
+                Console.ReadLine();
+            }
+        }
     }
 }

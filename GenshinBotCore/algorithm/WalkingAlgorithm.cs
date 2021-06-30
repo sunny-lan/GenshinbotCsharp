@@ -13,7 +13,7 @@ namespace genshinbot.algorithm
     class WalkingAlgorithm
     {
 
-        private readonly IWire<double> MouseMovements;
+        public readonly IWire<double> MouseMovements;
 
         public enum KeyAction
         {
@@ -35,7 +35,6 @@ namespace genshinbot.algorithm
             IWire<Point2d?> wantedPosition
         )
         {
-
             var arrowControl = new ArrowSteering(knownAngle,
                 Wire.CombineLatest(wantedPosition,knownPosition, (wanted, known) =>
                 {
@@ -70,16 +69,16 @@ namespace genshinbot.algorithm
                  }
                  //grounded
                  enableMouse.SetValue(true);
-                 return KeyAction.None;
+                 return KeyAction.BeginWalk;
              }).Debounce(200);
 
-            MouseMovements = arrowControl.MouseDelta.Relay(enableMouse.DependsOn(
-                otherActions.As<KeyAction,object>()));
+            MouseMovements = arrowControl.MouseDelta;
 
             //todo use more advanced
 
             //just keep walking as long as wanted position exists
-            var goForward = wantedPosition.Select(x => x is not null); 
+            var goForward = Wire.CombineLatest(knownPosition, wantedPosition,knownAngle,
+                (_,x,_) => x is not null); 
 
             KeyboardOut = goForward.Edge(
                 rising:KeyAction.BeginWalk,

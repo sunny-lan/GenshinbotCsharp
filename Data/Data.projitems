@@ -30,6 +30,12 @@
     <Content Include="$(MSBuildThisFileDirectory)data\images\80c8ddfa-7308-416f-a7cd-ca7fe46f62c3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="$(MSBuildThisFileDirectory)data\images\ad106605-ce26-4444-9e63-d86b2045aa0e.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(MSBuildThisFileDirectory)data\images\ca1cd977-b32e-44bd-ae49-cf0abca0610f.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="$(MSBuildThisFileDirectory)data\images\f636bb25-8aa7-4afc-8414-5f8b29fdfb55.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

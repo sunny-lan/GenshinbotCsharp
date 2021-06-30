@@ -67,7 +67,8 @@ namespace genshinbot
           //   automation.windows.WindowAutomator2.Test3();
             //screens.PlayingScreen.test();
             //screens.MapScreen.Test2(rig);
-            await controllers.LocationManager.TestTrackAsync(rig);
+            await controllers.LocationManager.TestGoto(rig);
+           // await controllers.LocationManager.TestTrackAsync(rig);
             // await controllers.LocationManager.testAsync3();
             //await screens.MapScreen.Test3Async();
             // automation.windows.WindowAutomator2.Test4();

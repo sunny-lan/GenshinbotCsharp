@@ -2,6 +2,7 @@
 using genshinbot.automation.hooking;
 using genshinbot.automation.input;
 using genshinbot.data;
+using genshinbot.data.events;
 using genshinbot.diag;
 using genshinbot.reactive;
 using genshinbot.reactive.wire;
@@ -122,31 +123,51 @@ namespace genshinbot.tools
             });
             var point2DFiller = Filler.From<Point2d>(async x =>
             {
+                var sz = await w.Bounds.NonNull().Get();
                 Prompt($"{Select.Description} to select, {Cancel.Description} to cancel", 1);
                 Point2d pos = x;
                 KeyComb key;
                 Point2d? last=null;
+                void setPos(Point2d p)
+                {
+                    if (sz.Contains(p.Round()))
+                    {
+                        pos = p;
+                        overlay.Point = pos.Round();
+                    }
+                }
+                int TOTAL = 1; 
                 using (w.MouseCap.MouseEvents.Subscribe( evt =>
                 {
                     //ignore if alt is not pressed!
                     if(w.KeyCap.KbdState.Value.GetValueOrDefault(Keys.Alt))
-                    if (evt is IMouseCapture.MoveEvent mEvt)
+                    if (evt is MoveEvent mEvt)
                     {
 
-                            pos = mEvt.Position;
+                           setPos( mEvt.Position);
 
-                        overlay.Point = pos.Round();
                     }
                 }))
                 using (w.KeyCap.KeyEvents.Subscribe(st =>
                 {
                     if (st.Down)
                     {
-                        if (st.Key == Keys.Left) pos += new Point2d(-1, 0);
-                        if (st.Key == Keys.Right) pos += new Point2d(1, 0);
-                        if (st.Key == Keys.Up) pos += new Point2d(0, -1);
-                        if (st.Key == Keys.Down) pos += new Point2d(0, 1);
-                        overlay.Point = pos.Round();
+                        int v = TOTAL;
+                        TOTAL++;
+                        TOTAL = Math.Min(TOTAL, 10);
+
+                        Point2d pos2 = pos;
+                        if (st.Key == Keys.Left) pos2 += new Point2d(-v, 0);
+                        if (st.Key == Keys.Right) pos2 += new Point2d(v, 0);
+                        if (st.Key == Keys.Up) pos2 += new Point2d(0, -v);
+                        if (st.Key == Keys.Down) pos2 += new Point2d(0, v);
+
+
+                        setPos(pos2);
+                    }
+                    else
+                    {
+                        TOTAL = 1;
                     }
                 }))
                 {

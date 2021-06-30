@@ -14,8 +14,8 @@ namespace genshinbot.algorithm
     /// </summary>
     public class ArrowSteering
     {
-        private double scale = 100, maxDelta = 100;
-        TimeSpan recharch = TimeSpan.FromSeconds(1);
+        private double scale = 70, maxDelta = 50;
+        TimeSpan recharch = TimeSpan.FromSeconds(5);
 
         public IWire<double> MouseDelta { get; init; }
         public ArrowSteering(IWire<Pkt<double>> known, IWire<double?> wanted)
@@ -39,7 +39,7 @@ namespace genshinbot.algorithm
                     lastSign = sign;
                     limiter /= 2;
                 }
-                //  Console.WriteLine($"limiter={limiter} sign={sign}");
+                  Console.WriteLine($"limiter={limiter} sign={sign}");
 
 
                 return Math.Min(maxDelta, rel * scale * limiter);
