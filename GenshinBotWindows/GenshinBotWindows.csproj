@@ -15,6 +15,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="badui\**" />
+    <Compile Remove="controllers\**" />
+    <Compile Remove="data\**" />
+    <EmbeddedResource Remove="badui\**" />
+    <EmbeddedResource Remove="controllers\**" />
+    <EmbeddedResource Remove="data\**" />
+    <None Remove="badui\**" />
+    <None Remove="controllers\**" />
+    <None Remove="data\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="yui\windows\Accordion.cs" />
     <Compile Remove="yui\windows\Accordion.Designer.cs" />
   </ItemGroup>
@@ -81,12 +93,6 @@
     <EmbeddedResource Update="yui\windows\Tab.resx">
       <DependentUpon>Tab.cs</DependentUpon>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="badui\" />
-    <Folder Include="controllers\" />
-    <Folder Include="data\map\" />
   </ItemGroup>
 
   <ItemGroup>

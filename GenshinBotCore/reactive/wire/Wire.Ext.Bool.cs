@@ -1,4 +1,5 @@
-﻿using System;
+﻿using genshinbot.util;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -28,6 +29,22 @@ namespace genshinbot.reactive.wire
                         if (rising is Out o) next(o); }
                     else { 
                         if (falling is Out o) next(o); }
+                    last = v;
+                }
+            });
+        }
+
+        public static IWire<NoneT> Edge(this IWire<bool> signal, bool rising=true)
+        //where Out:struct
+        {
+            bool? last = null;
+            return signal.Link<bool, NoneT>((v, next) =>
+            {
+                if (last != v)
+                {
+                    if (rising==v) {
+                         next(NoneT.V);
+                    }
                     last = v;
                 }
             });

@@ -22,6 +22,8 @@ using genshinbot.diag;
 using genshinbot.automation.hooking;
 using genshinbot.reactive.wire;
 using genshinbot.automation.input.windows;
+using genshinbot.automation.proxy;
+using System.Diagnostics;
 
 namespace genshinbot.automation.windows
 {
@@ -122,6 +124,7 @@ namespace genshinbot.automation.windows
 
             Screen = new ScreenshotAdapter(this);
             iS = new InputSim(this);
+            kbdLock = new KbdLockProxy(iS, Focused);
             mouseCap = new Lazy<MouseHookAdapter>(() => new MouseHookAdapter(Focused,
                 pt => ScreenToClient(pt)));
             keyCap = new Lazy<KbdHookAdapter>(() => new KbdHookAdapter(Focused));
@@ -132,6 +135,7 @@ namespace genshinbot.automation.windows
         {
             foregroundChangeHook.Stop();
             locationChangeHook.Stop();
+            kbdLock.Dispose();
 
             foreach (var d in disposeList)
                 d.Dispose();
@@ -188,7 +192,8 @@ namespace genshinbot.automation.windows
 
         #region Input
 
-        public IKeySimulator2 Keys => iS;
+        public IKeySimulator2 Keys => kbdLock;
+        private KbdLockProxy kbdLock;
         public IMouseSimulator2 Mouse => iS;
         private InputSim iS;
         class InputSim : IMouseSimulator2, IKeySimulator2
@@ -371,6 +376,17 @@ namespace genshinbot.automation.windows
             }
 
         }
+
+
+        public static async Task TestKbdLock()
+        {
+            IWindowAutomator2 w = new WindowAutomator2("*Untitled - Notepad", null);
+            await w.Keys.KeyDown(input.Keys.A);
+            Debug.WriteLine("switch away and back");
+            await ConsoleAsync.ReadLine();
+
+        }
+
 
         public static void Test3()
         {
