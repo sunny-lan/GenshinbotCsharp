@@ -1,4 +1,5 @@
-﻿using genshinbot.reactive;
+﻿using genshinbot.automation.input;
+using genshinbot.reactive;
 using genshinbot.reactive.wire;
 using genshinbot.util;
 using OpenCvSharp;
@@ -36,14 +37,14 @@ namespace genshinbot.algorithm
         )
         {
             var arrowControl = new ArrowSteering(knownAngle,
-                Wire.CombineLatest(wantedPosition,knownPosition, (wanted, known) =>
-                {
-                    if (wanted is Point2d pp)
-                        return known.Value.AngleTo(pp);
-                    else return null as double?;
-                })
+                Wire.CombineLatest(wantedPosition, knownPosition, (wanted, known) =>
+                 {
+                     if (wanted is Point2d pp)
+                         return known.Value.AngleTo(pp);
+                     else return null as double?;
+                 })
            );
-            LiveWireSource<bool> enableMouse = new(false);
+            /*LiveWireSource<bool> enableMouse = new(false);
             var otherActions = Wire.CombineLatest(isAllDead, isFlying, isClimbing, (dead, flying, climbing) =>
              {
                  if (dead.Value)
@@ -52,7 +53,7 @@ namespace genshinbot.algorithm
                      {
                          //continue flying
                          enableMouse.SetValue(true);
-                        return KeyAction.None;
+                         return KeyAction.None;
                      }
                      else if (climbing.Value)
                      {
@@ -70,9 +71,11 @@ namespace genshinbot.algorithm
                  //grounded
                  enableMouse.SetValue(true);
                  return KeyAction.BeginWalk;
-             }).Debounce(200);
+             }).Debounce(200);*/
 
-            MouseMovements = arrowControl.MouseDelta;
+            var smoother = new MouseSmoother(arrowControl.MouseDelta.Select(x =>
+                new Point2d(x,0)));
+            MouseMovements = smoother.Output.Select(x=>x.X);//TODO temp test
 
             //todo use more advanced
 
@@ -98,8 +101,7 @@ namespace genshinbot.algorithm
             //5.  check arrow direction
             //6.  if direction wrong, go backwards a bit, repeat step 4
 
-            KeyboardOut = Wire.Merge(KeyboardOut, otherActions
-            );
+          //  KeyboardOut = Wire.Merge(KeyboardOut, otherActions);
 
         }
     }

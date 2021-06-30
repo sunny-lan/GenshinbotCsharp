@@ -105,7 +105,7 @@ namespace genshinbot.screens
             algorithm.MinimapMatch.PositionTracker? posTrack = null;
 
             //TODO async
-            return Minimap.Select((Mat x) =>
+            return Minimap.ProcessAsync((Mat x) =>
             {
             begin:
                 Point2d res;
@@ -138,7 +138,7 @@ namespace genshinbot.screens
                 approxPos = res;
                 return res;
             }
-            //,    onError
+            ,    onError
             );
         }
 
@@ -165,7 +165,7 @@ namespace genshinbot.screens
             //TODO handle errors+offload to separate thread!
             ArrowDirection = Arrow
                 // .Debug("arrow IMG")
-                .Select(
+                .ProcessAsync(
                     arrow =>
                     {
                         //  Console.WriteLine("begin detect");
@@ -173,7 +173,7 @@ namespace genshinbot.screens
                         //  Console.WriteLine("end detect");
                         return res;
                     }
-                    //,error => Console.WriteLine($"ERROR! {error}")
+                    ,error => Console.WriteLine($"ERROR! {error}")
                 )
                 //.Debug("arrow DIR")
                 ;

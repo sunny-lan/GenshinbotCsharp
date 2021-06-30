@@ -68,7 +68,6 @@ namespace genshinbot
             //screens.PlayingScreen.test();
             //screens.MapScreen.Test2(rig);
 
-            //    await controllers.LocationManager.TestGoto(rig);
             // await controllers.LocationManager.TestTrackAsync(rig);
             // await controllers.LocationManager.testAsync3();
             //await screens.MapScreen.Test3Async();
@@ -88,7 +87,8 @@ namespace genshinbot
             //   await tools.AutofillTool.Test2();
             //await tools.AutofillTool.ConfigurePlayingScreen(rig.Make());
             //data.jsonconverters.MatConverter.Test();
-            await automation.windows.WindowAutomator2.TestKbdLock();
+           // await automation.windows.WindowAutomator2.TestKbdLock();
+                await controllers.LocationManager.TestGoto(rig);
 
             Console.WriteLine("Program ended. Press enter to exit");
             Console.ReadLine();

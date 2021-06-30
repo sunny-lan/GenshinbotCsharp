@@ -23,7 +23,7 @@ namespace genshinbot.reactive
         {
             var ts = new CancellationTokenSource();
             Task.Run(async() => {
-                Console.WriteLine("begin loop");
+               // Console.WriteLine("begin loop");
                 while (!ts.Token.IsCancellationRequested)
                 {
                     //   Console.WriteLine(" begin poll");
@@ -31,7 +31,7 @@ namespace genshinbot.reactive
                     if (delay is int dd)
                         await Task.Delay(dd, ts.Token);
                 }
-                Console.WriteLine("end loop");
+               // Console.WriteLine("end loop");
             }, ts.Token);
             return DisposableUtil.From(() => {
                 Console.WriteLine("request cancellation");

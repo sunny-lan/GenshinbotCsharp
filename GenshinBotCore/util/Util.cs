@@ -432,6 +432,9 @@ namespace genshinbot
 
         public static Point2d Norm(this Point2d p)
         {
+
+            if (p==Origin)
+                return Origin;
             return p * (1.0 / p.Length());
         }
 

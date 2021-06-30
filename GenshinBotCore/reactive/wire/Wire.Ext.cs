@@ -40,6 +40,12 @@ namespace genshinbot.reactive.wire
                 .Select<IWire<object>,Func<IDisposable>>(d => d.Use)
                 .ToArray());
         }
+        public static IWire<U> DependsOn<U>(this IWire<U> w, params IWire<object>[] dependency)
+        {
+            return w.OnSubscribe<U>(dependency
+                .Select<IWire<object>, Func<IDisposable>>(d => d.Use)
+                .ToArray());
+        }
 
         public static IWire<V> As<U,V>(this IWire<U> w) where U:V 
         {

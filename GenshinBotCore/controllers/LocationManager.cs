@@ -130,6 +130,8 @@ namespace genshinbot.controllers
                 dest.SetValue(dst);
                 await pos.Where(p => p.Value.DistanceTo(dst) < 1).Get();
                await screens.PlayingScreen.Io.K.KeyUp(automation.input.Keys.W);
+                await screens.PlayingScreen.Io.K.KeyUp(automation.input.Keys.W);
+                await screens.PlayingScreen.Io.K.KeyUp(automation.input.Keys.W);
             }
         }
         /*  public void TeleportTo(Feature waypoint)
