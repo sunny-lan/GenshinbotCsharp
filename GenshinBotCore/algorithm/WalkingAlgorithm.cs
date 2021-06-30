@@ -36,7 +36,8 @@ namespace genshinbot.algorithm
             IWire<Point2d?> wantedPosition
         )
         {
-            var arrowControl = new ArrowSteering(knownAngle,
+            throw new NotImplementedException();
+          /*  var arrowControl = new ArrowSteering(knownAngle,
                 Wire.CombineLatest(wantedPosition, knownPosition, (wanted, known) =>
                  {
                      if (wanted is Point2d pp)
@@ -44,7 +45,7 @@ namespace genshinbot.algorithm
                      else return null as double?;
                  })
            );
-            /*LiveWireSource<bool> enableMouse = new(false);
+            LiveWireSource<bool> enableMouse = new(false);
             var otherActions = Wire.CombineLatest(isAllDead, isFlying, isClimbing, (dead, flying, climbing) =>
              {
                  if (dead.Value)
@@ -71,7 +72,7 @@ namespace genshinbot.algorithm
                  //grounded
                  enableMouse.SetValue(true);
                  return KeyAction.BeginWalk;
-             }).Debounce(200);*/
+             }).Debounce(200);
 
             var smoother = new MouseSmoother(arrowControl.MouseDelta.Select(x =>
                 new Point2d(x,0)));
@@ -101,7 +102,7 @@ namespace genshinbot.algorithm
             //5.  check arrow direction
             //6.  if direction wrong, go backwards a bit, repeat step 4
 
-          //  KeyboardOut = Wire.Merge(KeyboardOut, otherActions);
+          //  KeyboardOut = Wire.Merge(KeyboardOut, otherActions);*/
 
         }
     }

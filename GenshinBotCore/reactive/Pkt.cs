@@ -62,6 +62,10 @@ namespace genshinbot.reactive
 
     public static class Pkt
     {
+        public static IWire<Pkt<T>> Where<T>(this IWire<Pkt<T>> t, Func<T,bool> v)
+        {
+            return t.Where(pkt => v(pkt.Value));
+        }
         public static IDisposable Subscribe<T>(this IWire<Pkt<T>> t, Action<T> v)
         {
             return t.Subscribe(pkt => v(pkt.Value));

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -45,6 +46,15 @@ namespace genshinbot.reactive.wire
             return w.OnSubscribe<U>(dependency
                 .Select<IWire<object>, Func<IDisposable>>(d => d.Use)
                 .ToArray());
+        }
+
+        public static IWire<U> Limit<U>(this IWire<U> w, int cnt)
+        {
+            LiveWireSource<int> ctr=new(0);
+            return ctr
+                .Select(c => ctr.Value < cnt ? w : EmptyWire<U>.Instance)
+                .Switch()
+                .Do(_=>ctr.SetValue(ctr.Value+1));
         }
 
         public static IWire<V> As<U,V>(this IWire<U> w) where U:V 
@@ -501,6 +511,22 @@ namespace genshinbot.reactive.wire
             return new Wire<T>(t.Subscribe);
         }
 
+
+        class NotifyImpl<T> : INotifyCompletion
+        {
+            internal IWire<T> w { get; init; }
+            object lck = new object();
+            public void OnCompleted(Action continuation)
+            {
+                IDisposable? d=null;
+                d = w.Subscribe(_ =>
+                {
+                    d.Dispose();
+                    continuation();
+                });
+            }
+        }
+        //TODO implement custom INotify
         public static async Task<T> Get<T>(this IWire<T> t, TimeSpan? timeout = null)
         {
             TaskCompletionSource<T> taskCompletionSource = new TaskCompletionSource<T>();

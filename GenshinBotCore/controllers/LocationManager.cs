@@ -14,6 +14,7 @@ using System.Reactive.Linq;
 using genshinbot.reactive;
 using genshinbot.diag;
 using genshinbot.reactive.wire;
+using genshinbot.automation.input;
 
 namespace genshinbot.controllers
 {
@@ -31,13 +32,13 @@ namespace genshinbot.controllers
             if (Data.MapDb.Coord2Minimap == null)
                 CalculateCoord2Minimap();
 
-        
+
 
         }
 
 
 
-        
+
         public void CalculateCoord2Minimap()
         {
             var db = Data.MapDb;
@@ -68,10 +69,10 @@ namespace genshinbot.controllers
             var coord2Mini = db.Coord2Minimap.Expect();
 
             var map = screens.MapScreen;
-            var screen=screens.ActiveScreen.Value;
+            var screen = screens.ActiveScreen.Value;
             if (screen != screens.PlayingScreen)
             {
-                if(screen == map)
+                if (screen == map)
                 {
                     await screens.MapScreen.Close();
                 }
@@ -82,7 +83,7 @@ namespace genshinbot.controllers
             }
             await screens.PlayingScreen.OpenMap();
             var center = (await map.Io.W.Bounds.Value2()).Center();
-            
+
             var screen2Coord = await map.Screen2Coord.Get();
             var miniLoc = coord2Mini.Transform(screen2Coord.Value.ToCoord(center));
             await map.Close();
@@ -90,48 +91,55 @@ namespace genshinbot.controllers
                 .Select(x => coord2Mini.Inverse(x));
         }
 
-        public async Task WalkTo(Point2d dst, Action<Exception> onError, bool expectClimb=false)
+        public class WalkOptions
         {
+            public bool ExpectClimb { get; init; } = false;
+            public double Tolerance { get; init; } = 1;
+        }
+        public static WalkOptions DefaultWalkOptions = new WalkOptions();
+        public async Task<Pkt<Point2d>> WalkTo(Point2d dst, Action<Exception> onError, WalkOptions? opt = null)
+        {
+            var opt2 = opt ?? DefaultWalkOptions;
+
             var pos = await TrackPos(onError);
-            var dest = new LiveWireSource<Point2d?>(null);
-            var alg = new algorithm.WalkingAlgorithm(
-                    pos,
-                    screens.PlayingScreen.ArrowDirection,
-                    screens.PlayingScreen.IsFlying,
-                    screens.PlayingScreen.IsClimbing,
-                    screens.PlayingScreen.IsAllDead,
-                    dest
-                );
-            using (alg.KeyboardOut.Subscribe(x =>
+            var wanted = new LiveWireSource<double?>(null);
+            var arrowControl = new algorithm.ArrowSteering(
+                screens.PlayingScreen.ArrowDirection,
+                wanted);
+            
+            var deltaP = arrowControl.MouseDelta.Select(x =>
+               new Point2d(x, 0));
+            var smoother = new MouseSmoother(deltaP);
+
+            BotIO io = screens.PlayingScreen.Io;
+            while (true)
             {
-                if (x == algorithm.WalkingAlgorithm.KeyAction.BeginWalk)
+                using (deltaP.Subscribe(async delta =>
                 {
-                    screens.PlayingScreen.Io.K.KeyDown(automation.input.Keys.W);
-                }
-                if (x == algorithm.WalkingAlgorithm.KeyAction.EndWalk)
+                    Console.WriteLine($"d={delta}");
+                    await io.M.MouseMove(delta);
+                }))
+                using (pos.Subscribe(p =>
                 {
-                    screens.PlayingScreen.Io.K.KeyUp(automation.input.Keys.W);
-                }
-                if (x == algorithm.WalkingAlgorithm.KeyAction.Drop)
+                    Console.WriteLine($"p={p}");
+                    wanted.SetValue(p.AngleTo(dst));
+                }))
                 {
-                    _ = screens.PlayingScreen.Io.K.KeyPress(automation.input.Keys.X);
+                    //dont start till mouse ready
+                    await Task.WhenAll(wanted.NonNull().Get());
+                    try
+                    {
+                        await io.K.KeyDown(Keys.W);
+                        return await pos.Where(p => p.DistanceTo(dst) < opt2.Tolerance).Get();
+
+                    }
+                    finally
+                    {
+                        await io.K.KeyUp(Keys.W);
+                        wanted.SetValue(null);
+                    }
                 }
-                if (x == algorithm.WalkingAlgorithm.KeyAction.Jump)
-                {
-                    _ = screens.PlayingScreen.Io.K.KeyPress(automation.input.Keys.Space);
-                }
-            }))
-            using (alg.MouseMovements.Subscribe(x =>
-            {
-                screens.PlayingScreen.Io.M.MouseMove(new Point2d(x, 0));
-            }))
-            {
-                await Task.Delay(100);
-                dest.SetValue(dst);
-                await pos.Where(p => p.Value.DistanceTo(dst) < 1).Get();
-               await screens.PlayingScreen.Io.K.KeyUp(automation.input.Keys.W);
-                await screens.PlayingScreen.Io.K.KeyUp(automation.input.Keys.W);
-                await screens.PlayingScreen.Io.K.KeyUp(automation.input.Keys.W);
+
             }
         }
         /*  public void TeleportTo(Feature waypoint)
@@ -335,17 +343,17 @@ namespace genshinbot.controllers
             ScreenManager mgr = new ScreenManager(b);
             mgr.ForceScreen(mgr.PlayingScreen);
             LocationManager lm = new LocationManager(mgr);
-            var trackin= await lm.TrackPos(onError:Console.WriteLine);
+            var trackin = await lm.TrackPos(onError: Console.WriteLine);
             Console.WriteLine("trakin begin");
 
             using (trackin.Subscribe(
-               x=>Console.WriteLine(x)//,
-             //   onError:x=>Console.WriteLine(x)
+               x => Console.WriteLine(x)//,
+                                        //   onError:x=>Console.WriteLine(x)
             ))
-           /* using(mgr.PlayingScreen.ArrowDirection.Subscribe(
+            /* using(mgr.PlayingScreen.ArrowDirection.Subscribe(
 
-                x => Console.WriteLine(x)
-                ))*/
+                 x => Console.WriteLine(x)
+                 ))*/
             {
                 Console.ReadLine();
             }
@@ -354,7 +362,7 @@ namespace genshinbot.controllers
         public static async Task TestGoto(ITestingRig rig)
         {
             //Point2d dst = new Point2d(x: 1956.43237304688, y: -303.038940429688);
-            Point2d dst = new Point2d(x: 2207.3157080477517 ,y: -595.0791251572828);
+            Point2d dst = new Point2d(x: 2207.3157080477517, y: -595.0791251572828);
             BotIO b = rig.Make();
             ScreenManager mgr = new ScreenManager(b);
             mgr.ForceScreen(mgr.PlayingScreen);

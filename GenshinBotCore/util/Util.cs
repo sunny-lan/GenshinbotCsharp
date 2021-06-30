@@ -442,5 +442,10 @@ namespace genshinbot
         {
             return p.Norm() * Math.Min(p.DistanceTo(Origin), maxDist);
         }
+        public static Point2d LimitDistance(this Point2d p, double maxDist, out double outputlength)
+        {
+            outputlength = Math.Min(p.DistanceTo(Origin), maxDist);
+            return p.Norm() * outputlength;
+        }
     }
 }

@@ -14,19 +14,20 @@ namespace genshinbot.algorithm
     /// </summary>
     public class ArrowSteering
     {
-        private double scale = 70, maxDelta = 50;
+        ///measured in pixels/radian
+        private double scale = 70, maxPx=100;
         TimeSpan recharch = TimeSpan.FromSeconds(5);
 
         public IWire<double> MouseDelta { get; init; }
-        public ArrowSteering(IWire<Pkt<double>> known, IWire<double?> wanted)
+        public ArrowSteering(IWire<Pkt<double>> known, ILiveWire<double?> wanted1)
         {
             double limiter = 1;//trying to avoid oscilations
             var lastRecharge = DateTime.Now;
             bool? lastSign = null;
 
-            //TODO disconnect if wanted is null
-            MouseDelta = Wire.CombineLatest(wanted, known,(double? wanted,Pkt<double> known) =>
+            MouseDelta = known.Select((Pkt<double> known) =>
             {
+                double? wanted = wanted1.Value;
                 double amt = (known.CaptureTime - lastRecharge) / recharch;
                 lastRecharge = known.CaptureTime;
                 limiter = Math.Clamp(limiter + amt, 0, 1);
@@ -42,8 +43,8 @@ namespace genshinbot.algorithm
                   Console.WriteLine($"limiter={limiter} sign={sign}");
 
 
-                return Math.Min(maxDelta, rel * scale * limiter);
-            }) ;
+                return Math.Clamp(rel*  scale * limiter, -maxPx,maxPx);
+            }) .Where(x=>x!=0).DependsOn(wanted1.As<double?,object>());
         }
     }
 }

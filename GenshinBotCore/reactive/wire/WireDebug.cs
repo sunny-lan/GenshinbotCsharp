@@ -12,7 +12,7 @@ namespace genshinbot.reactive.wire
         public static WireDebug Instance = new WireDebug();
         public bool Enable=
             #if DEBUG 
-            true
+            false
 #else
             false
 #endif
