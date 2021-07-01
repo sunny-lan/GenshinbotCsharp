@@ -19,10 +19,8 @@ namespace genshinbot
 
 
 
-        [STAThread]
         static async Task Main(string[] args)
         {
-
             DPIAware.Set(SHCore.PROCESS_DPI_AWARENESS.PROCESS_PER_MONITOR_DPI_AWARE);
             //TaskExceptionCatcher.Do ();
             Kernel32.AllocConsole();

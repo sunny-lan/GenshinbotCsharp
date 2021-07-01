@@ -29,15 +29,15 @@ namespace genshinbot.automation.proxy
             disp = focused.Edge(rising: true).Subscribe(async _ =>
             {
                 Debug.WriteLine("Focus true. Repressing all keys!");
-                await Task.Delay(initialDelay);
+                await Task.Delay(initialDelay).ConfigureAwait(false);
                 await Task.WhenAll(kbdSt.Select(async k =>
                 {
                     if (k.Value)
                     {
                         Debug.WriteLine($"   Repressing {k.Key}");
-                        await output.Key(k.Key, k.Value);
+                        await output.Key(k.Key, k.Value).ConfigureAwait(false);
                     }
-                }));
+                })).ConfigureAwait(false);
             });
         }
         public void Dispose()

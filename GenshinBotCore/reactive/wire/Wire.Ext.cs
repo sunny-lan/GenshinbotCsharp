@@ -168,7 +168,7 @@ namespace genshinbot.reactive.wire
         /// <returns></returns>
         public static async Task LockWhile(this ILiveWire<bool> o, Func<Task> t, TimeSpan? timeout = null)
         {
-            await o.WaitTrue(timeout);
+            await o.WaitTrue(timeout).ConfigureAwait(false);
 
             var taskCompletionSource = new TaskCompletionSource<NoneT>();
 
@@ -181,8 +181,8 @@ namespace genshinbot.reactive.wire
                 }
             ))
             {
-                var tt = await Task.WhenAny(t(), taskCompletionSource.Task);
-                await tt;
+                var tt = await Task.WhenAny(t(), taskCompletionSource.Task).ConfigureAwait(false); 
+                await tt.ConfigureAwait(false);
             }
         }
         public static async Task Lock<T>(this IWire<T> o, Func<Task> t, T v)
@@ -200,13 +200,13 @@ namespace genshinbot.reactive.wire
                 }
             ))
             {
-                var tt = await Task.WhenAny(t(), taskCompletionSource.Task);
-                await tt;
+                var tt = await Task.WhenAny(t(), taskCompletionSource.Task).ConfigureAwait(false);
+                await tt.ConfigureAwait(false);
             }
         }
         public static async Task<T> LockWhile<T>(this ILiveWire<bool> o, Func<Task<T>> t, TimeSpan? timeout = null)
         {
-            await o.WaitTrue(timeout);
+            await o.WaitTrue(timeout).ConfigureAwait(false);
 
             var taskCompletionSource = new TaskCompletionSource<T>();
 
@@ -219,8 +219,8 @@ namespace genshinbot.reactive.wire
                 }
             ))
             {
-                var tt = await Task.WhenAny(t(), taskCompletionSource.Task);
-                return await tt;
+                var tt = await Task.WhenAny(t(), taskCompletionSource.Task).ConfigureAwait(false);
+                return await tt.ConfigureAwait(false);
             }
         }
 
@@ -435,7 +435,7 @@ namespace genshinbot.reactive.wire
         public static async Task<T> Value2<T>(this ILiveWire<T?> w) where T : struct
         {
             if (w.Value is T t) return t;
-            return await w.NonNull().Get();
+            return await w.NonNull().Get().ConfigureAwait(false);
         }
 
         public static IWire<T> NonNull<T>(this IWire<T?> w) where T : struct
@@ -578,14 +578,14 @@ namespace genshinbot.reactive.wire
                 if (timeout is TimeSpan tt)
                     _ = Task.Delay(tt).ContinueWith(_ => taskCompletionSource.SetException(
                           new TimeoutException()));
-                return await taskCompletionSource.Task;
+                return await taskCompletionSource.Task.ConfigureAwait(false);
             }
         }
 
         public static async Task WaitTrue(this ILiveWire<bool> t, TimeSpan? timeout = null)
         {
             if (t.Value) return;
-            while (!await t.Get(timeout)) ;
+            while (!await t.Get(timeout).ConfigureAwait(false)) ;
         }
 
         /// <summary>
@@ -845,11 +845,11 @@ namespace genshinbot.reactive.wire
                 var limiter = new SemaphoreSlim(mc);
                 return w.Link<In, Out>(async (value, next) =>
                 {
-                    if (await limiter.WaitAsync(opt2.WaitSpot))
+                    if (await limiter.WaitAsync(opt2.WaitSpot).ConfigureAwait(false))
                     {
                         try
                         {
-                            await f(value, next);
+                            await f(value, next).ConfigureAwait(false);
 
                         }
                         catch (Exception e)
@@ -879,11 +879,11 @@ namespace genshinbot.reactive.wire
                 var limiter = new SemaphoreSlim(mc);
                 return w.Link<In, Out>(async (value, next) =>
                 {
-                    if (await limiter.WaitAsync(opt2.WaitSpot))
+                    if (await limiter.WaitAsync(opt2.WaitSpot).ConfigureAwait(false))
                     {
                         try
                         {
-                            next(await f(value));
+                            next(await f(value).ConfigureAwait(false));
 
                         }
                         catch (Exception e)
@@ -906,7 +906,7 @@ namespace genshinbot.reactive.wire
                 {
                     try
                     {
-                        next(await f(value));
+                        next(await f(value).ConfigureAwait(false));
                     }
                     catch (Exception e)
                     {

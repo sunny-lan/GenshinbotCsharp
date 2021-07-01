@@ -29,7 +29,7 @@ namespace genshinbot.reactive
                     //   Console.WriteLine(" begin poll");
                     a();
                     if (delay is int dd)
-                        await Task.Delay(dd, ts.Token);
+                        await Task.Delay(dd, ts.Token).ConfigureAwait(false);
                 }
                // Console.WriteLine("end loop");
             }, ts.Token);

@@ -64,7 +64,7 @@ namespace genshinbot.reactive
     {
         public static async Task<T>Get<T>(this IWire<Pkt<T>> t)
         {
-            return (await t.Get<Pkt<T>>()).Value;
+            return (await t.Get<Pkt<T>>().ConfigureAwait(false)).Value;
         }
         public static IWire<Pkt<T>> Where<T>(this IWire<Pkt<T>> t, Func<T,bool> v)
         {

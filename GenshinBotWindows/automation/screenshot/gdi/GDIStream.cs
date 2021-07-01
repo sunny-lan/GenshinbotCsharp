@@ -17,12 +17,13 @@ using genshinbot.reactive;
 using System.Reactive.Subjects;
 using genshinbot.reactive.wire;
 using genshinbot.util;
+using genshinbot.memo;
 
 namespace genshinbot.automation.screenshot.gdi
 {
     using Snap = Pkt<Mat>;
 
-    class GDIStream : ScreenshotObservable
+    class GDIStream : ScreenshotObservable,IScreenshotMemo
     {
         private Gdi32.SafeHDC hDesktopDC;
         private Gdi32.SafeHDC hTmpDC;
@@ -210,6 +211,12 @@ namespace genshinbot.automation.screenshot.gdi
             }
             return cache[r];
         }
+
+
+        public Mem<Mat> Take(Rect r)
+        {
+            throw new NotImplementedException();
+        }
         public static async Task Test2()
         {
             //Task.Run(()=> { while (true) Cv2.WaitKey(1); });\
@@ -255,30 +262,31 @@ namespace genshinbot.automation.screenshot.gdi
             }
 
         }
+
         /*
-                public static void Test()
-                {
-                    IWire<Unit> tmp = Observable.FromEvent(
-                        h => Console.WriteLine("add"),
-                        h => Console.WriteLine("remove")
-                    );
+       public static void Test()
+       {
+           IWire<Unit> tmp = Observable.FromEvent(
+               h => Console.WriteLine("add"),
+               h => Console.WriteLine("remove")
+           );
 
-                    Console.WriteLine("a");
-                    Console.ReadKey();
-                    Console.WriteLine("b");
-                    using (var o = tmp.Subscribe(Observer.Create<Unit>(_ => Console.WriteLine("evt"))))
-                    {
-                        Console.ReadKey();
-                        Console.WriteLine("d");
-                        using (var b = tmp.Subscribe(Observer.Create<Unit>(_ => Console.WriteLine("evt"))))
-                        {
-                            Console.ReadKey();
-                        }
-                        Console.WriteLine("e");
-                        Console.ReadKey();
-                    }
-                    Console.WriteLine("c");
+           Console.WriteLine("a");
+           Console.ReadKey();
+           Console.WriteLine("b");
+           using (var o = tmp.Subscribe(Observer.Create<Unit>(_ => Console.WriteLine("evt"))))
+           {
+               Console.ReadKey();
+               Console.WriteLine("d");
+               using (var b = tmp.Subscribe(Observer.Create<Unit>(_ => Console.WriteLine("evt"))))
+               {
+                   Console.ReadKey();
+               }
+               Console.WriteLine("e");
+               Console.ReadKey();
+           }
+           Console.WriteLine("c");
 
-                }*/
+       }*/
     }
 }

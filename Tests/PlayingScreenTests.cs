@@ -39,9 +39,9 @@ namespace GenshinBotTests
                 for (int i = 0; i < 4; i++)
                 {
                     var k = await p.PlayerHealth[i].Get();
-                    Debug.WriteLine($" p[{i}]={Math.Round(k.Value, 4)}:");
+                    Debug.WriteLine($" p[{i}]={Math.Round(k, 4)}:");
                     if (expRes is not null)
-                        Assert.Equal(k.Value, expRes[i], 3);
+                        Assert.Equal(k, expRes[i], 3);
                 }
             }
             await testAsync("guyun_playing_screen_1440x900", new[] { 0.06792452830188679, 0, 0, 0 });
@@ -70,7 +70,7 @@ namespace GenshinBotTests
                 Debug.WriteLine($"{img}, approx={approxPos} found={res}");
                 double lim = 1;
                 if (pos is Point2d pp)
-                    Assert.True(res.Value.DistanceTo(pp) < lim);
+                    Assert.True(res.DistanceTo(pp) < lim);
             }
             await testAsync("guyun_playing_screen_1440x900", new Point2d (4038,4361),
                 new Point2d(x: 4037.29252119009, y: 4364.061027347406));
@@ -107,7 +107,7 @@ namespace GenshinBotTests
                 var res = await p.ClimbingScoreX.Get();
                 Debug.WriteLine($"{img} = {res}");
                 var r2 = await p.IsClimbing.Get();
-                Assert.Equal(r2.Value, climbing);
+                Assert.Equal(r2, climbing);
             }
 
             await testAsync("playing_luhua_1050", false);
@@ -175,14 +175,14 @@ namespace GenshinBotTests
             async Task testAsync(string img, bool climbing)
             {
                 gw.PlayingScreen.Image = Data.Imread($"test/{img}.png");
-                Pkt<bool> r2;
+               bool r2;
                 using (p.IsAllDead.Debug("isalldead").Use())
                 {
                     await Task.Delay(100);//why so slow?
                     r2 = await p.IsAllDead.Get();
                 }
                 Debug.WriteLine($"{img} = {r2}");
-                Assert.Equal(r2.Value, climbing);
+                Assert.Equal(r2, climbing);
             }
 
             await testAsync("playing_luhua_1050", false);

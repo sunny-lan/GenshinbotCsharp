@@ -140,7 +140,7 @@ namespace genshinbot.controllers
             using (deltaP.Subscribe(async delta =>
             {
                 Console.WriteLine($"d={delta}");
-                await io.M.MouseMove(delta);
+                await io.M.MouseMove(delta).ConfigureAwait(false);
             }))
             using (pos.Subscribe(async p =>
             {
@@ -157,14 +157,14 @@ namespace genshinbot.controllers
             {  //keep going until either atDest, or dead
                 
                     //dont start till mouse ready
-                    await wanted.NonNull().Get();
+                    await wanted.NonNull().Get().ConfigureAwait(false);
                     try
                     {
                         Debug.WriteLine("begin walking");
-                        await io.K.KeyDown(Keys.W);
+                        await io.K.KeyDown(Keys.W).ConfigureAwait(false);
 
                         backtowalking:
-                        var r = await await Task.WhenAny(allDead.Get(), atDest.Get());
+                        var r = await await Task.WhenAny(allDead.Get(), atDest.Get()).ConfigureAwait(false);
 
                         Debug.WriteLine("walking ended");
                         if (r == WalkStatus.Arrived)
@@ -176,11 +176,11 @@ namespace genshinbot.controllers
                         else if (r == WalkStatus.Deading)
                         {
                             Debug.WriteLine("    deading - check to make sure dead (first press space)");
-                            await Task.Delay(350);
-                            await io.K.KeyPress(Keys.Space);
+                            await Task.Delay(350).ConfigureAwait(false);
+                            await io.K.KeyPress(Keys.Space).ConfigureAwait(false);
                             //check again to make sure
-                            await Task.Delay(opt2.WaitResponse);
-                            if (await playingScreen.IsAllDead.Get())
+                            await Task.Delay(opt2.WaitResponse).ConfigureAwait(false);
+                            if (await playingScreen.IsAllDead.Get().ConfigureAwait(false))
                             {
 
                                 Debug.WriteLine("       yup");
@@ -195,7 +195,7 @@ namespace genshinbot.controllers
                     }
                     finally
                     {
-                        await io.K.KeyUp(Keys.W);
+                        await io.K.KeyUp(Keys.W).ConfigureAwait(false);
                         wanted.SetValue(null);
                     }
                 
@@ -205,26 +205,26 @@ namespace genshinbot.controllers
             Debug.WriteLine("enter status=dead");
 
             //todo sometimes climbing may be valid
-            if (await playingScreen.IsClimbing.Get())
+            if (await playingScreen.IsClimbing.Get().ConfigureAwait(false))
             {
                 Debug.WriteLine("   detect climbing");
                 //keep pressing x till we're on ground
                 do
                 {
                     Debug.WriteLine("       try drop");
-                    await io.K.KeyPress(Keys.X);
-                    await Task.Delay(opt2.WaitResponse);
-                } while (!await playingScreen.IsAllDead.Get());
+                    await io.K.KeyPress(Keys.X).ConfigureAwait(false);
+                    await Task.Delay(opt2.WaitResponse).ConfigureAwait(false);
+                } while (!await playingScreen.IsAllDead.Get().ConfigureAwait(false));
 
                 Debug.WriteLine("       climb sucessfully cancelled. back up");
                 try
                 {
-                    await io.K.KeyDown(Keys.S);
-                    await Task.Delay(opt2.BackupTime);
+                    await io.K.KeyDown(Keys.S).ConfigureAwait(false);
+                    await Task.Delay(opt2.BackupTime).ConfigureAwait(false);
                 }
                 finally
                 {
-                    await io.K.KeyUp(Keys.S);
+                    await io.K.KeyUp(Keys.S).ConfigureAwait(false);
 
                 }
                 goto walking;
@@ -242,21 +242,21 @@ namespace genshinbot.controllers
             //keep jumping until either we are flying, or walking
             do
             {
-                if (await playingScreen.IsFlying.Get())
+                if (await playingScreen.IsFlying.Get().ConfigureAwait(false))
                 {
                     Debug.WriteLine("   successfully enter flying state");
                     goto flying;
                 }
 
-                if (!await playingScreen.IsAllDead.Get())
+                if (!await playingScreen.IsAllDead.Get().ConfigureAwait(false))
                 {
                     Debug.WriteLine("   landed after falling");
                     goto walking;
                 }
 
                 Debug.WriteLine("   press space");
-                await io.K.KeyPress(Keys.Space);
-                await Task.Delay(opt2.WaitResponse);
+                await io.K.KeyPress(Keys.Space).ConfigureAwait(false);
+                await Task.Delay(opt2.WaitResponse).ConfigureAwait(false);
 
                
                 //todo we may be climbing
@@ -268,7 +268,7 @@ namespace genshinbot.controllers
             using (deltaP.Subscribe(async delta =>
             {
                 Console.WriteLine($"fly d={delta}");
-                await io.M.MouseMove(delta);
+                await io.M.MouseMove(delta).ConfigureAwait(false);
             }))
             using (pos.Subscribe(p =>
             {
@@ -277,11 +277,11 @@ namespace genshinbot.controllers
             }))
             {
                 //dont start till mouse ready
-                await wanted.NonNull().Get();
+                await wanted.NonNull().Get().ConfigureAwait(false);
                 try
                 {
                     Debug.WriteLine("   begin moving");
-                    await io.K.KeyDown(Keys.W);
+                    await io.K.KeyDown(Keys.W).ConfigureAwait(false);
 
                     //keep going until not flying, or at dest
                     using (var notFlying = playingScreen.IsFlying
@@ -297,7 +297,7 @@ namespace genshinbot.controllers
                         .GetGetter()
                     )
                     {
-                        var r = await await Task.WhenAny(notFlying.Get(), atDest.Get());
+                        var r = await await Task.WhenAny(notFlying.Get(), atDest.Get()).ConfigureAwait(false);
                         if (r == WalkStatus.Arrived)
                         {
                             Debug.WriteLine("      arrived while flying");
@@ -309,7 +309,7 @@ namespace genshinbot.controllers
                             // we may have landed or climbing now
                             //or ran out of stamina 
                             //todo running out of stamina is not handled 
-                            if (await playingScreen.IsAllDead.Get())
+                            if (await playingScreen.IsAllDead.Get().ConfigureAwait(false))
                                 goto dead;
                             else
                                 goto walking;
@@ -318,7 +318,7 @@ namespace genshinbot.controllers
                 }
                 finally
                 {
-                    await io.K.KeyUp(Keys.W);
+                    await io.K.KeyUp(Keys.W).ConfigureAwait(false);
                     wanted.SetValue(null);
                 }
             }

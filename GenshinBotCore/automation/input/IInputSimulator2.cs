@@ -29,17 +29,17 @@ namespace genshinbot.automation.input
         Task MouseUp(MouseBtn btn) => MouseButton(btn, false);
         async Task MouseClick(MouseBtn btn)
         {
-            await MouseDown(btn);
-            await MouseUp(btn);
+            await MouseDown(btn).ConfigureAwait(false);
+            await MouseUp(btn).ConfigureAwait(false);
         }
         async Task MouseClick(MouseBtn btn, Point pos)
         {
-            await MouseTo(pos);
-            await MouseClick(btn);
+            await MouseTo(pos).ConfigureAwait(false);
+            await MouseClick(btn).ConfigureAwait(false);
         }
         async Task LeftClick(Point pos)
         {
-            await MouseClick(MouseBtn.Left, pos);
+            await MouseClick(MouseBtn.Left, pos).ConfigureAwait(false);
         }
         Task MouseButton(MouseBtn btn, bool down);
     }

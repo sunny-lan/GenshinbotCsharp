@@ -113,28 +113,28 @@ namespace GenshinBotTests
                 Debounce=1//performance limit
             });
             var b = all.Get();
-            Pkt<bool>? last = null ;
+            bool last = false ;
             for (int i = 0; i < 4; i++)
             {
-                last = new Pkt<bool>(false);
-                w[i].Emit(last);
+                last = false;
+                w[i].Emit(new (last));
             }
             var val = await b;
             Debug.WriteLine(val);
             Assert.Equal(last, val);
-            Assert.False(val.Value);
+            Assert.False(val);
 
             b = all.Get();
             for (int i = 0; i < 4; i++)
             {
-                last = new Pkt<bool>(true);
+                last = true;
                 w[i].Emit(last);
             }
 
              val = await b;
             Debug.WriteLine(val);
             Assert.Equal(last, val);
-            Assert.True(val.Value);
+            Assert.True(val);
         }
 
         [Fact(Timeout=1000)]
@@ -149,10 +149,10 @@ namespace GenshinBotTests
             });
             var b = all.Get();
             TaskCompletionSource fence=new TaskCompletionSource();
-            Pkt<bool>? last = null;
+            bool last = false;
             for (int i = 0; i < 4; i++)
             {
-                last = new Pkt<bool>(false);
+                last = (false);
                 _ = Task.Run(async () =>
                   {
                       await fence.Task;
@@ -163,12 +163,12 @@ namespace GenshinBotTests
             var val = await b;
             Debug.WriteLine(val);
             Assert.Equal(last, val);
-            Assert.False(val.Value);
+            Assert.False(val);
 
             b = all.Get(); fence = new TaskCompletionSource();
             for (int i = 0; i < 4; i++)
             {
-                last = new Pkt<bool>(true);
+                last = (true);
                 _ = Task.Run(async () =>
                 {
                     await fence.Task;
@@ -180,7 +180,7 @@ namespace GenshinBotTests
             val = await b;
             Debug.WriteLine(val);
             Assert.Equal(last, val);
-            Assert.True(val.Value);
+            Assert.True(val);
         }
     }
 }
