@@ -105,7 +105,7 @@ namespace genshinbot.screens
             algorithm.MinimapMatch.PositionTracker? posTrack = null;
 
             //TODO async
-            return Minimap.ProcessAsync((Mat x) =>
+            return Minimap.Select((Mat x) =>
             {
             begin:
                 Point2d res;
@@ -138,7 +138,7 @@ namespace genshinbot.screens
                 approxPos = res;
                 return res;
             }
-            ,    onError
+           // ,    onError
             );
         }
 
@@ -165,7 +165,7 @@ namespace genshinbot.screens
             //TODO handle errors+offload to separate thread!
             ArrowDirection = Arrow
                 // .Debug("arrow IMG")
-                .ProcessAsync(
+                .Select(
                     arrow =>
                     {
                         //  Console.WriteLine("begin detect");
@@ -173,7 +173,7 @@ namespace genshinbot.screens
                         //  Console.WriteLine("end detect");
                         return res;
                     }
-                    ,error => Console.WriteLine($"ERROR! {error}")
+                 //   ,error => Console.WriteLine($"ERROR! {error}")
                 )
                 //.Debug("arrow DIR")
                 ;
@@ -185,7 +185,9 @@ namespace genshinbot.screens
                 int cpy = i;
                 PlayerHealth[i] = b.W.Screen
                     .Watch2(rd.Select2(rd => rd.Characters[cpy].Health))
-                    .Select(healthAlg.ReadHealth);
+                    .Select(healthAlg.ReadHealth
+                    //, error => Console.WriteLine($"ERROR! {error}")
+                    );
 
                 PlayerSelect[i] = b.W.Screen
                     .Watch2(rd.Select2(rd =>
@@ -200,7 +202,9 @@ namespace genshinbot.screens
 
                         var hsv = color.CvtColor(ColorConversionCodes.BGR2HSV);
                         return (hsv.Val1 > sMax);
-                    });
+                    }
+                  //  , error => Console.WriteLine($"ERROR! {error}")
+                    );
                    
             }
 
@@ -210,7 +214,9 @@ namespace genshinbot.screens
                 Debug.Assert(rd.ClimbingX is not null, 
                     $"ClimbingX is not configured in settings for size {b.W.Size.Value}");
                 var comparer = new algorithm.NormComparer(rd.ClimbingX);
-                return b.W.Screen.Watch(rd.ClimbingX.Region).Select(comparer.Compare);
+                return b.W.Screen.Watch(rd.ClimbingX.Region).Select(comparer.Compare
+                  //  , error => Console.WriteLine($"ERROR! {error}")
+                    );
             }).Switch2();
             IsClimbing = ClimbingScoreX.Select(x => x < db.ClimbingXThreshold);
 
@@ -219,7 +225,9 @@ namespace genshinbot.screens
                 Debug.Assert(rd.FlyingSpace is not null,
                     $"ClimbingX is not configured in settings for size {b.W.Size.Value}");
                 var comparer = new algorithm.NormComparer(rd.FlyingSpace);
-                return b.W.Screen.Watch(rd.FlyingSpace.Region).Select(comparer.Compare);
+                return b.W.Screen.Watch(rd.FlyingSpace.Region).Select(comparer.Compare
+                   // , error => Console.WriteLine($"ERROR! {error}")
+                    );
             }).Switch2();
             IsFlying = FlyingScoreX.Select(x => x < db.ClimbingXThreshold);
 

@@ -62,6 +62,10 @@ namespace genshinbot.reactive
 
     public static class Pkt
     {
+        public static async Task<T>Get<T>(this IWire<Pkt<T>> t)
+        {
+            return (await t.Get<Pkt<T>>()).Value;
+        }
         public static IWire<Pkt<T>> Where<T>(this IWire<Pkt<T>> t, Func<T,bool> v)
         {
             return t.Where(pkt => v(pkt.Value));

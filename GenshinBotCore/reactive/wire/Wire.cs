@@ -65,7 +65,7 @@ namespace genshinbot.reactive.wire
        // object n_lock = new object();
         protected virtual void OnNext(T value)
         {
-         //   enabled_lock.Wait();
+            //   enabled_lock.Wait();
             /*try
             {
                 pendingLock.Wait();
@@ -77,7 +77,8 @@ namespace genshinbot.reactive.wire
             {
                 pendingLock.Release();
             }*/
-            Debug.Assert(_enabled);
+            // Debug.Assert(_enabled);
+            if (!_enabled) return;
             List<Action<T>> tmp;
 
             //  Console.WriteLine($"{iid} onNext slock enter");
@@ -127,12 +128,12 @@ namespace genshinbot.reactive.wire
 
         public IDisposable Subscribe(Action<T> onValue)
         {
-            bool disposed=false;
-            object lck = new object();
+            VolatileBool disposed=new VolatileBool();
+           // object lck = new object();
             void wrapper(T v)
             {
-                lock (lck)
-                    if (!disposed)
+               // lock (lck)
+                    if (!disposed.Value)
                         onValue(v);
                     else
                         Console.WriteLine("BAD");
@@ -156,8 +157,8 @@ namespace genshinbot.reactive.wire
             }
             return DisposableUtil.From(() =>
             {
-                lock(lck)
-                disposed = true;
+              //  lock(lck)
+                disposed.Value = true;
                 //Console.WriteLine($"{iid} remove subscriber {onValue.GetHashCode()} begin");
 
                // if (iid == 1499603965 && onValue.GetHashCode() == 1969696357)

@@ -13,17 +13,17 @@ namespace genshinbot.reactive.wire
 
     public static partial class LiveWire
     {
-        public static ILiveWire<T> Create<T>(T init,Func<Action<T>,IDisposable> enable)
+        public static ILiveWire<T> Create<T>(T init, Func<Action<T>, IDisposable> enable)
         {
             T val = init;
-            return new LiveWire<T>(()=>val,onChange =>
-            {
-                return enable(v =>
-                {
-                    val = v;
-                    onChange();
-                });
-            });
+            return new LiveWire<T>(() => val, onChange =>
+               {
+                   return enable(v =>
+                   {
+                       val = v;
+                       onChange();
+                   });
+               });
         }
     }
     public static partial class Wire
@@ -35,10 +35,10 @@ namespace genshinbot.reactive.wire
         /// <param name="w"></param>
         /// <param name="dependency"></param>
         /// <returns></returns>
-        public static ILiveWire<U> DependsOn<U>(this ILiveWire<U> w,params IWire<object>[] dependency)
+        public static ILiveWire<U> DependsOn<U>(this ILiveWire<U> w, params IWire<object>[] dependency)
         {
             return w.OnSubscribe<U>(dependency
-                .Select<IWire<object>,Func<IDisposable>>(d => d.Use)
+                .Select<IWire<object>, Func<IDisposable>>(d => d.Use)
                 .ToArray());
         }
         public static IWire<U> DependsOn<U>(this IWire<U> w, params IWire<object>[] dependency)
@@ -50,24 +50,24 @@ namespace genshinbot.reactive.wire
 
         public static IWire<U> Limit<U>(this IWire<U> w, int cnt)
         {
-            LiveWireSource<int> ctr=new(0);
+            LiveWireSource<int> ctr = new(0);
             return ctr
                 .Select(c => ctr.Value < cnt ? w : EmptyWire<U>.Instance)
                 .Switch()
-                .Do(_=>ctr.SetValue(ctr.Value+1));
+                .Do(_ => ctr.SetValue(ctr.Value + 1));
         }
 
-        public static IWire<V> As<U,V>(this IWire<U> w) where U:V 
+        public static IWire<V> As<U, V>(this IWire<U> w) where U : V
         {
-            return w.Select(x => (V)x );
+            return w.Select(x => (V)x);
         }
 
 
-        public static IWire<Out> CombineLatest<In1, In2,In3, Out>(
+        public static IWire<Out> CombineLatest<In1, In2, In3, Out>(
             IWire<In1> t,
             IWire<In2> t2,
             IWire<In3> t3,
-            Func<In1, In2, In3,Out> f
+            Func<In1, In2, In3, Out> f
         )
         {
             return CombineLatest(t, CombineLatest(t2, t3, (t2, t3) => (t2, t3)), (t, a) =>
@@ -86,26 +86,26 @@ namespace genshinbot.reactive.wire
         /// <param name="t2"></param>
         /// <param name="f"></param>
         /// <returns></returns>
-        public static IWire<Out> CombineLatest<In1,In2,Out>(
+        public static IWire<Out> CombineLatest<In1, In2, Out>(
             IWire<In1> t,
             IWire<In2> t2,
-            Func<In1,In2,Out> f
+            Func<In1, In2, Out> f
         )
         {
             return new Wire<Out>(onNext =>
             {
-                OneOf< In1,NoneT> p1 = NoneT.V;
-                OneOf< In2,NoneT> p2 = NoneT.V;
+                OneOf<In1, NoneT> p1 = NoneT.V;
+                OneOf<In2, NoneT> p2 = NoneT.V;
                 void onUpdate()
                 {
-                    if(p1.IsT0 && p2.IsT0)
+                    if (p1.IsT0 && p2.IsT0)
                     {
                         onNext(f(p1.AsT0, p2.AsT0));
                     }
                 }
                 return DisposableUtil.Merge(
-                    t.Subscribe(x=> { p1 = x;onUpdate(); })        ,
-                    t2.Subscribe(x=> { p2 = x;onUpdate(); })        
+                    t.Subscribe(x => { p1 = x; onUpdate(); }),
+                    t2.Subscribe(x => { p2 = x; onUpdate(); })
                 );
             });
         }
@@ -143,20 +143,20 @@ namespace genshinbot.reactive.wire
             return new Wire<T>(onNext =>
             {
                 return DisposableUtil.Merge(
-                    t.Subscribe(onNext), 
+                    t.Subscribe(onNext),
                     DisposableUtil.Merge(f.Select(x => x()).ToArray())
                 );
             });
         }
         public static ILiveWire<T> OnSubscribe<T>(this ILiveWire<T> t, params Func<IDisposable>[] f)
         {
-            return new LiveWire<T>(()=>t.Value, onNext =>
-            {
-                return DisposableUtil.Merge(
-                    t.Subscribe(_=>onNext()),
-                    DisposableUtil.Merge(f.Select(x => x()).ToArray())
-                );
-            });
+            return new LiveWire<T>(() => t.Value, onNext =>
+              {
+                  return DisposableUtil.Merge(
+                      t.Subscribe(_ => onNext()),
+                      DisposableUtil.Merge(f.Select(x => x()).ToArray())
+                  );
+              });
         }
         /// <summary>
         /// Fails a task if observable sends false while task isn't complete
@@ -320,7 +320,8 @@ namespace genshinbot.reactive.wire
             In1?[] last = new In1?[t.Length];
             var thing = Wire.Merge(
                 t.Select((wire, index) =>
-                    wire.Do(val => {
+                    wire.Do(val =>
+                    {
                         if (last[index] == null) count++;
                         last[index] = val;
                     })
@@ -363,7 +364,7 @@ namespace genshinbot.reactive.wire
                     Task.Delay(debounce).ContinueWith(_ =>
                     {
                         var val = Thread.VolatileRead(ref ctr);
-                        if (val==startCtr)
+                        if (val == startCtr)
                             onChangeOld(v);
                     });
                 };
@@ -374,20 +375,20 @@ namespace genshinbot.reactive.wire
         public static ILiveWire<T> Debounce<T>(this ILiveWire<T> t, int debounce)
         {
             throw new NotImplementedException();
-           /* return new LiveWire<T>(() => t.Value, onChangeOld =>
-              {
-                  long ctr = 0;
-                  Action onChange = () =>
-                  {
-                      long curCtr = Interlocked.Increment(ref ctr);
-                      Task.Delay(debounce).ContinueWith(_ =>
-                      {
-                          if (ctr == curCtr)
-                              onChangeOld();
-                      });
-                  };
-                  return t.Subscribe(_ => onChange());
-              });*/
+            /* return new LiveWire<T>(() => t.Value, onChangeOld =>
+               {
+                   long ctr = 0;
+                   Action onChange = () =>
+                   {
+                       long curCtr = Interlocked.Increment(ref ctr);
+                       Task.Delay(debounce).ContinueWith(_ =>
+                       {
+                           if (ctr == curCtr)
+                               onChangeOld();
+                       });
+                   };
+                   return t.Subscribe(_ => onChange());
+               });*/
         }
 
         public static ILiveWire<T> Combine<T, In1, In2>(ILiveWire<In1> t1, ILiveWire<In2> t2,
@@ -511,34 +512,67 @@ namespace genshinbot.reactive.wire
             return new Wire<T>(t.Subscribe);
         }
 
-
-        class NotifyImpl<T> : INotifyCompletion
+        public static WireGetter<T> GetGetter<T>(this IWire<T> t)
         {
-            internal IWire<T> w { get; init; }
-            object lck = new object();
-            public void OnCompleted(Action continuation)
+            return new WireGetter<T>(t);
+        }
+
+        //sketchy reusable thing
+        public class WireGetter<T> :  IDisposable
+        {
+
+            private IDisposable d;
+            private T? v;
+            private TaskCompletionSource<T> conts = new ();
+
+            public WireGetter(IWire<T> w)
             {
-                IDisposable? d=null;
-                d = w.Subscribe(_ =>
-                {
-                    d.Dispose();
-                    continuation();
-                });
+                d = w.Subscribe(complete);
+            }
+            private void complete(T vv)
+            {
+                Interlocked.Exchange(ref conts, new ()).SetResult(vv);
+                
+            }
+
+            public Task<T> Get()
+            {
+                return conts.Task;
+            }
+
+            public bool IsCompleted { get; private set; }
+
+            public T GetResult() => v!;
+
+            public void Dispose()
+            {
+                if (IsCompleted) return;
+                conts = null;
+                IsCompleted = true;
+                d.Dispose();
+            }
+
+            ~WireGetter()
+            {
+                Dispose();
             }
         }
         //TODO implement custom INotify
         public static async Task<T> Get<T>(this IWire<T> t, TimeSpan? timeout = null)
         {
             TaskCompletionSource<T> taskCompletionSource = new TaskCompletionSource<T>();
-            
+
             using (t.Subscribe(o =>
              {
-                 if (taskCompletionSource.Task.IsCompleted)
+                 lock (taskCompletionSource)
                  {
-                     System.Diagnostics.Debug.WriteLine("bad");
-                     return;
+                     if (taskCompletionSource.Task.IsCompleted)
+                     {
+                         System.Diagnostics.Debug.WriteLine("bad");
+                         return;
+                     }
+                     taskCompletionSource.SetResult(o);
                  }
-                 taskCompletionSource.SetResult(o);
              }))
             {
                 if (timeout is TimeSpan tt)
@@ -563,11 +597,11 @@ namespace genshinbot.reactive.wire
         /// <param name="f"></param>
         /// <param name="protect">If true, ignores calls to next when not subscribed</param>
         /// <returns></returns>
-        public static IWire<Out> Link<In, Out>(this IWire<In> w, Action<In, Action<Out>> f,bool protect=false)
+        public static IWire<Out> Link<In, Out>(this IWire<In> w, Action<In, Action<Out>> f, bool protect = false)
         {
             return new Wire<Out>(onNext =>
             {
-                bool disposed=false;
+                bool disposed = false;
                 void next(Out v)
                 {
                     if (protect)
@@ -595,7 +629,7 @@ namespace genshinbot.reactive.wire
     where Out : struct
 
         {
-            return w.Select<In?,Out?>(x => x is null ? null : f(x.Expect()));
+            return w.Select<In?, Out?>(x => x is null ? null : f(x.Expect()));
         }
 
         public static ILiveWire<Out?> Select2<In, Out>(this ILiveWire<In?> w, Func<In, Out> f)
@@ -798,8 +832,8 @@ namespace genshinbot.reactive.wire
         public static ProcessAsyncOptions DefaultAsyncOptions = new ProcessAsyncOptions();
 
 
-        public static IWire<Out> LinkAsync<In, Out>(this IWire<In> w, 
-            Func<In, Action<Out>,Task> f,
+        public static IWire<Out> LinkAsync<In, Out>(this IWire<In> w,
+            Func<In, Action<Out>, Task> f,
             Action<Exception> onError,
             ProcessAsyncOptions? opt = null)
         {
@@ -815,7 +849,7 @@ namespace genshinbot.reactive.wire
                     {
                         try
                         {
-                            await f(value,next);
+                            await f(value, next);
 
                         }
                         catch (Exception e)

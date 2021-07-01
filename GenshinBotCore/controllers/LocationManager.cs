@@ -85,7 +85,7 @@ namespace genshinbot.controllers
             var center = (await map.Io.W.Bounds.Value2()).Center();
 
             var screen2Coord = await map.Screen2Coord.Get();
-            var miniLoc = coord2Mini.Transform(screen2Coord.Value.ToCoord(center));
+            var miniLoc = coord2Mini.Transform(screen2Coord.ToCoord(center));
             await map.Close();
             return screens.PlayingScreen.TrackPos(miniLoc, onError)
                 .Select(x => coord2Mini.Inverse(x));
@@ -95,52 +95,235 @@ namespace genshinbot.controllers
         {
             public bool ExpectClimb { get; init; } = false;
             public double Tolerance { get; init; } = 1;
+            public int WaitResponse { get; init; } = 600;
+            public int DeadTrigger { get; init; } = 30;
+            public int BackupTime { get; init; } = 1000;
         }
         public static WalkOptions DefaultWalkOptions = new WalkOptions();
-        public async Task<Pkt<Point2d>> WalkTo(Point2d dst, Action<Exception> onError, WalkOptions? opt = null)
+        enum WalkStatus
+        {
+            Deading,
+            Arrived,
+            NotFlyingAnymore
+        }
+        public async Task WalkTo(Point2d dst, Action<Exception> onError, WalkOptions? opt = null)
         {
             var opt2 = opt ?? DefaultWalkOptions;
 
             var pos = await TrackPos(onError);
             var wanted = new LiveWireSource<double?>(null);
+            PlayingScreen playingScreen = screens.PlayingScreen;
             var arrowControl = new algorithm.ArrowSteering(
-                screens.PlayingScreen.ArrowDirection,
+                playingScreen.ArrowDirection,
                 wanted);
-            
+
             var deltaP = arrowControl.MouseDelta.Select(x =>
                new Point2d(x, 0));
             var smoother = new MouseSmoother(deltaP);
 
-            BotIO io = screens.PlayingScreen.Io;
-            while (true)
+            BotIO io = playingScreen.Io;
+        walking:
+            Debug.WriteLine("enter status=walking");
+            //assume we are initially walking
+            using (var allDead = playingScreen.IsAllDead
+                    .Depacket()
+                    .Where(x => x)
+                    .Select(_ => WalkStatus.Deading)
+                    .GetGetter()
+                    )
+            using (var atDest = pos
+                .Depacket()
+                .Where(p => p.DistanceTo(dst) < opt2.Tolerance)
+                .Select(_ => WalkStatus.Arrived)
+                .GetGetter()
+            )
+            using (deltaP.Subscribe(async delta =>
             {
-                using (deltaP.Subscribe(async delta =>
+                Console.WriteLine($"d={delta}");
+                await io.M.MouseMove(delta);
+            }))
+            using (pos.Subscribe(async p =>
+            {
+                Console.WriteLine($"p={p}");
+               /* if (p.DistanceTo(dst) < opt2.Tolerance)
                 {
-                    Console.WriteLine($"d={delta}");
-                    await io.M.MouseMove(delta);
-                }))
-                using (pos.Subscribe(p =>
-                {
-                    Console.WriteLine($"p={p}");
-                    wanted.SetValue(p.AngleTo(dst));
-                }))
-                {
+                    Debug.WriteLine("arrived quick kill hack");
+                    await io.K.KeyUp(Keys.W);//TODO hak
+                    wanted.SetValue(null);
+                    return;
+                }*/
+                wanted.SetValue(p.AngleTo(dst));
+            }))
+            {  //keep going until either atDest, or dead
+                
                     //dont start till mouse ready
-                    await Task.WhenAll(wanted.NonNull().Get());
+                    await wanted.NonNull().Get();
                     try
                     {
+                        Debug.WriteLine("begin walking");
                         await io.K.KeyDown(Keys.W);
-                        return await pos.Where(p => p.DistanceTo(dst) < opt2.Tolerance).Get();
 
+                        backtowalking:
+                        var r = await await Task.WhenAny(allDead.Get(), atDest.Get());
+
+                        Debug.WriteLine("walking ended");
+                        if (r == WalkStatus.Arrived)
+                        {
+                            Debug.WriteLine("    arrived");
+
+                            return;
+                        }
+                        else if (r == WalkStatus.Deading)
+                        {
+                            Debug.WriteLine("    deading - check to make sure dead (first press space)");
+                            await Task.Delay(350);
+                            await io.K.KeyPress(Keys.Space);
+                            //check again to make sure
+                            await Task.Delay(opt2.WaitResponse);
+                            if (await playingScreen.IsAllDead.Get())
+                            {
+
+                                Debug.WriteLine("       yup");
+                                goto dead;
+                            }
+                            else
+                            {
+                                Debug.WriteLine("       nope - back to walking");
+                                goto backtowalking;
+                            }
+                        }
                     }
                     finally
                     {
                         await io.K.KeyUp(Keys.W);
                         wanted.SetValue(null);
                     }
+                
+            }
+
+        dead:
+            Debug.WriteLine("enter status=dead");
+
+            //todo sometimes climbing may be valid
+            if (await playingScreen.IsClimbing.Get())
+            {
+                Debug.WriteLine("   detect climbing");
+                //keep pressing x till we're on ground
+                do
+                {
+                    Debug.WriteLine("       try drop");
+                    await io.K.KeyPress(Keys.X);
+                    await Task.Delay(opt2.WaitResponse);
+                } while (!await playingScreen.IsAllDead.Get());
+
+                Debug.WriteLine("       climb sucessfully cancelled. back up");
+                try
+                {
+                    await io.K.KeyDown(Keys.S);
+                    await Task.Delay(opt2.BackupTime);
+                }
+                finally
+                {
+                    await io.K.KeyUp(Keys.S);
+
+                }
+                goto walking;
+            }
+
+        /*todo
+         * rightnow impoosible to fly here
+        var isFly = await playingScreen.IsFlying.Get();
+        if (isFly) goto flying;
+        else
+        {*/
+
+        falling:
+            Debug.WriteLine("enter status=falling");
+            //keep jumping until either we are flying, or walking
+            do
+            {
+                if (await playingScreen.IsFlying.Get())
+                {
+                    Debug.WriteLine("   successfully enter flying state");
+                    goto flying;
                 }
 
+                if (!await playingScreen.IsAllDead.Get())
+                {
+                    Debug.WriteLine("   landed after falling");
+                    goto walking;
+                }
+
+                Debug.WriteLine("   press space");
+                await io.K.KeyPress(Keys.Space);
+                await Task.Delay(opt2.WaitResponse);
+
+               
+                //todo we may be climbing
+            } while (true);
+
+
+        flying:
+            Debug.WriteLine("enter status=flying");
+            using (deltaP.Subscribe(async delta =>
+            {
+                Console.WriteLine($"fly d={delta}");
+                await io.M.MouseMove(delta);
+            }))
+            using (pos.Subscribe(p =>
+            {
+                Console.WriteLine($"fly p={p}");
+                wanted.SetValue(p.AngleTo(dst));
+            }))
+            {
+                //dont start till mouse ready
+                await wanted.NonNull().Get();
+                try
+                {
+                    Debug.WriteLine("   begin moving");
+                    await io.K.KeyDown(Keys.W);
+
+                    //keep going until not flying, or at dest
+                    using (var notFlying = playingScreen.IsFlying
+                        .Depacket()
+                        .Where(x => !x)
+                        .Select(_ => WalkStatus.NotFlyingAnymore)
+                        .GetGetter()
+                        )
+                    using (var atDest = pos
+                        .Depacket()
+                        .Where(p => p.DistanceTo(dst) < opt2.Tolerance)
+                        .Select(_ => WalkStatus.Arrived)
+                        .GetGetter()
+                    )
+                    {
+                        var r = await await Task.WhenAny(notFlying.Get(), atDest.Get());
+                        if (r == WalkStatus.Arrived)
+                        {
+                            Debug.WriteLine("      arrived while flying");
+                            return;
+                        }
+                        else if (r == WalkStatus.NotFlyingAnymore)
+                        {
+                            Debug.WriteLine("      not flying anymore. enter next state");
+                            // we may have landed or climbing now
+                            //or ran out of stamina 
+                            //todo running out of stamina is not handled 
+                            if (await playingScreen.IsAllDead.Get())
+                                goto dead;
+                            else
+                                goto walking;
+                        }
+                    }
+                }
+                finally
+                {
+                    await io.K.KeyUp(Keys.W);
+                    wanted.SetValue(null);
+                }
             }
+            Debug.Assert(false, "invalid state");
+
         }
         /*  public void TeleportTo(Feature waypoint)
          {
