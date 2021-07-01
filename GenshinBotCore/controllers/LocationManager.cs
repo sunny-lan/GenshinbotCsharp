@@ -106,7 +106,7 @@ namespace genshinbot.controllers
             Arrived,
             NotFlyingAnymore
         }
-        public async Task WalkTo(Point2d dst, Action<Exception> onError, WalkOptions? opt = null)
+        public async Task WalkTo(ILiveWire<Point2d> dst, Action<Exception> onError, WalkOptions? opt = null)
         {
             var opt2 = opt ?? DefaultWalkOptions;
 
@@ -122,85 +122,83 @@ namespace genshinbot.controllers
             var smoother = new MouseSmoother(deltaP);
 
             BotIO io = playingScreen.Io;
-        walking:
-            Debug.WriteLine("enter status=walking");
+       // walking:
+        //    Debug.WriteLine("enter status=walking");
             //assume we are initially walking
-            using (var allDead = playingScreen.IsAllDead
-                    .Depacket()
-                    .Where(x => x)
-                    .Select(_ => WalkStatus.Deading)
-                    .GetGetter()
-                    )
-            using (var atDest = pos
-                .Depacket()
-                .Where(p => p.DistanceTo(dst) < opt2.Tolerance)
-                .Select(_ => WalkStatus.Arrived)
-                .GetGetter()
-            )
+            /*  using (var allDead = playingScreen.IsAllDead
+                      .Depacket()
+                      .Where(x => x)
+                      .Select(_ => WalkStatus.Deading)
+                      .GetGetter()
+                      )*/
+            using(dst.Use())
             using (deltaP.Subscribe(async delta =>
             {
                 Console.WriteLine($"d={delta}");
                 await io.M.MouseMove(delta).ConfigureAwait(false);
             }))
-            using (pos.Subscribe(async p =>
+            using (pos.Subscribe( p =>
             {
                 Console.WriteLine($"p={p}");
-               /* if (p.DistanceTo(dst) < opt2.Tolerance)
-                {
-                    Debug.WriteLine("arrived quick kill hack");
-                    await io.K.KeyUp(Keys.W);//TODO hak
-                    wanted.SetValue(null);
-                    return;
-                }*/
-                wanted.SetValue(p.AngleTo(dst));
+                /* if (p.DistanceTo(dst) < opt2.Tolerance)
+                 {
+                     Debug.WriteLine("arrived quick kill hack");
+                     await io.K.KeyUp(Keys.W);//TODO hak
+                     wanted.SetValue(null);
+                     return;
+                 }*/
+                wanted.SetValue(p.AngleTo(dst.Value ));
             }))
             {  //keep going until either atDest, or dead
-                
-                    //dont start till mouse ready
-                    await wanted.NonNull().Get().ConfigureAwait(false);
-                    try
+
+                //dont start till mouse ready
+                await wanted.NonNull().Get().ConfigureAwait(false);
+                try
+                {
+                    Debug.WriteLine("begin walking");
+                    await io.K.KeyDown(Keys.W).ConfigureAwait(false);
+
+                    await pos.Where(p => p.DistanceTo(dst.Value) < opt2.Tolerance).Get();
+                    return;
+
+                    /*backtowalking:
+                    var r = await await Task.WhenAny(allDead.Get(), atDest.Get()).ConfigureAwait(false);
+
+                    Debug.WriteLine("walking ended");
+                    if (r == WalkStatus.Arrived)
                     {
-                        Debug.WriteLine("begin walking");
-                        await io.K.KeyDown(Keys.W).ConfigureAwait(false);
+                        Debug.WriteLine("    arrived");
 
-                        backtowalking:
-                        var r = await await Task.WhenAny(allDead.Get(), atDest.Get()).ConfigureAwait(false);
-
-                        Debug.WriteLine("walking ended");
-                        if (r == WalkStatus.Arrived)
-                        {
-                            Debug.WriteLine("    arrived");
-
-                            return;
-                        }
-                        else if (r == WalkStatus.Deading)
-                        {
-                            Debug.WriteLine("    deading - check to make sure dead (first press space)");
-                            await Task.Delay(350).ConfigureAwait(false);
-                            await io.K.KeyPress(Keys.Space).ConfigureAwait(false);
-                            //check again to make sure
-                            await Task.Delay(opt2.WaitResponse).ConfigureAwait(false);
-                            if (await playingScreen.IsAllDead.Get().ConfigureAwait(false))
-                            {
-
-                                Debug.WriteLine("       yup");
-                                goto dead;
-                            }
-                            else
-                            {
-                                Debug.WriteLine("       nope - back to walking");
-                                goto backtowalking;
-                            }
-                        }
+                        return;
                     }
-                    finally
+                    else if (r == WalkStatus.Deading)
                     {
-                        await io.K.KeyUp(Keys.W).ConfigureAwait(false);
-                        wanted.SetValue(null);
-                    }
-                
+                        Debug.WriteLine("    deading - check to make sure dead (first press space)");
+                        await Task.Delay(350).ConfigureAwait(false);
+                        await io.K.KeyPress(Keys.Space).ConfigureAwait(false);
+                        //check again to make sure
+                        await Task.Delay(opt2.WaitResponse).ConfigureAwait(false);
+                        if (await playingScreen.IsAllDead.Get().ConfigureAwait(false))
+                        {
+
+                            Debug.WriteLine("       yup");
+                            goto dead;
+                        }
+                        else
+                        {
+                            Debug.WriteLine("       nope - back to walking");
+                            goto backtowalking;
+                        }
+                    }*/
+                }
+                finally
+                {
+                    await io.K.KeyUp(Keys.W).ConfigureAwait(false);
+                    wanted.SetValue(null);
+                }
+
             }
-
+            /*
         dead:
             Debug.WriteLine("enter status=dead");
 
@@ -230,12 +228,12 @@ namespace genshinbot.controllers
                 goto walking;
             }
 
-        /*todo
+        todo
          * rightnow impoosible to fly here
         var isFly = await playingScreen.IsFlying.Get();
         if (isFly) goto flying;
         else
-        {*/
+        {
 
         falling:
             Debug.WriteLine("enter status=falling");
@@ -321,7 +319,7 @@ namespace genshinbot.controllers
                     await io.K.KeyUp(Keys.W).ConfigureAwait(false);
                     wanted.SetValue(null);
                 }
-            }
+            }*/
             Debug.Assert(false, "invalid state");
 
         }
@@ -552,7 +550,7 @@ namespace genshinbot.controllers
             LocationManager lm = new LocationManager(mgr);
             while (true)
             {
-                await lm.WalkTo(dst, Console.WriteLine);
+                await lm.WalkTo(new ConstLiveWire<Point2d>(dst), Console.WriteLine);
                 Console.ReadLine();
             }
         }
