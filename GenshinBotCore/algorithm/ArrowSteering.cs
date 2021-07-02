@@ -15,7 +15,7 @@ namespace genshinbot.algorithm
     public class ArrowSteering
     {
         ///measured in pixels/radian
-        private double scale = 200, maxPx=70;
+        private double scale = 70, maxPx=70;
         TimeSpan recharch = TimeSpan.FromSeconds(5);
 
         public IWire<double> MouseDelta { get; init; }

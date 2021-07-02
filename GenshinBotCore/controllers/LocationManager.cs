@@ -57,13 +57,30 @@ namespace genshinbot.controllers
                 Translation = a.Minimap - a.Coord * scale
             };
         }
-
+        Task<IWire<Pkt<Point2d>>>? _memo;
+        /// <summary>
+        /// memoized trackpos
+        /// </summary>
+        /// <returns></returns>
+        public Task<IWire<Pkt<Point2d>>> TrackPos(Action<Exception> onError = null)
+        {
+            if (_memo is null)
+            {
+                _memo = _TrackPos(err =>
+                {
+                    _memo = null;
+                    onError?.Invoke(err);
+                    Debug.WriteLine(err);
+                });
+            }
+            return _memo;
+        }
         /// <summary>
         /// it is up to the user to call this in the correct timing! (aka no concurrent calls)
         /// </summary>
         /// <param name="onError"></param>
         /// <returns></returns>
-        public async Task<IWire<Pkt<Point2d>>> TrackPos(Action<Exception> onError)
+        public async Task<IWire<Pkt<Point2d>>> _TrackPos(Action<Exception> onError)
         {
             var db = Data.MapDb;
             var coord2Mini = db.Coord2Minimap.Expect();
@@ -94,7 +111,6 @@ namespace genshinbot.controllers
         public class WalkOptions
         {
             public bool ExpectClimb { get; init; } = false;
-            public double Tolerance { get; init; } = 1;
             public int WaitResponse { get; init; } = 600;
             public int DeadTrigger { get; init; } = 30;
             public int BackupTime { get; init; } = 1000;
@@ -106,24 +122,26 @@ namespace genshinbot.controllers
             Arrived,
             NotFlyingAnymore
         }
-        public async Task WalkTo(ILiveWire<Point2d> dst, Action<Exception> onError, WalkOptions? opt = null)
+
+        public record WalkPoint(Point2d Value, double? Tolerance = null);
+
+        public async Task WalkTo(List<WalkPoint> dst, WalkOptions? opt = null)
         {
             var opt2 = opt ?? DefaultWalkOptions;
-
-            var pos = await TrackPos(onError);
+            int idx = 0;
+            var pos = await TrackPos();
             var wanted = new LiveWireSource<double?>(null);
             PlayingScreen playingScreen = screens.PlayingScreen;
             var arrowControl = new algorithm.ArrowSteering(
                 playingScreen.ArrowDirection,
                 wanted);
-
+            
             var deltaP = arrowControl.MouseDelta.Select(x =>
                new Point2d(x, 0));
             var smoother = new MouseSmoother(deltaP);
-
             BotIO io = playingScreen.Io;
-       // walking:
-        //    Debug.WriteLine("enter status=walking");
+            // walking:
+            //    Debug.WriteLine("enter status=walking");
             //assume we are initially walking
             /*  using (var allDead = playingScreen.IsAllDead
                       .Depacket()
@@ -131,24 +149,34 @@ namespace genshinbot.controllers
                       .Select(_ => WalkStatus.Deading)
                       .GetGetter()
                       )*/
-            using(dst.Use())
             using (deltaP.Subscribe(async delta =>
             {
-                Console.WriteLine($"d={delta}");
+               // Console.WriteLine($"d={delta}");
                 await io.M.MouseMove(delta).ConfigureAwait(false);
             }))
-            using (pos.Subscribe( p =>
-            {
-                Console.WriteLine($"p={p}");
-                /* if (p.DistanceTo(dst) < opt2.Tolerance)
-                 {
-                     Debug.WriteLine("arrived quick kill hack");
-                     await io.K.KeyUp(Keys.W);//TODO hak
-                     wanted.SetValue(null);
-                     return;
-                 }*/
-                wanted.SetValue(p.AngleTo(dst.Value ));
-            }))
+            using (pos.Subscribe(p =>
+           {
+             //  Console.WriteLine($"p={p}");
+               /* if (p.DistanceTo(dst) < opt2.Tolerance)
+                {
+                    Debug.WriteLine("arrived quick kill hack");
+                    await io.K.KeyUp(Keys.W);//TODO hak
+                    wanted.SetValue(null);
+                    return;
+                }*/
+               while (idx<dst.Count)
+               {
+                   double tol=dst[idx].Tolerance??(idx==dst.Count-1?4:2);
+                   if (dst[idx].Value.DistanceTo(p) > tol) break;
+                   idx++;
+               }
+               if (idx == dst.Count)
+               {
+                   wanted.SetValue(null);
+                   return;
+               }
+               wanted.SetValue(p.AngleTo(dst[idx].Value));
+           }))
             {  //keep going until either atDest, or dead
 
                 //dont start till mouse ready
@@ -157,10 +185,8 @@ namespace genshinbot.controllers
                 {
                     Debug.WriteLine("begin walking");
                     await io.K.KeyDown(Keys.W).ConfigureAwait(false);
-
-                    await pos.Where(p => p.DistanceTo(dst.Value) < opt2.Tolerance).Get();
+                    await wanted.Where(x=>x is null).Get().ConfigureAwait(false);
                     return;
-
                     /*backtowalking:
                     var r = await await Task.WhenAny(allDead.Get(), atDest.Get()).ConfigureAwait(false);
 
@@ -194,7 +220,7 @@ namespace genshinbot.controllers
                 finally
                 {
                     await io.K.KeyUp(Keys.W).ConfigureAwait(false);
-                    wanted.SetValue(null);
+                   // wanted.SetValue(null);
                 }
 
             }
@@ -323,6 +349,8 @@ namespace genshinbot.controllers
             Debug.Assert(false, "invalid state");
 
         }
+
+
         /*  public void TeleportTo(Feature waypoint)
          {
              Debug.Assert(waypoint.Type == FeatureType.Teleporter);
@@ -524,7 +552,7 @@ namespace genshinbot.controllers
             ScreenManager mgr = new ScreenManager(b);
             mgr.ForceScreen(mgr.PlayingScreen);
             LocationManager lm = new LocationManager(mgr);
-            var trackin = await lm.TrackPos(onError: Console.WriteLine);
+            var trackin = await lm.TrackPos();
             Console.WriteLine("trakin begin");
 
             using (trackin.Subscribe(
@@ -548,9 +576,11 @@ namespace genshinbot.controllers
             ScreenManager mgr = new ScreenManager(b);
             mgr.ForceScreen(mgr.PlayingScreen);
             LocationManager lm = new LocationManager(mgr);
+            List<WalkPoint> bad = new();
+            bad.Add(new WalkPoint(dst));
             while (true)
             {
-                await lm.WalkTo(new ConstLiveWire<Point2d>(dst), Console.WriteLine);
+                await lm.WalkTo(bad);
                 Console.ReadLine();
             }
         }

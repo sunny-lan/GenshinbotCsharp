@@ -48,7 +48,6 @@ namespace genshinbot.data
         {
             return File.ReadAllText(Get(name));
         }
-
         public static void Write(string name, string value, bool createDirs = true)
         {
             var path = Get(name);

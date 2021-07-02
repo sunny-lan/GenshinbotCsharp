@@ -25,11 +25,11 @@ namespace genshinbot.automation
 
         public ScreenshotObservable Screen { get;  }
 
-        public IMouseCapture MouseCap => throw new NotImplementedException();
+        public IMouseCapture MouseCap { get; }
 
-        public IKeyCapture KeyCap => throw new NotImplementedException();
+        public IKeyCapture KeyCap { get; }
 
-        public ILiveWire<Rect?> ScreenBounds => throw new NotImplementedException();
+        public ILiveWire<Rect?> ScreenBounds { get; }
 
         public ProxyWAutomator(ILiveWire<bool> enabled, IWindowAutomator2 w)
         {
@@ -38,6 +38,12 @@ namespace genshinbot.automation
             Keys = new ProxyKey(enabled, w.Keys);
             Mouse = new ProxyMouse(enabled, w.Mouse);
             Screen = new ProxyScreen(enabled, w.Screen);
+
+            //TODO
+            KeyCap = w.KeyCap;
+            MouseCap = w.MouseCap;
+
+            ScreenBounds = w.ScreenBounds.Relay2(enabled);
 
             Focused = w.Focused;//TODO.Relay(enabled);
             Size = w.Size.Relay2(enabled);

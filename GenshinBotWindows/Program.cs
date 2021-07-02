@@ -85,9 +85,9 @@ namespace genshinbot
             //   await tools.AutofillTool.Test2();
             //await tools.AutofillTool.ConfigurePlayingScreen(rig.Make());
             //data.jsonconverters.MatConverter.Test();
-           // await automation.windows.WindowAutomator2.TestKbdLock();
-                await controllers.LocationManager.TestGoto(rig);
-
+            // await automation.windows.WindowAutomator2.TestKbdLock();
+            //       await controllers.LocationManager.TestGoto(rig);
+            await tools.WalkRecorder.TestAsync(rig.Make());
             Console.WriteLine("Program ended. Press enter to exit");
             Console.ReadLine();
             CvThread.Stop();
