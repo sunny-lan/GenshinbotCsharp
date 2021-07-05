@@ -23,6 +23,7 @@ namespace genshinbot.algorithm
         {
             double limiter = 1;//trying to avoid oscilations
             var lastRecharge = DateTime.Now;
+            var lastTime = DateTime.Now;
             bool? lastSign = null;
 
             MouseDelta = known.Select((Pkt<double> known) =>
@@ -33,14 +34,13 @@ namespace genshinbot.algorithm
                 limiter = Math.Clamp(limiter + amt, 0, 1);
 
                 var rel = wanted is null ? 0 : known.Value.RelativeAngle(wanted.Expect());
-                //detected oscilation = increase limiter
+                //detected oscilation = increase limiter 
                 var sign = rel > 0;
                 if (sign != lastSign)
                 {
                     lastSign = sign;
                     limiter /= 2;
                 }
-                  Console.WriteLine($"limiter={limiter} sign={sign}");
 
 
                 return Math.Clamp(rel*  scale * limiter, -maxPx,maxPx);

@@ -12,7 +12,7 @@ namespace genshinbot.data
             () => Data.ReadJson1<DispatchDb>("dispatchDb.json"));
 
         public static async Task SaveInstanceAsync(DispatchDb instance = null)
-        {
+        { 
             if (instance == null) instance = Instance;
             await Data.WriteJsonAsync("dispatchDb.json", instance);
         }

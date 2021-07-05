@@ -123,7 +123,7 @@ namespace genshinbot.tools
             });
             var point2DFiller = Filler.From<Point2d>(async x =>
             {
-                var sz = await w.Bounds.NonNull().Get();
+                var sz = await w.Bounds.Value2();
                 Prompt($"{Select.Description} to select, {Cancel.Description} to cancel", 1);
                 Point2d pos = x;
                 KeyComb key;
@@ -140,7 +140,7 @@ namespace genshinbot.tools
                 using (w.MouseCap.MouseEvents.Subscribe( evt =>
                 {
                     //ignore if alt is not pressed!
-                    if(w.KeyCap.KbdState.Value.GetValueOrDefault(Keys.Alt))
+                    if(System.Windows.Forms.Cursor.Current is not null)
                     if (evt is MoveEvent mEvt)
                     {
 
@@ -269,17 +269,25 @@ namespace genshinbot.tools
 
         }
 
+
+
         Dictionary<Type, Filler> fillers;
         async Task<object> edit(object o, Type tt, string path = "")
         {
             using (Indent.Inc())
-            {
+            { var under = Nullable.GetUnderlyingType(tt);
+                if ( under!= null)
+                {
+                    return await edit(o, under, path);
+                }
                 if (o == null)
                 {
                     Prompt("object is null. try to construct", 1);
                     ClearPrompt(1);
 
-                    o = Activator.CreateInstance(tt);
+                        o = Activator.CreateInstance(tt);
+
+
                     if (o == null)
                     {
                         Prompt("WARN: unable to construct, skip");
@@ -296,7 +304,7 @@ namespace genshinbot.tools
                     Prompt($"{path} - new: {newval}");
                     return newval;
                 }
-                var stuffs = new List<(Func<object> o, string subpath, Action<object> set, Type t)>();
+                var stuffs = new List<(Func<object?> o, string subpath, Action<object> set, Type t)>();
                 if (o is Array arr)
                 {
                     for (int i = 0; i < arr.Length; i++)
@@ -306,7 +314,27 @@ namespace genshinbot.tools
                             () => arr.GetValue(icpy),
                             $"{path}[{icpy}]",
                             o => arr.SetValue(o, icpy),
-                            tt.GetElementType()
+                            tt.GetElementType()!
+                        ));
+                    }
+                }else if(o is IDictionary d)
+                {
+                    var args = tt.GetGenericArguments();
+                    Type? subt = null;
+                    if (args.Length == 2)
+                    {
+                        subt = args[1];
+                    }
+                    foreach (var key in d.Keys)
+                    {
+                        var kk = key;
+                        var ttt =
+                            d[kk]?.GetType() ?? subt;
+                        if(ttt is not null)
+                        stuffs.Add((
+                            ()=>d[kk],
+                            $"{path}[{kk}]",
+                            o=>d[kk]=o,ttt
                         ));
                     }
                 }
@@ -447,11 +475,17 @@ namespace genshinbot.tools
         }
 
 
-        public static async Task ConfigureDailyDoer(BotIO w)
+        public static async Task ConfigureDispatch(BotIO w)
         {
             var tool = new AutofillTool(w.W);
             await tool.Edit(DispatchDb.Instance);
             await DispatchDb.SaveInstanceAsync();
+        }
+        public static async Task ConfigureCharacterSel(BotIO w)
+        {
+            var tool = new AutofillTool(w.W);
+            await tool.Edit(CharacterSelectorDb.Instance.Value);
+            await CharacterSelectorDb.Instance.Save();
         }
 
         public static async Task ConfigurePlayingScreen(BotIO w)

@@ -81,13 +81,15 @@ namespace genshinbot
             //await tools.DailyDoer.runAsync(rig.Make());
             // await tools.DailyDoer.DispatchCollect(rig.Make());
             //await experiments.RxTest.runAsync();
-            //await tools.AutofillTool.ConfigureDailyDoer(rig.Make());
+            //await tools.AutofillTool.ConfigureDispatch(rig.Make());
             //   await tools.AutofillTool.Test2();
             //await tools.AutofillTool.ConfigurePlayingScreen(rig.Make());
             //data.jsonconverters.MatConverter.Test();
             // await automation.windows.WindowAutomator2.TestKbdLock();
             //       await controllers.LocationManager.TestGoto(rig);
-            await tools.WalkRecorder.TestAsync(rig.Make());
+            //  await tools.WalkRecorder.TestAsync(rig.Make());
+            //await tools.AutofillTool.ConfigureCharacterSel(rig.Make());
+            await tools.DailyDoer.runAsync(rig.Make());
             Console.WriteLine("Program ended. Press enter to exit");
             Console.ReadLine();
             CvThread.Stop();
