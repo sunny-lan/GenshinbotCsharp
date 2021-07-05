@@ -6,8 +6,14 @@ using System.Threading.Tasks;
 
 namespace genshinbot.data
 {
-    public class DbInst<T> where T : new()
+    public abstract class DbInst {
+        public abstract object ObjVal { get; }
+
+        public abstract Task Save();
+    }
+    public class DbInst<T>:DbInst where T : new()
     {
+
         public  T Value
         {
             get
@@ -18,6 +24,8 @@ namespace genshinbot.data
 
         public string DbFile { get; }
 
+        public override object ObjVal  => Value;
+
         private  Lazy<T> inst;
 
         public DbInst(string db)
@@ -26,7 +34,7 @@ namespace genshinbot.data
             DbFile = db;
         }
 
-        public async Task Save()
+        public override async Task Save()
         {
             await Data.WriteJsonAsync<T>(DbFile, Value);
         }

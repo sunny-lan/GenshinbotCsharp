@@ -15,6 +15,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using static genshinbot.reactive.Ext;
@@ -108,7 +109,8 @@ namespace genshinbot.tools
         {
             //TODO KSETCH
             return await w.KeyCap.KeyEvents
-                .Where(e => !e.Down)
+                .Where(   e => 
+                !e.Down)
                 .Select(e => cmb.Where(cmb => cmb.Keys[0] == e.Key).ToArray())
                 .Where(x => x.Length == 1).Select(x => x[0]).Get();
         }
@@ -267,6 +269,18 @@ namespace genshinbot.tools
             foreach (var filler in fillers1)
                 fillers[filler.Type] = filler;
 
+            overlay = new yui.windows.Overlay2();
+            overlay.run();
+            disp.Add(overlay.follow(w.Focused));
+            disp.Add(overlay.follow(w.ScreenBounds));
+            
+        }
+        List<IDisposable> disp = new List<IDisposable>();
+        ~AutofillTool()
+        {
+            overlay.Dispose();
+            foreach (var d in disp)
+                d.Dispose();
         }
 
 
@@ -391,13 +405,9 @@ namespace genshinbot.tools
                 }
             }
         }
-
+        
         public async Task Edit(object o)
         {
-            overlay = new yui.windows.Overlay2();
-            overlay.run();
-            using (overlay.follow(w.Focused))
-            using (overlay.follow(w.ScreenBounds))
             using (Indent.Inc())
             {
                 var props = o.GetType().GetProperties();
@@ -429,8 +439,75 @@ namespace genshinbot.tools
                     }
                 }
             }
-            overlay.Dispose();
-            overlay = null;
+        }
+
+
+         async Task roulette( List<(string description, Func<Task> inner)> stuffs)
+        {
+            int idx = 0;
+            while (true)
+            {
+                Prompt($"{stuffs[idx].description}", 0);
+                Prompt($"{Left.Description}/{Right.Description} to inc/dec. {Select.Description} to select. {Cancel.Description} to exit.", 1);
+                var key = await WaitComboAsync(Select, Cancel, Left, Right);
+                ClearPrompt(1);
+                ClearPrompt(0);
+                if (key == Select)
+                {
+                    await stuffs[idx].inner();
+                }
+                else if (key == Cancel)
+                {
+                    return;
+                }
+                else if (key == Left)
+                {
+                    idx = (idx - 1 + stuffs.Count) % stuffs.Count;
+                }
+                else if (key == Right)
+                {
+                    idx = (idx + 1) % stuffs.Count;
+                }
+                else Debug.Assert(false);
+            }
+        }
+        public async Task ConfigureAll()
+        {
+            Console.WriteLine("searching assembly for DB");
+            var ass = AppDomain.CurrentDomain.GetAssemblies();
+                List<(string description, Func<Task> inner)> lst = new();
+            foreach (var a in ass)
+            {
+                var types = a.GetTypes();
+
+                foreach (var t in types)
+                {
+                    if (t.IsGenericType) continue;//TODO support for generic db types
+                    //Console.WriteLine(t.Name);
+                    foreach (var f in t.GetFields(BindingFlags.Public | BindingFlags.Static))
+                    {
+                        if (f.FieldType.IsAssignableTo(typeof(DbInst)))
+                        {
+                            lst.Add((
+                                $"{t.Name}.{f.Name}",
+                                async () =>
+                                {
+                                    var db = (DbInst)f.GetValue(null);
+                                    await Edit(db.ObjVal);
+                                    Prompt($"{Select.Description} to save. {Cancel.Description} to cancel.", 1);
+                                    var key = await WaitComboAsync(Select, Cancel);
+                                    ClearPrompt(1);
+                                    if (key == Select)
+                                    {
+                                        await db.Save();
+                                    }
+                                }
+                            ));
+                        }
+                    }
+                }
+            }
+            await roulette(lst);
         }
         public static async Task Test(ITestingRig r)
         {
@@ -474,7 +551,6 @@ namespace genshinbot.tools
             }
         }
 
-
         public static async Task ConfigureDispatch(BotIO w)
         {
             var tool = new AutofillTool(w.W);
@@ -486,6 +562,11 @@ namespace genshinbot.tools
             var tool = new AutofillTool(w.W);
             await tool.Edit(CharacterSelectorDb.Instance.Value);
             await CharacterSelectorDb.Instance.Save();
+        }
+        public static async Task ConfigAll(BotIO w)
+        {
+            var tool = new AutofillTool(w.W);
+            await tool.ConfigureAll();
         }
 
         public static async Task ConfigurePlayingScreen(BotIO w)

@@ -88,8 +88,9 @@ namespace genshinbot
             // await automation.windows.WindowAutomator2.TestKbdLock();
             //       await controllers.LocationManager.TestGoto(rig);
             //  await tools.WalkRecorder.TestAsync(rig.Make());
-            //await tools.AutofillTool.ConfigureCharacterSel(rig.Make());
-            await tools.DailyDoer.runAsync(rig.Make());
+          //  await tools.AutofillTool.ConfigureCharacterSel(rig.Make());
+            await tools.AutofillTool.ConfigAll(rig.Make());
+         //   await tools.DailyDoer.runAsync(rig.Make());
             Console.WriteLine("Program ended. Press enter to exit");
             Console.ReadLine();
             CvThread.Stop();
