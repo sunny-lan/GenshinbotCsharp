@@ -18,7 +18,7 @@ namespace genshinbot.tools
         BotIO b;
 
         public DailyDoer(BotIO b)
-        {
+        {  
             this.b = b;
         }
 
@@ -157,7 +157,10 @@ namespace genshinbot.tools
        public static async Task runAsync(BotIO w)
         {
             var x = new DailyDoer(w);
+            await x.CollectLiyue();
+            await x.CollectMondstadt();
             await x.DispatchAll();
+            
         }
     }
 }

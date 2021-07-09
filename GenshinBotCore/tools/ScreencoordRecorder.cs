@@ -15,13 +15,6 @@ namespace genshinbot.tools
 {
    public static class ScreencoordRecorder
     {
-        class Db
-        {
-            class RD
-            {
-
-            }
-        }
         public static async Task runAsync(IWindowAutomator2 w)
         {
             Keys[] take = { Keys.LControlKey, Keys.J };
