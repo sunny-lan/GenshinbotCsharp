@@ -97,20 +97,19 @@ namespace genshinbot.screens
 
         public async Task TeleportTo(Feature teleporter)
         {
-            //TODO 
-            throw new NotImplementedException();
-            /*
+            
             Debug.Assert(teleporter.Type == FeatureType.Teleporter);
-            var p = ShowOnScreen(teleporter.Coordinates);
-            await b.M.MouseTo(p);
-            await b.M.MouseClick(0);
+            var p = await ShowOnScreen(teleporter.Coordinates);
+            await Io.M.MouseTo(p);
+            await Io.M.MouseClick(0);
             await Task.Delay(1000);
-            await b.M.MouseTo(db.R[b.W.Size.Get()].ActionBtnLoc);
-            await b.M.MouseClick(0);
+            await Io.M.MouseTo(db.R[await Io.W.Size.Value2()].ActionBtnLoc);
+            await Io.M.MouseClick(0);
            //TODO b.SWait(b.LoadingScreen);
             //TODO b.LoadingScreen.WaitTillDone();
-            Thread.Sleep(1000);
-           // b.S(b.PlayingScreen);*/
+            //await Task.Delay(1000);
+            await ScreenManager.ExpectScreen(ScreenManager.PlayingScreen);
+           // b.S(b.PlayingScreen);
         }
 
         /// <summary>

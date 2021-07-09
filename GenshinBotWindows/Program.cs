@@ -17,8 +17,16 @@ namespace genshinbot
 {
     class Program
     {
-        
 
+        class BaseBotIO : BotIO
+        {
+            public IWindowAutomator2 W { get; }
+
+            public BaseBotIO(IWindowAutomator2 w)
+            {
+                W = w;
+            }
+        }
 
         static async Task Main(string[] args)
         {
@@ -35,18 +43,20 @@ namespace genshinbot
             var rig = new TestingRig();
             var services = new ServiceCollection()
                 .AddSingleton<YUI>(_=>yui.windows.MainForm.make())
-                .AddSingleton<BotIO>(_=>rig.Make())
+                .AddSingleton<IWindowAutomator2>(_=> new WindowAutomator2("Genshin Impact", "UnityWndClass"))
+                .AddSingleton<BotIO, BaseBotIO>()
                 .AddSingleton<screens.ScreenManager>()
                 .AddSingleton<controllers.LocationManager>()
                 .AddSingleton<tools.WalkEditor>()
+                .AddSingleton<tools.AutofillTool>()
                 .AddSingleton<tools.DailyDoer>();
 
             var sp = services.BuildServiceProvider();
-            var sm = sp.GetService<screens.ScreenManager>();
+            // var sm = sp.GetService<screens.ScreenManager>();
             //  sm.ForceScreen(sm.PlayingScreen);
             // using  var kk= sp.GetService<tools.WalkEditor>();
 
-            await screens.MapScreen.Testshow(rig);
+            //  await screens.MapScreen.Testshow(rig);
 
             //   Screenshot.Init();
             //TestMapLive();
@@ -103,8 +113,8 @@ namespace genshinbot
             // await automation.windows.WindowAutomator2.TestKbdLock();
             //       await controllers.LocationManager.TestGoto(rig);
             //  await tools.WalkRecorder.TestAsync(rig.Make());
-          //  await tools.AutofillTool.ConfigureCharacterSel(rig.Make());
-           // await tools.AutofillTool.ConfigAll(rig.Make());
+            //  await tools.AutofillTool.ConfigureCharacterSel(rig.Make());
+            await sp.GetService<tools.AutofillTool>().ConfigureAll();
           //  await tools.DailyDoer.runAsync(rig.Make());
             Console.WriteLine("Program ended. Press enter to exit");
             Console.ReadLine();

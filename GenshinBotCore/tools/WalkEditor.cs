@@ -47,9 +47,23 @@ namespace genshinbot.tools
             {
                 Weight = 0
             });
+
+            sidebar.SetFlex(new()
+            {
+                Direction = Orientation.Vertical,
+                Scroll = true,
+                Wrap = false,
+            });
+
             beginTrack = sidebar.CreateButton();
+            sidebar.SetFlex(beginTrack, new()
+            {
+                Weight = 0,
+            });
             beginTrack.Text = "track";
             beginTrack.Click += async (s, e) => await BeginTrack_ClickAsync(s, e);
+
+            
 
 
             var features = Data.MapDb.Features;

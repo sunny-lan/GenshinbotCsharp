@@ -489,7 +489,7 @@ namespace genshinbot.tools
                         if (f.FieldType.IsAssignableTo(typeof(DbInst)))
                         {
                             lst.Add((
-                                $"{t.Name}.{f.Name}",
+                                $"{t.FullName}.{f.Name}",
                                 async () =>
                                 {
                                     var db = (DbInst)f.GetValue(null);
