@@ -5,6 +5,7 @@ using genshinbot.automation.windows;
 using genshinbot.data;
 using genshinbot.diag;
 using genshinbot.util;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Diagnostics;
 using System.Threading;
@@ -16,7 +17,7 @@ namespace genshinbot
 {
     class Program
     {
-
+        
 
 
         static async Task Main(string[] args)
@@ -31,8 +32,22 @@ namespace genshinbot
               |(uint)User32.WindowStylesEx.WS_EX_NOACTIVATE |(uint)User32.WindowStylesEx.WS_EX_TOPMOST));
             Console.ReadLine();
             */
-
             var rig = new TestingRig();
+            var services = new ServiceCollection()
+                .AddSingleton<YUI>(_=>yui.windows.MainForm.make())
+                .AddSingleton<BotIO>(_=>rig.Make())
+                .AddSingleton<screens.ScreenManager>()
+                .AddSingleton<controllers.LocationManager>()
+                .AddSingleton<tools.WalkEditor>()
+                .AddSingleton<tools.DailyDoer>();
+
+            var sp = services.BuildServiceProvider();
+            var sm = sp.GetService<screens.ScreenManager>();
+            //  sm.ForceScreen(sm.PlayingScreen);
+            // using  var kk= sp.GetService<tools.WalkEditor>();
+
+            await screens.MapScreen.Testshow(rig);
+
             //   Screenshot.Init();
             //TestMapLive();
             // tools.CoordChecker.run(args);
@@ -90,7 +105,7 @@ namespace genshinbot
             //  await tools.WalkRecorder.TestAsync(rig.Make());
           //  await tools.AutofillTool.ConfigureCharacterSel(rig.Make());
            // await tools.AutofillTool.ConfigAll(rig.Make());
-            await tools.DailyDoer.runAsync(rig.Make());
+          //  await tools.DailyDoer.runAsync(rig.Make());
             Console.WriteLine("Program ended. Press enter to exit");
             Console.ReadLine();
             CvThread.Stop();

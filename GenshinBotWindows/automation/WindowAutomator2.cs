@@ -45,7 +45,7 @@ namespace genshinbot.automation.windows
             }
         }
 
-        public ILiveWire<bool> Focused { get;  }
+        public ILiveWire<bool> Focused { get; }
 
         private List<IDisposable> disposeList = new List<IDisposable>();
         public WindowAutomator2(string TITLE, string CLASS)
@@ -63,7 +63,7 @@ namespace genshinbot.automation.windows
                 //.Do(e=>Console.WriteLine($"e={e.idObject} {e.hwnd.DangerousGetHandle()}"))
                 .ToLive(() => GetRectDirect())
                 .DistinctUntilChanged()
-             //   .Debug("clientArea")
+                //   .Debug("clientArea")
                 ;
             locationChangeHook.Start();
 
@@ -79,16 +79,16 @@ namespace genshinbot.automation.windows
             var foregroundStream = Wire.Merge<NoneT>(
                     foregroundChangeHook.Wire
                         .Where(
-                        e => 
+                        e =>
                         e.idObject == User32.ObjectIdentifiers.OBJID_WINDOW).Nonify()
                         ,
                         clientAreaStream.Nonify()
                     )
-                  //  .Debug("RAW foreground")
+                    //  .Debug("RAW foreground")
                     .ToLive(() => IsForegroundWindow())
-                  //  .Debug("LIVE foreground")
+                    //  .Debug("LIVE foreground")
                     .DistinctUntilChanged()
-             //    .Debug("foreground");
+            //    .Debug("foreground");
             ;
             foregroundChangeHook.Start();
             //perform merged processing path
@@ -109,7 +109,7 @@ namespace genshinbot.automation.windows
 
             ScreenBounds = combined.Select(x => x.screenBounds)
                 .DistinctUntilChanged()
-               //  .Debug("screenbounds");
+            //  .Debug("screenbounds");
             ;
 
             Size = ScreenBounds
@@ -144,8 +144,8 @@ namespace genshinbot.automation.windows
 
         #region Rect
 
-        public ILiveWire<Size?> Size { get;  }
-        public ILiveWire<Rect?> Bounds { get;  }
+        public ILiveWire<Size?> Size { get; }
+        public ILiveWire<Rect?> Bounds { get; }
 
         private WinEventHook locationChangeHook;
 
@@ -233,13 +233,40 @@ namespace genshinbot.automation.windows
 
             public Task MouseMove(Point2d d)
             {
-                return parent.Focused.LockWhile(() => ms.MouseMove(d));
+                async Task _MouseMove()
+                {
+                    var op=await MousePos();
+                    var op2 = await ms.MousePos();
+                    var p = d + op;
+
+                    var pp = new System.Drawing.Point((int)Math.Round(p.X), (int)Math.Round(p.Y));
+                    DPIAware.Use(DPIAware.DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE, () =>
+                    {
+                        if (!User32.ClientToScreen(parent.hWnd, ref pp))
+                            throw new Exception();
+                    });
+                    p = pp.Cv() - op2;
+                    //Console.WriteLine($"op={op}")
+                    await ms.MouseMove(p);
+                }
+                return parent.Focused.LockWhile(_MouseMove);
 
             }
 
             public Task<Point2d> MousePos()
             {
-                return parent.Focused.LockWhile(ms.MousePos);
+                async Task<Point2d> _mousePos()
+                {
+                    var p = await ms.MousePos();
+                    var pp = new System.Drawing.Point((int)Math.Round(p.X), (int)Math.Round(p.Y));
+                    DPIAware.Use(DPIAware.DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE, () =>
+                    {
+                        if (!User32.ScreenToClient(parent.hWnd, ref pp))
+                            throw new Exception();
+                    });
+                    return pp.Cv();
+                }
+                return parent.Focused.LockWhile(_mousePos);
             }
 
             void cvtPixelToMouse(ref System.Drawing.Point p)
@@ -283,13 +310,13 @@ namespace genshinbot.automation.windows
             return pp.Cv();
         }
 
-        public ScreenshotObservable Screen { get;  }
+        public ScreenshotObservable Screen { get; }
 
         public IMouseCapture MouseCap => mouseCap.Value;
         private Lazy<MouseHookAdapter> mouseCap;
         public IKeyCapture KeyCap => keyCap.Value;
 
-        public ILiveWire<Rect?> ScreenBounds { get;  }
+        public ILiveWire<Rect?> ScreenBounds { get; }
 
         private Lazy<KbdHookAdapter> keyCap;
 

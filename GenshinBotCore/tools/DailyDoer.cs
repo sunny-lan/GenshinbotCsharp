@@ -25,6 +25,12 @@ namespace genshinbot.tools
         KathyrneDb kath=KathyrneDb.Instance.Value;
         CharacterSelectorDb sel=CharacterSelectorDb.Instance.Value;
 
+        public async Task CollectPot()
+        {
+            var sz = await b.W.Size.Value2();
+
+        }
+
         public async Task Collect( Point button, Point[] all)
         {
             var sz = await b.W.Size.Value2();

@@ -131,9 +131,12 @@ namespace genshinbot.reactive
         /// <param name="observable"></param>
         /// <param name="fn"></param>
         /// <returns></returns>
-        public static IWire<Pkt<Out>> Select<In, Out>(this IWire<Pkt<In>> observable, Func<In, Out> fn)
+        public static IWire<Pkt<Out>> Select<In, Out>(
+            this IWire<Pkt<In>> observable,
+            Func<In, Out> fn,
+            Action<Exception>? onError=null)
         {
-            return observable.Select((Pkt<In> x) => x.Select(fn));
+            return observable.Select((Pkt<In> x) => x.Select(fn),onError);
         }
         public static ILiveWire<Pkt<Out>> Select<In, Out>(this ILiveWire<Pkt<In>> observable, Func<In, Out> fn)
         {

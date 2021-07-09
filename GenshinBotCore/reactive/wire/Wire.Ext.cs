@@ -783,9 +783,24 @@ namespace genshinbot.reactive.wire
                 });
             });
         }
-        public static IWire<Out> Select<In, Out>(this IWire<In> w, Func<In, Out> f)
+        public static IWire<Out> Select<In, Out>(this IWire<In> w, Func<In, Out> f,
+            Action<Exception>? onError = null)
         {
-            return w.Link<In, Out>((value, next) => next(f(value)));
+            return w.Link<In, Out>((value, next) => {
+                if (onError is null)
+                    next(f(value));
+                else
+                {
+                    try
+                    {
+                        next(f(value));
+                    }
+                    catch(Exception e)
+                    {
+                        onError(e);
+                    }
+                }
+            });
         }
         public class ProcessAsyncOptions
         {

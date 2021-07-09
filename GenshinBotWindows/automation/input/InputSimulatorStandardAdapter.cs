@@ -45,7 +45,7 @@ namespace genshinbot.automation.input.windows
 
         public Task MouseMove(Point2d d)
         {
-            DPIAware.Use(DPIAware.DPI_AWARENESS_CONTEXT_UNAWARE, () =>
+            DPIAware.Use(DPIAware.DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE, () =>
             {
                 var oo = d.Round();
                 iS.Mouse.MoveMouseBy(oo.X, oo.Y);
@@ -56,7 +56,7 @@ namespace genshinbot.automation.input.windows
 
         public Task<Point2d> MousePos()
         {
-            return Task.FromResult(DPIAware.Use(DPIAware.DPI_AWARENESS_CONTEXT_UNAWARE, () =>
+            return Task.FromResult(DPIAware.Use(DPIAware.DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE, () =>
             {
                 var pt = Cursor.Position;
                 return pt.Cv().Cvt();

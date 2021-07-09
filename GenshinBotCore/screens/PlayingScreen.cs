@@ -120,7 +120,7 @@ namespace genshinbot.screens
                         posTrack = new algorithm.MinimapMatch.PositionTracker(posMatch);
                     }
                     else
-                        Debug.Assert(false,"Failed to find valid scale");
+                        throw new algorithm.AlgorithmFailedException("Failed to find valid scale");
                 }
 
                 var res2 = posTrack.Track(x);
@@ -138,7 +138,7 @@ namespace genshinbot.screens
                 approxPos = res;
                 return res;
             }
-           // ,    onError
+           ,    onError
             );
         }
 

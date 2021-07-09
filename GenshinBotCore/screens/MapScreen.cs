@@ -118,18 +118,16 @@ namespace genshinbot.screens
         /// </summary>
         /// <param name="coord"></param>
         /// <returns></returns>
-        public Point2d ShowOnScreen(Point2d coord)
-        {//TODO 
-            throw new NotImplementedException();
-            /*
+        public async Task<Point2d> ShowOnScreen(Point2d coord)
+        {
+            var mm = new input.MouseMover2(Io.W.Mouse);
             while (true)
             {
-                UpdateScreenshot();
-                var r = b.W.GetBounds();
+                var r = await Io.W.Bounds.Value2();
                 var center = r.Center();
                 var active = center.RectAround(db.R[r.Size].ActiveArea);
 
-                var l = GetLocation();
+                var l = await Screen2Coord.Get();
                 var point = l.ToPoint(coord);
 
                 if (active.Contains(point.Round()))
@@ -141,20 +139,23 @@ namespace genshinbot.screens
                 // the drag begin location is on a clickable thing
                 var beginPos = active.RandomWithin();
 
-                b.W.MouseTo(beginPos);
-                Thread.Sleep(10);
+                await Io.M.MouseTo(beginPos);
+                await Task.Delay(10);
 
-                b.W.MouseDown(0);
-                Thread.Sleep(10);
+                await Io.M.MouseDown(MouseBtn.Left);
+                await Task.Delay(10);
 
-                b.M.Goto((beginPos - point).LimitDistance(200)+ beginPos).Wait();
-                Thread.Sleep(100); //pause to prevent flick gesture from happening
+                var dst = (beginPos - point).LimitDistance(200) + beginPos;
+                Console.WriteLine($"goto {dst} point={point} begin={beginPos}");
+                await mm.Goto(dst);
+                await Task.Delay(100); //pause to prevent flick gesture from happening
+                Console.WriteLine("dd");
 
-                b.W.MouseUp(0);
-                Thread.Sleep(10);
+                await Io.M.MouseUp(MouseBtn.Left);
+                await Task.Delay(10);
 
             }
-            */
+            
         }
 
         /*  public static void Test()
@@ -185,6 +186,14 @@ namespace genshinbot.screens
             {
                 Console.ReadLine();
             }
+
+        }
+        public static async Task Testshow(ITestingRig rig1)
+        {
+            var rig = rig1.Make();
+            var screen = new MapScreen(rig, null);
+           await screen.Io.M.MouseTo(
+                await screen.ShowOnScreen(Data.MapDb.Features[0].Coordinates));
 
         }
         public static async Task Test3Async()

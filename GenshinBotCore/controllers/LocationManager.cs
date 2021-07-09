@@ -350,7 +350,6 @@ namespace genshinbot.controllers
 
         }
 
-
         /*  public void TeleportTo(Feature waypoint)
          {
              Debug.Assert(waypoint.Type == FeatureType.Teleporter);

@@ -115,6 +115,7 @@ namespace genshinbot.yui.windows
 
         private void Viewport_MouseWheel(object sender, MouseEventArgs e)
         {
+            if (e.Delta == 0) return;
             var mouse = e.Location.Cv();
             OnTChange?.Invoke(T.ScaleAround(mouse, Math.Max(0.1, e.Delta / Math.Abs(e.Delta) * 0.05 + _transform.Scale)));
         }

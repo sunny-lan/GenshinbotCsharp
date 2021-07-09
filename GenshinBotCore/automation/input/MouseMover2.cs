@@ -1,5 +1,6 @@
 ﻿using genshinbot.automation.input;
 using OpenCvSharp;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -7,7 +8,7 @@ namespace genshinbot.input
 {
     public class MouseMover2
     {
-        private IInputSimulator i;
+        private IMouseSimulator2 i;
         private Point2d dst;
 
         private Task t;
@@ -26,7 +27,7 @@ namespace genshinbot.input
 
         private bool Absolute = false;
 
-        public MouseMover2(IInputSimulator i)
+        public MouseMover2(IMouseSimulator2 i)
         {
             this.i = i;
         }
@@ -44,7 +45,7 @@ namespace genshinbot.input
             if (!Running)
             {
                 Running = true;
-                t = Task.Run(thread);
+                t = Task.Run(threadAsync);
             }
             return t;
         }
@@ -56,31 +57,32 @@ namespace genshinbot.input
             if (!Running)
             {
                 Running = true;
-                t = Task.Run(thread);
+                t = Task.Run(threadAsync);
             }
             return t;
         }
 
-        private void thread()
+        private async Task threadAsync()
         {
             while (Running)
             {
                 if (Absolute)
                 {
-                    var cur = i.MousePos();
+                    var cur = await i.MousePos();
+                    Console.WriteLine($"mp={cur}");
                     if (cur.DistanceTo(dst) <= MaxSpeed * MoveInterval)
                     {
-                        i.MouseTo(dst);
+                        await i.MouseTo(dst);
                         break;
                     }
                     var delta = dst - cur;
-                    i.MouseMove(delta.LimitDistance(MaxSpeed * MoveInterval));
+                    await i.MouseMove(delta.LimitDistance(MaxSpeed * MoveInterval));
                 }
                 else
                 {
-                    i.MouseMove(speed);
+                    await i.MouseMove(speed);
                 }
-                Thread.Sleep(MoveInterval);
+                await Task.Delay(MoveInterval);
             }
             Running = false;
         }
