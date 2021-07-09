@@ -20,6 +20,11 @@
     <None Remove="data\test\arrow_fail.png" />
     <None Remove="data\test\arrow_fail_2.png" />
     <None Remove="data\test\bad arrow.png" />
+    <None Remove="data\test\convo_kath_1050.png" />
+    <None Remove="data\test\convo_option_kath_1050.png" />
+    <None Remove="data\test\convo_wagner_1050.png" />
+    <None Remove="data\test\daily_commision_1050.png" />
+    <None Remove="data\test\f_katheryne_1050.png" />
     <None Remove="data\test\map_a.png" />
     <None Remove="data\test\map_b.png" />
     <None Remove="data\test\map_c.png" />
@@ -36,6 +41,7 @@
     <None Remove="data\test\palette1.png" />
     <None Remove="data\test\palette2.png" />
     <None Remove="data\test\text.png" />
+    <None Remove="data\test\two_convos_f_1050.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -46,6 +52,21 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="data\test\bad arrow.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\convo_kath_1050.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\convo_option_kath_1050.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\convo_wagner_1050.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\daily_commision_1050.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\f_katheryne_1050.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="data\test\guyun_playing_climbing_1050.png">
@@ -112,6 +133,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="data\test\text.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\two_convos_f_1050.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
