@@ -193,5 +193,10 @@ namespace GenshinBotTests
 
 
         }
+
+        public async Task TestChat()
+        {
+
+        }
     }
 }

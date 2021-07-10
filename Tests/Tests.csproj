@@ -41,7 +41,6 @@
     <None Remove="data\test\palette1.png" />
     <None Remove="data\test\palette2.png" />
     <None Remove="data\test\text.png" />
-    <None Remove="data\test\two_convos_f_1050.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -133,9 +132,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="data\test\text.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="data\test\two_convos_f_1050.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

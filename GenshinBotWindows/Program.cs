@@ -49,6 +49,7 @@ namespace genshinbot
                 .AddSingleton<controllers.LocationManager>()
                 .AddSingleton<tools.WalkEditor>()
                 .AddSingleton<tools.AutofillTool>()
+                .AddSingleton<tools.BlackbarFixer>()
                 .AddSingleton<tools.DailyDoer>();
 
             var sp = services.BuildServiceProvider();
@@ -114,8 +115,10 @@ namespace genshinbot
             //       await controllers.LocationManager.TestGoto(rig);
             //  await tools.WalkRecorder.TestAsync(rig.Make());
             //  await tools.AutofillTool.ConfigureCharacterSel(rig.Make());
-            await sp.GetService<tools.AutofillTool>().ConfigureAll();
-          //  await tools.DailyDoer.runAsync(rig.Make());
+              await sp.GetService<tools.AutofillTool>().ConfigureAll();
+            //  await sp.GetService<tools.BlackbarFixer>().FixBlackBar();
+            //  await tools.DailyDoer.runAsync(rig.Make());
+            //algorithm.ChatReadAlg.Test();
             Console.WriteLine("Program ended. Press enter to exit");
             Console.ReadLine();
             CvThread.Stop();
