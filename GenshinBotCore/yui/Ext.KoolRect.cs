@@ -19,6 +19,12 @@ namespace genshinbot.yui
 
         public OpenCvSharp.Rect R { get; set; }
 
+        public event Action<MouseEvent>? MouseEvent
+        {
+            add => throw new NotImplementedException();
+            remove => throw new NotImplementedException();
+        }
+
         public void Delete()
         {
             top.Delete();

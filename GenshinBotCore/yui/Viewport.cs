@@ -34,6 +34,7 @@ namespace genshinbot.yui
     public interface Rect
     {
         OpenCvSharp.Rect R { get; set; }
+        event Action<MouseEvent> MouseEvent;
     }
 
     public interface Image

@@ -100,7 +100,7 @@ namespace genshinbot
             //await tools.ScreencoordRecorder.runAsync(new WindowAutomator2("*Untitled - Notepad", null));
             // await tools.ScreencoordRecorder.runAsync(rig.Make().W);
             //// .Show();
-            //Application.Run(new yui.windows.aRRO());
+            //Application.Run(new yui.windows.aRRO()); 
             //await screens.PlayingScreen.Test3Async();
             //await screens.PlayingScreen.TestClimb();
             // screens.PlayingScreen.TestClimb2(rig);
@@ -115,7 +115,7 @@ namespace genshinbot
             //       await controllers.LocationManager.TestGoto(rig);
             //  await tools.WalkRecorder.TestAsync(rig.Make());
             //  await tools.AutofillTool.ConfigureCharacterSel(rig.Make());
-              await sp.GetService<tools.AutofillTool>().ConfigureAll();
+              await sp.GetService<tools.AutofillTool>()!.ConfigureAll();
             //  await sp.GetService<tools.BlackbarFixer>().FixBlackBar();
             //  await tools.DailyDoer.runAsync(rig.Make());
             //algorithm.ChatReadAlg.Test();

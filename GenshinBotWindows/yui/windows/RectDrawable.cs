@@ -16,7 +16,16 @@ namespace genshinbot.yui.windows
         public RectDrawable(Viewport parent)
         {
             this.parent = parent;
+            parent.MouseEvent += Parent_MouseEvent;
         }
+
+        private void Parent_MouseEvent(MouseEvent obj)
+        {
+            if (r.Contains(obj.Location)) {
+                MouseEvent?.Invoke(obj);
+            }
+        }
+
         public OpenCvSharp.Rect R
         {
             get => r; set
@@ -26,6 +35,8 @@ namespace genshinbot.yui.windows
                 parent.Invalidate();
             }
         }
+
+        public event Action<MouseEvent> ?MouseEvent;
 
         public void OnPaint(PaintEventArgs e)
         {
