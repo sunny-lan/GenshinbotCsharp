@@ -56,7 +56,8 @@ namespace genshinbot.screens
         public IWire<Pkt<Mat>> Screen { get; }
         public IWire<Pkt<List<algorithm.MapTemplateMatch.Result>>> Features { get; }
         public IWire<Pkt<algorithm.MapLocationMatch.Result>> Screen2Coord { get; }
-        
+
+        public event Action<Exception> OnMatchError;
 
         public MapScreen(BotIO b, ScreenManager screenManager) : base(b, screenManager)
         {
@@ -69,15 +70,15 @@ namespace genshinbot.screens
                 (Mat map) =>
                 {
                     var k = templateMatch.FindTeleporters(map).ToList();
-                    Debug.Assert(k.Count > 0);//TODO
+                    if (k.Count == 0) throw new algorithm.AlgorithmFailedException("No teleporters found");
                     return k;
                 }
-                //,error => throw error//todo
+                ,error => OnMatchError?.Invoke(error)
             );
             Screen2Coord = b.W.Size.Select3((Size size) =>
                 Features.Select(
                     features => locationMatch.FindLocation2(features, size, ExpectUnknown)
-                    //,error => throw error//todo
+                    , error => OnMatchError?.Invoke(error)
                 )
             ).Switch2();
 
@@ -97,7 +98,7 @@ namespace genshinbot.screens
 
         public async Task TeleportTo(Feature teleporter)
         {
-            Debug.Assert(ScreenManager.ActiveScreen == this);
+            Debug.Assert(ScreenManager.ActiveScreen.Value == this);
             Debug.Assert(teleporter.Type == FeatureType.Teleporter);
             var p = await ShowOnScreen(teleporter.Coordinates);
             await Io.M.MouseTo(p);

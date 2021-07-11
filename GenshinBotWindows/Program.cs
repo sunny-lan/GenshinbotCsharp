@@ -44,14 +44,14 @@ namespace genshinbot
 
             var services = new ServiceCollection()
                 .AddSingleton<YUI>(_=>yui.windows.MainForm.make())
-                //.AddSingleton<IWindowAutomator2>(_=> new WindowAutomator2("Genshin Impact", "UnityWndClass"))
-                .AddSingleton<IWindowAutomator2>(_=> {
+                .AddSingleton<IWindowAutomator2>(_=> new WindowAutomator2("Genshin Impact", "UnityWndClass"))
+                /*.AddSingleton<IWindowAutomator2>(_=> {
                     var gw = new MockGenshinWindow(new OpenCvSharp. Size(1680, 1050));
                     gw.MapScreen.Image = Data.Imread("test/map_luhua_1050.png");
                     gw.PlayingScreen.Image = Data.Imread("test/playing_luhua_1050.png");
                     gw.CurrentScreen = gw.PlayingScreen;
                     return gw;
-                })
+                })*/
                 .AddSingleton<BotIO, BaseBotIO>()
                 .AddSingleton<screens.ScreenManager>()
                 .AddSingleton<controllers.LocationManager>()

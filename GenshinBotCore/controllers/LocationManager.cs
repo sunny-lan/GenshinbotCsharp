@@ -105,8 +105,16 @@ namespace genshinbot.controllers
             }
             await screens.PlayingScreen.OpenMap();
             var center = (await map.Io.W.Bounds.Value2()).Center();
-
-            var screen2Coord = await map.Screen2Coord.Get();
+            algorithm.MapLocationMatch.Result? screen2Coord;
+            try
+            {
+                map.OnMatchError += onError;
+                 screen2Coord = await map.Screen2Coord.Get();
+            }
+            finally
+            {
+                map.OnMatchError -= onError;
+            }
             var miniLoc = coord2Mini.Transform(screen2Coord.ToCoord(center));
             await map.Close();
             return screens.PlayingScreen.TrackPos(miniLoc, onError)

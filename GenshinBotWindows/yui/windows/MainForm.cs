@@ -79,9 +79,9 @@ namespace genshinbot.yui.windows
 
         public void GiveFocus(yui.Tab t)
         {
-            tabs.SelectedTab = t as TabPage;
-            Task.Run(async() =>
+            Action kkk = async () =>
             {
+                tabs.SelectedTab = t as TabPage;
                 Color oldColor = statusStrip.BackColor;
                 for (int i = 0; i < 3; i++)
                 {
@@ -90,7 +90,9 @@ namespace genshinbot.yui.windows
                     statusStrip.BackColor = oldColor;
                     await Task.Delay(50);
                 }
-            });
+            };
+            tabs.BeginInvoke(kkk);
+           
         }
 
         public PopupResult Popup(string message, string title = "", PopupType type = PopupType.Message)
