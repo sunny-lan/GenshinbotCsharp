@@ -1,4 +1,6 @@
-﻿using OpenCvSharp;
+﻿using genshinbot.data;
+using genshinbot.reactive.wire;
+using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +11,11 @@ using System.Threading.Tasks;
 namespace genshinbot.screens
 {
 
-    public class LoadingScreen 
+    public class LoadingScreen :IScreen
     {
         public class Db
         {
+            public static DbInst<Db> Instance = new DbInst<Db>("screens/loadingScreen.json");
             public class RD
             {
                 public Rect Patch { get; set; } = new Rect(10, 10, 20, 20);
@@ -52,63 +55,54 @@ namespace genshinbot.screens
         }
 
 
-        private GenshinBot b;
 
-        public Db.Theme Theme;
         Mat inrange = new Mat();
 
-
-        public LoadingScreen(GenshinBot b)
+        public LoadingScreen(BotIO b, ScreenManager screenManager) : base(b, screenManager)
         {
-            this.b = b;
         }
+
         ~LoadingScreen()
         {
             inrange.Dispose();
         }
 
-        public bool CheckActive()
-        {
-            Theme = findTheme();
-            return Theme != null;
-        }
 
-        public void WaitTillDone()
+        public async Task WaitTillDone()
         {
-            while (findTheme() != null) ;
-        }
+            var w = this.Io.W;
 
-        Db.Theme findTheme()
-        {
-            var w = this.b.W;
-            var db = this.b.Db.LoadingScreenDb;
-
-            var sz = w.GetSize();
+            var sz = await w.Size.Value2();
             var patch = db.R[sz].Patch;
-            var c = w.GetPixelColor(patch.Left, patch.Top);
-
+            var tmp = await w.Screen.Watch(patch.Center().RectAround(new Size(1, 1))).Get();
+            var c = tmp.Value.Mean();
 
             //check which color theme
             foreach (var t in db.Themes)
             {
                 if (t.Bg == c)
                 {
-                    //check all pixels in patch are same color
-                    Mat subimg = w.Screenshot(patch);
-                    Scalar c1 = c;
-                    c1.Val0++;
-                    c1.Val1++;
-                    c1.Val2++;
-                    c1.Val3 = 256;
-                    Cv2.InRange(subimg, c, c1, inrange);
-                    int cnt = inrange.CountNonZero();
-                    if (cnt == subimg.Width * subimg.Height)
-                        return t;
-                    else
-                        return null;//not all pixels matched
+                    //wait until cannot detect theme
+                    await w.Screen.Watch(patch).Where((m) =>
+                    {
+                        var subimg = m.Value;
+                        Scalar c1 = c;
+                        c1.Val0++;
+                        c1.Val1++;
+                        c1.Val2++;
+                        c1.Val3 = 256;
+                        Cv2.InRange(subimg, c, c1, inrange);
+                        int cnt = inrange.CountNonZero();
+                        return cnt < subimg.Width * subimg.Height;
+                    }).Get();
+
+                    return;
                 }
             }
-            return null;
+
         }
+
+        Db db = Db.Instance.Value;
+
     }
 }

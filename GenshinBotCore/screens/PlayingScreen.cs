@@ -91,7 +91,11 @@ namespace genshinbot.screens
         }
 
         algorithm.MinimapMatch.ScaleMatcher scaleMatcher = new algorithm.MinimapMatch.ScaleMatcher(new MinimapMatchSettingsAdapter());
-
+        public async Task OpenSettings()
+        {
+            await Io.K.KeyPress(Keys.Escape);
+            await Task.Delay(3000);//todo
+        }
         /// <summary>
         /// it is up to the user to not call this concurrently
         /// It is expected as soon as a tracking error happens, 

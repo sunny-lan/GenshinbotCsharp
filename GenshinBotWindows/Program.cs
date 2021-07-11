@@ -41,9 +41,17 @@ namespace genshinbot
             Console.ReadLine();
             */
             var rig = new TestingRig();
+
             var services = new ServiceCollection()
                 .AddSingleton<YUI>(_=>yui.windows.MainForm.make())
-                .AddSingleton<IWindowAutomator2>(_=> new WindowAutomator2("Genshin Impact", "UnityWndClass"))
+                //.AddSingleton<IWindowAutomator2>(_=> new WindowAutomator2("Genshin Impact", "UnityWndClass"))
+                .AddSingleton<IWindowAutomator2>(_=> {
+                    var gw = new MockGenshinWindow(new OpenCvSharp. Size(1680, 1050));
+                    gw.MapScreen.Image = Data.Imread("test/map_luhua_1050.png");
+                    gw.PlayingScreen.Image = Data.Imread("test/playing_luhua_1050.png");
+                    gw.CurrentScreen = gw.PlayingScreen;
+                    return gw;
+                })
                 .AddSingleton<BotIO, BaseBotIO>()
                 .AddSingleton<screens.ScreenManager>()
                 .AddSingleton<controllers.LocationManager>()
@@ -53,10 +61,10 @@ namespace genshinbot
                 .AddSingleton<tools.DailyDoer>();
 
             var sp = services.BuildServiceProvider();
-            // var sm = sp.GetService<screens.ScreenManager>();
-            //  sm.ForceScreen(sm.PlayingScreen);
-            // using  var kk= sp.GetService<tools.WalkEditor>();
-
+             var sm = sp.GetService<screens.ScreenManager>();
+              sm.ForceScreen(sm.PlayingScreen);
+             using  var kk= sp.GetService<tools.WalkEditor>();
+            
             //  await screens.MapScreen.Testshow(rig);
 
             //   Screenshot.Init();
@@ -113,9 +121,9 @@ namespace genshinbot
             //data.jsonconverters.MatConverter.Test();
             // await automation.windows.WindowAutomator2.TestKbdLock();
             //       await controllers.LocationManager.TestGoto(rig);
-            //  await tools.WalkRecorder.TestAsync(rig.Make());
+            // await tools.WalkRecorder.TestAsync(rig.Make());
             //  await tools.AutofillTool.ConfigureCharacterSel(rig.Make());
-              await sp.GetService<tools.AutofillTool>()!.ConfigureAll();
+             // await sp.GetService<tools.AutofillTool>()!.ConfigureAll();
             //  await sp.GetService<tools.BlackbarFixer>().FixBlackBar();
             //  await tools.DailyDoer.runAsync(rig.Make());
             //algorithm.ChatReadAlg.Test();

@@ -20,7 +20,7 @@ namespace genshinbot.controllers
 {
     public class LocationManager
     {
-        private ScreenManager screens;
+        public readonly ScreenManager screens;
 
 
         public LocationManager(ScreenManager s)
@@ -57,6 +57,7 @@ namespace genshinbot.controllers
                 Translation = a.Minimap - a.Coord * scale
             };
         }
+        List<Action<Exception>>? _onErrList;
         Task<IWire<Pkt<Point2d>>>? _memo;
         /// <summary>
         /// memoized trackpos
@@ -66,13 +67,17 @@ namespace genshinbot.controllers
         {
             if (_memo is null)
             {
+                _onErrList = new();
                 _memo = _TrackPos(err =>
                 {
                     _memo = null;
-                    onError?.Invoke(err);
+                    foreach (var ea in _onErrList) ea(err);
+                    _onErrList = null;
                     Debug.WriteLine(err);
                 });
             }
+            if (onError is not null)
+                _onErrList!.Add(onError);
             return _memo;
         }
         /// <summary>
@@ -131,11 +136,21 @@ namespace genshinbot.controllers
             int idx = 0;
             var pos = await TrackPos();
             var wanted = new LiveWireSource<double?>(null);
+
+            if (screens.ActiveScreen.Value != screens.PlayingScreen)
+            {
+                if (screens.ActiveScreen.Value == screens.MapScreen)
+                {
+                    await screens.MapScreen.Close();
+                }
+            }
+
+            Debug.Assert(screens.ActiveScreen.Value == screens.PlayingScreen);
             PlayingScreen playingScreen = screens.PlayingScreen;
             var arrowControl = new algorithm.ArrowSteering(
                 playingScreen.ArrowDirection,
                 wanted);
-            
+
             var deltaP = arrowControl.MouseDelta.Select(x =>
                new Point2d(x, 0));
             var smoother = new MouseSmoother(deltaP);
@@ -151,12 +166,12 @@ namespace genshinbot.controllers
                       )*/
             using (deltaP.Subscribe(async delta =>
             {
-               // Console.WriteLine($"d={delta}");
+                // Console.WriteLine($"d={delta}");
                 await io.M.MouseMove(delta).ConfigureAwait(false);
             }))
             using (pos.Subscribe(p =>
            {
-             //  Console.WriteLine($"p={p}");
+               //  Console.WriteLine($"p={p}");
                /* if (p.DistanceTo(dst) < opt2.Tolerance)
                 {
                     Debug.WriteLine("arrived quick kill hack");
@@ -164,9 +179,9 @@ namespace genshinbot.controllers
                     wanted.SetValue(null);
                     return;
                 }*/
-               while (idx<dst.Count)
+               while (idx < dst.Count)
                {
-                   double tol=dst[idx].Tolerance??(idx==dst.Count-1?4:2);
+                   double tol = dst[idx].Tolerance ?? (idx == dst.Count - 1 ? 4 : 2);
                    if (dst[idx].Value.DistanceTo(p) > tol) break;
                    idx++;
                }
@@ -185,7 +200,7 @@ namespace genshinbot.controllers
                 {
                     Debug.WriteLine("begin walking");
                     await io.K.KeyDown(Keys.W).ConfigureAwait(false);
-                    await wanted.Where(x=>x is null).Get().ConfigureAwait(false);
+                    await wanted.Where(x => x is null).Get().ConfigureAwait(false);
                     return;
                     /*backtowalking:
                     var r = await await Task.WhenAny(allDead.Get(), atDest.Get()).ConfigureAwait(false);
@@ -220,7 +235,7 @@ namespace genshinbot.controllers
                 finally
                 {
                     await io.K.KeyUp(Keys.W).ConfigureAwait(false);
-                   // wanted.SetValue(null);
+                    // wanted.SetValue(null);
                 }
 
             }
@@ -350,200 +365,215 @@ namespace genshinbot.controllers
 
         }
 
-        /*  public void TeleportTo(Feature waypoint)
-         {
-             Debug.Assert(waypoint.Type == FeatureType.Teleporter);
-             var m = b.MapScreen; //b.S<screens.MapScreen>();
-             m.TeleportTo(waypoint);
-             approxPos = waypoint.Coordinates;
-             pt = null;
-         }
+        public async Task TeleportTo(Feature waypoint)
+        {
+            Debug.Assert(waypoint.Type == FeatureType.Teleporter);
+            var m = screens.MapScreen;
+            if (screens.ActiveScreen.Value != m)
+            {
+                if (screens.ActiveScreen.Value == screens.PlayingScreen)
+                    await screens.PlayingScreen.OpenMap();
+                else
+                    throw new Exception("expected playing or map screen");
+            }
+            await m.TeleportTo(waypoint);
 
-           public Point2d DeduceLocation()
-          {
-              var db = this.Data.MapDb;
-              if (db.Coord2Minimap == null)
-                  throw new Exception("Missing setting");
-              bool approxLocCalculated = false;
+        }
+        /* 
+                  public Point2d DeduceLocation()
+                 {
+                     var db = this.Data.MapDb;
+                     if (db.Coord2Minimap == null)
+                         throw new Exception("Missing setting");
+                     bool approxLocCalculated = false;
 
-              var p = b.S<PlayingScreen>();
-          begin:
+                     var p = b.S<PlayingScreen>();
+                 begin:
 
-              //check map to find initial location
-              if (this.approxPos == null)
-              {
-                  approxPos = GetLocationFromMap();
+                     //check map to find initial location
+                     if (this.approxPos == null)
+                     {
+                         approxPos = GetLocationFromMap();
 
-                  approxLocCalculated = true;
-              }
-              Mat minimap = p.SnapMinimap();
-
-
-
-              Point2d miniPos1;
-              if (pt == null) //if the scale hasn't been calculated yet
-              {
-                  Console.WriteLine("Recalculating scale");
-                  //convert map coord to minimap pos so we can use minimap matcher
-                  var bigApproxPos = db.Coord2Minimap.Expect().Transform(this.approxPos.Expect());
-                  var miniPos = m.FindScale(bigApproxPos, minimap, out var pt1);
-
-                  //we were unable to find a valid scale
-                  if (miniPos == null)
-                  {
-                      //this means
-                      if (approxLocCalculated)
-                      {
-                          //a) the algorithm failed or the Coord2Minimap setting is wrong
-                          throw new Exception("Failed to find valid scale");
-                      }
-                      else
-                      {
-                          //b) the value of ApproxPos is out of date
-                          this.approxPos = null; //invalidate and try again
-                          goto begin;
-                      }
-                  }
-
-                  //we successfully found the coordinate
-                  miniPos1 = miniPos.Expect();
-                  pt = new algorithm.MinimapMatch.PositionTracker(pt1);
-              }
-              else
-              {
-                  //if we found the scale already, we can continue tracking
-                  var miniPos = pt.Track(minimap);
-
-                  if (miniPos == null)
-                  {
-                      //if tracking failed we need to invalidate the scale
-                      // and try again
-                      pt = null;
-                      goto begin;
-                  }
-
-                  miniPos1 = miniPos.Expect();
-              }
-
-              //convert minimap point back to map coordinates
-              var coord = db.Coord2Minimap.Expect().Inverse(miniPos1);
-
-              //also, we can update approxPos in case we need it later
-              approxPos = coord;
-
-              return coord;
-          }
-
-        public void WalkTo(Point2d dstPos, double accuracy = 1)
-          {
-              var curPos = DeduceLocation();
-              var p = b.S<PlayingScreen>();
+                         approxLocCalculated = true;
+                     }
+                     Mat minimap = p.SnapMinimap();
 
 
 
-              while (true)
-              {
-                  if (curPos.DistanceTo(dstPos) <= accuracy)
-                  {
-                      b.K.KeyUp(input.GenshinKeys.Forward);
-                      b.M.Stop();
-                      return;
-                  }
+                     Point2d miniPos1;
+                     if (pt == null) //if the scale hasn't been calculated yet
+                     {
+                         Console.WriteLine("Recalculating scale");
+                         //convert map coord to minimap pos so we can use minimap matcher
+                         var bigApproxPos = db.Coord2Minimap.Expect().Transform(this.approxPos.Expect());
+                         var miniPos = m.FindScale(bigApproxPos, minimap, out var pt1);
 
-                  while (p.IsDisabled())
-                  {
-                      b.W.KeyPress((int)automation.input.Keys.Space);
-                      Thread.Sleep(100);
-                  }
+                         //we were unable to find a valid scale
+                         if (miniPos == null)
+                         {
+                             //this means
+                             if (approxLocCalculated)
+                             {
+                                 //a) the algorithm failed or the Coord2Minimap setting is wrong
+                                 throw new Exception("Failed to find valid scale");
+                             }
+                             else
+                             {
+                                 //b) the value of ApproxPos is out of date
+                                 this.approxPos = null; //invalidate and try again
+                                 goto begin;
+                             }
+                         }
 
-                  b.K.KeyPress(input.GenshinKeys.Forward);
-                  var dstAng = curPos.AngleTo(dstPos);
-                  var curAng = p.GetArrowDirection();
+                         //we successfully found the coordinate
+                         miniPos1 = miniPos.Expect();
+                         pt = new algorithm.MinimapMatch.PositionTracker(pt1);
+                     }
+                     else
+                     {
+                         //if we found the scale already, we can continue tracking
+                         var miniPos = pt.Track(minimap);
 
-                  var diff = curAng.RelativeAngle(dstAng);
-                  b.M.Move(new Point2d(diff / 2, 0));
-                  b.K.KeyDown(input.GenshinKeys.Forward);
-                  curPos = DeduceLocation();
+                         if (miniPos == null)
+                         {
+                             //if tracking failed we need to invalidate the scale
+                             // and try again
+                             pt = null;
+                             goto begin;
+                         }
 
-              }
-          }
+                         miniPos1 = miniPos.Expect();
+                     }
 
-          public static void Testwalkto()
-          {
-              Point2d dst = new Point2d(x: 1956.43237304688, y: -303.038940429688);
-              GenshinBot b = new GenshinBot();
+                     //convert minimap point back to map coordinates
+                     var coord = db.Coord2Minimap.Expect().Inverse(miniPos1);
 
-              // b.LocationManager.Coord2MinimapTool();
+                     //also, we can update approxPos in case we need it later
+                     approxPos = coord;
 
-              b.S(b.PlayingScreen);
+                     return coord;
+                 }
 
-              b.LocationManager.WalkTo(dst);
-          }
-
-          public static void Test()
-          {
-              GenshinBot b = new GenshinBot();
-
-              // b.LocationManager.Coord2MinimapTool();
-
-              b.S(b.PlayingScreen);
-
-
-              while (true)
-              {
-                  var pos = b.LocationManager.DeduceLocation();
-                  Console.WriteLine(pos);
-              }
-          }
+               public void WalkTo(Point2d dstPos, double accuracy = 1)
+                 {
+                     var curPos = DeduceLocation();
+                     var p = b.S<PlayingScreen>();
 
 
 
-          public void Coord2MinimapTool()
-          {
-              var data = new List<Tuple<Point2d, Point2d>>();
-              while (true)
-              {
-                  Console.WriteLine("Please enter approx pos");
-                  var approxPos = Util.ReadPoint();
+                     while (true)
+                     {
+                         if (curPos.DistanceTo(dstPos) <= accuracy)
+                         {
+                             b.K.KeyUp(input.GenshinKeys.Forward);
+                             b.M.Stop();
+                             return;
+                         }
 
-                  Console.WriteLine("Please go into map screen");
-                  Console.ReadLine();
+                         while (p.IsDisabled())
+                         {
+                             b.W.KeyPress((int)automation.input.Keys.Space);
+                             Thread.Sleep(100);
+                         }
 
-                  //bot control begins
+                         b.K.KeyPress(input.GenshinKeys.Forward);
+                         var dstAng = curPos.AngleTo(dstPos);
+                         var curAng = p.GetArrowDirection();
 
-                  var m = b.S(b.MapScreen);
-                  var coord1 = GetLocationFromMap();
-                  m.Close();
+                         var diff = curAng.RelativeAngle(dstAng);
+                         b.M.Move(new Point2d(diff / 2, 0));
+                         b.K.KeyDown(input.GenshinKeys.Forward);
+                         curPos = DeduceLocation();
 
-                  var p = b.S<PlayingScreen>();
-                  var mini = p.SnapMinimap();
+                     }
+                 }
 
-                  var miniP1 = this.m.FindScale(approxPos, mini, out var _);
-                  if (miniP1 == null)
-                  {
-                      Console.WriteLine("Minimap loc failed");
-                      continue;
-                  }
+                 public static void Testwalkto()
+                 {
+                     Point2d dst = new Point2d(x: 1956.43237304688, y: -303.038940429688);
+                     GenshinBot b = new GenshinBot();
 
-                  //bot control ends
+                     // b.LocationManager.Coord2MinimapTool();
 
-                  Console.WriteLine("Data point #" + data.Count);
-                  Console.WriteLine("  Map coordinate " + coord1);
-                  Console.WriteLine("  Minimap pos " + miniP1);
+                     b.S(b.PlayingScreen);
 
-                  data.Add(new Tuple<Point2d, Point2d>(coord1, miniP1.Expect()));
+                     b.LocationManager.WalkTo(dst);
+                 }
 
-                  if (data.Count >= 2)
-                  {
+                 public static void Test()
+                 {
+                     GenshinBot b = new GenshinBot();
 
-                  }
+                     // b.LocationManager.Coord2MinimapTool();
 
-                  Console.WriteLine("Please move to a different point and open map");
-                  Console.ReadKey();
+                     b.S(b.PlayingScreen);
 
-              }
-          }*/
 
+                     while (true)
+                     {
+                         var pos = b.LocationManager.DeduceLocation();
+                         Console.WriteLine(pos);
+                     }
+                 }
+
+
+
+                 public void Coord2MinimapTool()
+                 {
+                     var data = new List<Tuple<Point2d, Point2d>>();
+                     while (true)
+                     {
+                         Console.WriteLine("Please enter approx pos");
+                         var approxPos = Util.ReadPoint();
+
+                         Console.WriteLine("Please go into map screen");
+                         Console.ReadLine();
+
+                         //bot control begins
+
+                         var m = b.S(b.MapScreen);
+                         var coord1 = GetLocationFromMap();
+                         m.Close();
+
+                         var p = b.S<PlayingScreen>();
+                         var mini = p.SnapMinimap();
+
+                         var miniP1 = this.m.FindScale(approxPos, mini, out var _);
+                         if (miniP1 == null)
+                         {
+                             Console.WriteLine("Minimap loc failed");
+                             continue;
+                         }
+
+                         //bot control ends
+
+                         Console.WriteLine("Data point #" + data.Count);
+                         Console.WriteLine("  Map coordinate " + coord1);
+                         Console.WriteLine("  Minimap pos " + miniP1);
+
+                         data.Add(new Tuple<Point2d, Point2d>(coord1, miniP1.Expect()));
+
+                         if (data.Count >= 2)
+                         {
+
+                         }
+
+                         Console.WriteLine("Please move to a different point and open map");
+                         Console.ReadKey();
+
+                     }
+                 }*/
+        public record WholeWalk(
+            Feature Teleporter,
+            List<WalkPoint> Points
+        );
+
+        public async Task WholeWalkTo(WholeWalk w, WalkOptions? opt = null)
+        {
+            await TeleportTo(w.Teleporter);
+            await WalkTo(w.Points, opt);
+        }
 
         public static async Task TestTrackAsync(ITestingRig rig)
         {

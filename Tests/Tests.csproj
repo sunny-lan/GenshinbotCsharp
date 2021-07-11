@@ -29,7 +29,6 @@
     <None Remove="data\test\map_b.png" />
     <None Remove="data\test\map_c.png" />
     <None Remove="data\test\map_D.png" />
-    <None Remove="data\test\map_luhua_1050.png" />
     <None Remove="data\test\minimap_test.png" />
     <None Remove="data\test\minimap_test_whole.png" />
     <None Remove="data\test\moretext.png" />
@@ -86,9 +85,6 @@
     <Content Include="data\test\map_D.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="data\test\map_luhua_1050.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="data\test\minimap_test.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -126,9 +122,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="data\test\palette2.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="data\test\playing_luhua_1050.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="data\test\text.png">

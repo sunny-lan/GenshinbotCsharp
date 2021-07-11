@@ -12,12 +12,18 @@ namespace genshinbot.yui.windows
             Bitmap bmp;
             private OpenCvSharp.Point _pos;
             private Transformation _t=new Transformation();
-            
 
-            /// <summary>
-            /// must not be disposed before the class is disposed
-            /// </summary>
-            public Mat Mat
+        public event Action<MouseEvent> MouseEvent
+        {
+            add => throw new NotImplementedException();
+            remove => throw new NotImplementedException();
+        }
+
+
+        /// <summary>
+        /// must not be disposed before the class is disposed
+        /// </summary>
+        public Mat Mat
             {
                 get => _img;
                 set

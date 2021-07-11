@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <Folder Include="data\events\" />
+    <Folder Include="rc\" />
   </ItemGroup>
 
   <Import Project="..\Data\Data.projitems" Label="Shared" />

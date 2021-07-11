@@ -9,7 +9,11 @@ namespace genshinbot.yui.windows
     {
         private OpenCvSharp.Rect _r;
         private Transformation _t;
-
+        public event Action<MouseEvent> MouseEvent
+        {
+            add => throw new NotImplementedException();
+            remove => throw new NotImplementedException();
+        }
         public OpenCvSharp.Rect R
         {
             get => _r;// => Bounds.Cv();

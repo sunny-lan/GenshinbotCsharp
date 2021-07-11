@@ -45,7 +45,7 @@ namespace genshinbot
 
            //TODO PlayingScreen = new screens.PlayingScreen(this);
             //TODO MapScreen = new screens.MapScreen(this);
-            LoadingScreen = new screens.LoadingScreen(this);
+            //LoadingScreen = new screens.LoadingScreen(this);
 
             Console.WriteLine("Screens initialized");
             screensInit = true;

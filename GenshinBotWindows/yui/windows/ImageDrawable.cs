@@ -8,26 +8,42 @@ namespace genshinbot.yui.windows
 {
     class ImageDrawable : Drawable,yui.Image
     {
-        Mat _img;
-        Bitmap bmp;
+        Mat ?_img;
+        Bitmap? bmp;
         private OpenCvSharp.Point _pos;
         private Viewport parent;
 
         public ImageDrawable(Viewport parent)
         {
             this.parent = parent;
+            parent.MouseEvent += obj =>
+            {
+                if (_img is null) return;
+                var r = new OpenCvSharp. Rect(_pos, _img.Size());
+                if (r.Contains(obj.Location))
+                {
+                    var tmp = obj;
+                    tmp.Location -= r.TopLeft;
+                    MouseEvent?.Invoke(tmp);
+                }
+            };
         }
 
 
         /// <summary>
         /// must not be disposed before the class is disposed
         /// </summary>
-        public Mat Mat
+        public Mat? Mat
         {
             get => _img;
             set
             {
-                if (value != _img)
+                if(value is null)
+                {
+                    _img = null;
+                    bmp = null;
+                }
+                else if (value != _img)
                 {
                     _img = value;
                     bmp = value?.ToBmpFast();
@@ -45,6 +61,8 @@ namespace genshinbot.yui.windows
                 parent.Invalidate();
             }
         }
+
+        public event Action<MouseEvent>? MouseEvent;
 
         public void Invalidate()
         {

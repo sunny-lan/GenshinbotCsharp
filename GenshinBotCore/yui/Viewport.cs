@@ -39,7 +39,7 @@ namespace genshinbot.yui
 
     public interface Image
     {
-        Mat Mat { get; set; }
+        Mat ?Mat { get; set; }
         Point TopLeft { get; set; }
 
         /// <summary>
@@ -47,6 +47,7 @@ namespace genshinbot.yui
         /// </summary>
         void Invalidate();
         void Invalidate(OpenCvSharp.Rect r);
+        event Action<MouseEvent> MouseEvent;
     }
     public interface DirectGfx
     {

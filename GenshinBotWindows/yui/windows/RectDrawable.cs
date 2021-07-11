@@ -22,7 +22,9 @@ namespace genshinbot.yui.windows
         private void Parent_MouseEvent(MouseEvent obj)
         {
             if (r.Contains(obj.Location)) {
-                MouseEvent?.Invoke(obj);
+                var tmp = obj;
+                tmp.Location -= r.TopLeft;
+                MouseEvent?.Invoke(tmp);
             }
         }
 

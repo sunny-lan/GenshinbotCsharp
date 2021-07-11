@@ -97,7 +97,7 @@ namespace genshinbot.screens
 
         public async Task TeleportTo(Feature teleporter)
         {
-            
+            Debug.Assert(ScreenManager.ActiveScreen == this);
             Debug.Assert(teleporter.Type == FeatureType.Teleporter);
             var p = await ShowOnScreen(teleporter.Coordinates);
             await Io.M.MouseTo(p);
@@ -105,9 +105,11 @@ namespace genshinbot.screens
             await Task.Delay(1000);
             await Io.M.MouseTo(db.R[await Io.W.Size.Value2()].ActionBtnLoc);
             await Io.M.MouseClick(0);
-           //TODO b.SWait(b.LoadingScreen);
+            //TODO b.SWait(b.LoadingScreen);
             //TODO b.LoadingScreen.WaitTillDone();
             //await Task.Delay(1000);
+            await ScreenManager.ExpectScreen(ScreenManager.LoadingScreen);
+            await ScreenManager.LoadingScreen.WaitTillDone();
             await ScreenManager.ExpectScreen(ScreenManager.PlayingScreen);
            // b.S(b.PlayingScreen);
         }

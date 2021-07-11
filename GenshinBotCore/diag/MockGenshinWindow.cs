@@ -2,6 +2,7 @@
 using genshinbot.automation.hooking;
 using genshinbot.automation.input;
 using genshinbot.automation.screenshot;
+using genshinbot.data.events;
 using genshinbot.reactive.wire;
 using OpenCvSharp;
 using System;
@@ -78,6 +79,9 @@ namespace genshinbot.diag
             PlayingScreen.KeyMap[automation.input.Keys.M] = MapScreen;
             MapScreen.KeyMap[automation.input.Keys.M] = PlayingScreen;
             MapScreen.KeyMap[automation.input.Keys.Escape] = PlayingScreen;
+
+            //dummy screenbounds
+            ScreenBounds = size.Select2(s => s.Bounds());
         }
 
 
@@ -91,11 +95,17 @@ namespace genshinbot.diag
         }
         public ILiveWire<bool> Focused => focused;
 
-        public IMouseCapture MouseCap => throw new NotImplementedException();
+        class Dummy : IMouseCapture, IKeyCapture
+        {
+            public IWire<MouseEvent> MouseEvents => throw new NotImplementedException();
 
-        public IKeyCapture KeyCap => throw new NotImplementedException();
+            public IWire<KeyEvent> KeyEvents => throw new NotImplementedException();
+        }
+        Dummy d = new();
+        public IMouseCapture MouseCap => d;
 
-        public ILiveWire<Rect?> ScreenBounds => throw new NotImplementedException();
+        public IKeyCapture KeyCap => d;
+        public ILiveWire<Rect?> ScreenBounds { get; }
 
         private LiveWireSource<bool> focused = new LiveWireSource<bool>(true);
 

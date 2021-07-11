@@ -19,11 +19,11 @@ namespace genshinbot.yui.windows
             Application.VisualStyleState = System.Windows.Forms.VisualStyles.VisualStyleState.ClientAndNonClientAreasEnabled;
             Application.Run(_f);
         }
-        public static YUI make()
+        public static MainForm make()
         {
             var _f = new MainForm();
             Task.Run(() => Application.Run(_f));
-            var waiter = EventWaiter.Waiter<YUI>();
+            var waiter = EventWaiter.Waiter<MainForm>();
             _f.Load += (s, e) => waiter.Item2(_f);
             waiter.Item1.Wait();
             return waiter.Item1.Result;

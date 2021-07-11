@@ -14,8 +14,8 @@ namespace genshinbot.screens
 {
     public abstract class IScreen
     {
-        public BotIO Io { get;  }
-        public ScreenManager ScreenManager { get;  }
+        public BotIO Io { get; }
+        public ScreenManager ScreenManager { get; }
 
         protected IScreen(BotIO b, ScreenManager screenManager)
         {
@@ -25,10 +25,11 @@ namespace genshinbot.screens
     }
     public class ScreenManager
     {
-        private BotIO io;
+        public readonly BotIO io;
 
-        public PlayingScreen PlayingScreen { get;  }
-        public MapScreen MapScreen { get;  }
+        public PlayingScreen PlayingScreen { get; }
+        public MapScreen MapScreen { get; }
+        public LoadingScreen LoadingScreen { get; }
 
         public ILiveWire<IScreen?> ActiveScreen => screen;
         private LiveWireSource<IScreen?> screen;
@@ -37,11 +38,10 @@ namespace genshinbot.screens
         {
             this.io = io;
             screen = new LiveWireSource<IScreen?>(null);
-            
-            PlayingScreen = new PlayingScreen(new ProxyBotIO(ActiveScreen.Select(s => 
-            s == PlayingScreen
-                ), io), this);
+
+            PlayingScreen = new PlayingScreen(new ProxyBotIO(ActiveScreen.Select(s => s == PlayingScreen), io), this);
             MapScreen = new MapScreen(new ProxyBotIO(ActiveScreen.Select(s => s == MapScreen), io), this);
+            LoadingScreen = new LoadingScreen(new ProxyBotIO(ActiveScreen.Select(s => s == LoadingScreen), io), this);
 
         }
         public void ForceScreen(IScreen? s)//TODO no async needed
@@ -51,9 +51,9 @@ namespace genshinbot.screens
         public async Task ExpectScreen(IScreen s, int timeout = 2000)
         {
             //TODO stuff
-             ForceScreen(null);
+            ForceScreen(null);
             await Task.Delay(timeout);
-             ForceScreen(s);
+            ForceScreen(s);
         }
 
 

@@ -34,6 +34,11 @@ namespace genshinbot.data
             DbFile = db;
         }
 
+        public void ReloadFromDisk()
+        {
+            inst = new Lazy<T>(() => Data.ReadJson1<T>(DbFile));
+        }
+
         public override async Task Save()
         {
             await Data.WriteJsonAsync<T>(DbFile, Value);
