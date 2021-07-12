@@ -44,27 +44,26 @@ namespace genshinbot
 
             var services = new ServiceCollection()
                 .AddSingleton<YUI>(_=>yui.windows.MainForm.make())
-                .AddSingleton<IWindowAutomator2>(_=> new WindowAutomator2("Genshin Impact", "UnityWndClass"))
-                /*.AddSingleton<IWindowAutomator2>(_=> {
+              //  .AddSingleton<IWindowAutomator2>(_=> new WindowAutomator2("Genshin Impact", "UnityWndClass"))
+                .AddSingleton<IWindowAutomator2>(_=> {
                     var gw = new MockGenshinWindow(new OpenCvSharp. Size(1680, 1050));
                     gw.MapScreen.Image = Data.Imread("test/map_luhua_1050.png");
                     gw.PlayingScreen.Image = Data.Imread("test/playing_luhua_1050.png");
                     gw.CurrentScreen = gw.PlayingScreen;
                     return gw;
-                })*/
+                })
                 .AddSingleton<BotIO, BaseBotIO>()
                 .AddSingleton<screens.ScreenManager>()
                 .AddSingleton<controllers.LocationManager>()
                 .AddSingleton<tools.WalkEditor>()
                 .AddSingleton<tools.AutofillTool>()
                 .AddSingleton<tools.BlackbarFixer>()
-                .AddSingleton<tools.DailyDoer>();
+                .AddSingleton<tools.DailyDoer>()
+                .AddSingleton<tools.MapUI>();
 
             var sp = services.BuildServiceProvider();
              var sm = sp.GetService<screens.ScreenManager>();
-              sm.ForceScreen(sm.PlayingScreen);
-             using  var kk= sp.GetService<tools.WalkEditor>();
-            
+
             //  await screens.MapScreen.Testshow(rig);
 
             //   Screenshot.Init();
@@ -123,7 +122,10 @@ namespace genshinbot
             //       await controllers.LocationManager.TestGoto(rig);
             // await tools.WalkRecorder.TestAsync(rig.Make());
             //  await tools.AutofillTool.ConfigureCharacterSel(rig.Make());
-             // await sp.GetService<tools.AutofillTool>()!.ConfigureAll();
+            //  sm.ForceScreen(sm.PlayingScreen);
+            //4  using var kk = sp.GetService<tools.WalkEditor>();
+            using var dd = sp.GetRequiredService<tools.MapUI>();
+          //  await sp.GetService<tools.AutofillTool>()!.ConfigureAll();
             //  await sp.GetService<tools.BlackbarFixer>().FixBlackBar();
             //  await tools.DailyDoer.runAsync(rig.Make());
             //algorithm.ChatReadAlg.Test();

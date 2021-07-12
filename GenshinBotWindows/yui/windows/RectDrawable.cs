@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenCvSharp;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -16,16 +17,18 @@ namespace genshinbot.yui.windows
         public RectDrawable(Viewport parent)
         {
             this.parent = parent;
-            parent.MouseEvent += Parent_MouseEvent;
         }
 
-        private void Parent_MouseEvent(MouseEvent obj)
+        public bool Parent_MouseEvent(MouseEvent obj)
         {
-            if (r.Contains(obj.Location)) {
+            if (r.Contains(obj.Location))
+            {
                 var tmp = obj;
                 tmp.Location -= r.TopLeft;
                 MouseEvent?.Invoke(tmp);
+                return true;
             }
+            return false;
         }
 
         public OpenCvSharp.Rect R
@@ -38,11 +41,23 @@ namespace genshinbot.yui.windows
             }
         }
 
-        public event Action<MouseEvent> ?MouseEvent;
+        private Pen p=Pens.Red;
+        private Scalar color=Scalar.Red;
+        public Scalar Color
+        {
+            get => color; set
+            {
+                p = new Pen(value.SysBgr255(), 1);
+                color = value;
+                parent.Invalidate();
+            }
+        }
+
+        public event Action<MouseEvent>? MouseEvent;
 
         public void OnPaint(PaintEventArgs e)
         {
-            e.Graphics.DrawRectangle(Pens.Red, r.Sys());
+            e.Graphics.DrawRectangle(p, r.Sys());
         }
     }
 }

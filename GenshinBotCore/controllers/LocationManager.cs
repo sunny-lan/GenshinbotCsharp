@@ -42,20 +42,7 @@ namespace genshinbot.controllers
         public void CalculateCoord2Minimap()
         {
             var db = Data.MapDb;
-            Debug.Assert(db.KnownMinimapCoords.Count >= 2, "At least 2 points required");
-            var a = db.KnownMinimapCoords[0];
-            var b = db.KnownMinimapCoords[1];
-            var deltaCoord = a.Coord - b.Coord;
-            var deltaMini = a.Minimap - b.Minimap;
-            double scaleX = deltaMini.X / deltaCoord.X;
-            double scaleY = deltaMini.Y / deltaCoord.Y;
-            Debug.Assert(Math.Abs(scaleY - scaleX) < db.MaxMinimapScaleDistortion, "Calculated scaling is non uniform");
-            double scale = (scaleX + scaleY) / 2.0;
-            db.Coord2Minimap = new data.Transformation
-            {
-                Scale = scale,
-                Translation = a.Minimap - a.Coord * scale
-            };
+            db.CalculateCoord2Minimap();
         }
         List<Action<Exception>>? _onErrList;
         Task<IWire<Pkt<Point2d>>>? _memo;

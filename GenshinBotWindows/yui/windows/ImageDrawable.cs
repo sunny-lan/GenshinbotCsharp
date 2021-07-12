@@ -16,17 +16,6 @@ namespace genshinbot.yui.windows
         public ImageDrawable(Viewport parent)
         {
             this.parent = parent;
-            parent.MouseEvent += obj =>
-            {
-                if (_img is null) return;
-                var r = new OpenCvSharp. Rect(_pos, _img.Size());
-                if (r.Contains(obj.Location))
-                {
-                    var tmp = obj;
-                    tmp.Location -= r.TopLeft;
-                    MouseEvent?.Invoke(tmp);
-                }
-            };
         }
 
 
@@ -78,6 +67,20 @@ namespace genshinbot.yui.windows
         {
             if(bmp!=null)
             e.Graphics.DrawImage(bmp, _pos.Sys());
+        }
+
+        public bool Parent_MouseEvent(MouseEvent obj)
+        {
+            if (_img is null) return false;
+            var r = new OpenCvSharp.Rect(_pos, _img.Size());
+            if (r.Contains(obj.Location))
+            {
+                var tmp = obj;
+                tmp.Location -= r.TopLeft;
+                MouseEvent?.Invoke(tmp);
+                return true;
+            }
+            return false;
         }
     }
 }

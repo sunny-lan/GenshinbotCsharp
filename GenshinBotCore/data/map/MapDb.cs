@@ -2,6 +2,7 @@
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,10 +11,71 @@ namespace genshinbot.data.map
 {
     public class MapDb
     {
-        public List<Feature> Features { get; set; }
+        public List<Feature> Features { get; set; } = new();
 
+        public Feature? DeleteFeature(int id)
+        {
+            Feature? del = null;
+            Feature? parent=null;
+            foreach (var f in Features)
+            {
+                if (f.Reachable is not null)
+                {
+                    int oldlen = f.Reachable.Count;
+                    f.Reachable = f.Reachable.Where(x => x != id).ToList();
+                    if (oldlen != f.Reachable.Count)
+                        parent = f;
+                }
 
-        public static MapDb Default() {
+                if (f.ID == id)
+                    del = f;
+            }
+            if (del is not null)
+                Features.Remove(del);
+            return parent;
+
+        }
+        public List<int>? FindPath(int src, int dst)
+        {
+            Dictionary<int, Feature> mapping = new();
+            foreach (var f in Features)
+                mapping[f.ID] = f;
+
+            List<int> res = new();
+            Dictionary<int, bool> visited = new();
+            bool dfs(int i)
+            {
+                if (visited.GetValueOrDefault(i)) return false;
+                visited[i] = true;
+
+                res.Add(i);
+                try
+                {
+                    if (i == dst)
+                    {
+                        return true;
+                    }
+                    if (mapping[i].Reachable is null) return false;
+                    foreach (var child in mapping[i].Reachable!)
+                    {
+                        if (dfs(child)) return true;
+                    }
+                    return false;
+                }
+                finally
+                {
+                    res.Remove(res.Count - 1);
+                }
+            }
+
+            if (dfs(src))
+
+                return res;
+            else return null;
+        }
+
+        public static MapDb Default()
+        {
             return new MapDb
             {
                 Features = new List<Feature>(),
@@ -29,6 +91,25 @@ namespace genshinbot.data.map
         /// Approximate transformation of a coordinate to a pixel on BigMap
         /// </summary>
         public Transformation? Coord2Minimap { get; set; }
+
+        public void CalculateCoord2Minimap()
+        {
+            var db = this;
+            Debug.Assert(db.KnownMinimapCoords.Count >= 2, "At least 2 points required");
+            var a = db.KnownMinimapCoords[0];
+            var b = db.KnownMinimapCoords[1];
+            var deltaCoord = a.Coord - b.Coord;
+            var deltaMini = a.Minimap - b.Minimap;
+            double scaleX = deltaMini.X / deltaCoord.X;
+            double scaleY = deltaMini.Y / deltaCoord.Y;
+            Debug.Assert(Math.Abs(scaleY - scaleX) < db.MaxMinimapScaleDistortion, "Calculated scaling is non uniform");
+            double scale = (scaleX + scaleY) / 2.0;
+            db.Coord2Minimap = new data.Transformation
+            {
+                Scale = scale,
+                Translation = a.Minimap - a.Coord * scale
+            };
+        }
 
         /// <summary>
         /// Stores a list of known points on the minimap, 

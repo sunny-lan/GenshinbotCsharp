@@ -7,7 +7,16 @@ using System;
 /// </summary>
 namespace genshinbot.yui
 {
-    public interface Viewport
+    public interface Clickable
+    {
+
+        event Action<MouseEvent>? MouseEvent;
+    }
+    public interface Colorable
+    {
+        Scalar Color { get; set; }
+    }
+    public interface Viewport:Clickable
     {
         Size Size { get; set; }
 
@@ -15,13 +24,12 @@ namespace genshinbot.yui
         /// transformation
         /// </summary>
         Transformation T { get; set; }
-        Action<Transformation> OnTChange { get; set; }
+        Action<Transformation>? OnTChange { get; set; }
 
         Rect CreateRect();
         Line CreateLine();
         Image CreateImage();
 
-        event Action<MouseEvent> MouseEvent;
 
         void ClearChildren();
         void Delete(object r);
@@ -31,13 +39,12 @@ namespace genshinbot.yui
     }
 
 
-    public interface Rect
+    public interface Rect:Clickable,Colorable
     {
         OpenCvSharp.Rect R { get; set; }
-        event Action<MouseEvent> MouseEvent;
     }
 
-    public interface Image
+    public interface Image:Clickable
     {
         Mat ?Mat { get; set; }
         Point TopLeft { get; set; }
@@ -47,7 +54,12 @@ namespace genshinbot.yui
         /// </summary>
         void Invalidate();
         void Invalidate(OpenCvSharp.Rect r);
-        event Action<MouseEvent> MouseEvent;
+    }
+
+    public interface Line : Clickable,Colorable
+    {
+        Point A { get; set; }
+        Point B { get; set; }
     }
     public interface DirectGfx
     {
@@ -62,9 +74,4 @@ namespace genshinbot.yui
         void Invalidate();
     }
 
-    public interface Line
-    {
-        Point A { get; set; }
-        Point B { get; set; }
-    }
 }

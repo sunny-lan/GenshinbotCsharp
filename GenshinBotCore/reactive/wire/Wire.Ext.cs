@@ -13,6 +13,18 @@ namespace genshinbot.reactive.wire
 
     public static partial class LiveWire
     {
+        /// <summary>
+        /// Same as Subscribe, except calls onValue as soon as we are connected
+        /// TODO may double call
+        /// </summary>
+        /// <param name="onValue"></param>
+        /// <returns></returns>
+        public static IDisposable Connect<T>(this ILiveWire<T> t, Action<T> onValue)
+        {
+            var res = t.Subscribe(onValue);
+            onValue(t.Value);
+            return res;
+        }
         public static ILiveWire<T> Create<T>(T init, Func<Action<T>, IDisposable> enable)
         {
             T val = init;

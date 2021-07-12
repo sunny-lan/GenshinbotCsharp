@@ -14,13 +14,14 @@ namespace genshinbot.yui.windows
     }
     interface Drawable
     {
+        bool Parent_MouseEvent(MouseEvent e);
         void OnPaint(PaintEventArgs e);
     }
     class Viewport : Control, yui.Viewport
     {
         private Transformation _transform = Transformation.Unit();
 
-        public event Action<MouseEvent> MouseEvent;
+        public event Action<MouseEvent>? MouseEvent;
         OpenCvSharp.Size yui.Viewport.Size
         {
             get => Size.cv();
@@ -42,8 +43,8 @@ namespace genshinbot.yui.windows
             }
         }
 
-        public Func<MouseEvent, bool> OnMouseEvent { get; set; }
-        public Action<Transformation> OnTChange { get; set; }
+        public Func<MouseEvent, bool>? OnMouseEvent { get; set; }
+        public Action<Transformation>? OnTChange { get; set; }
 
         public Point2d? MousePos { get; private set; }
 
@@ -86,13 +87,20 @@ namespace genshinbot.yui.windows
         {
             return (e) =>
             {
-                this.MouseEvent?.Invoke(new MouseEvent
+                var evt = new MouseEvent
                 {
                     Location = T.Inverse(e.Location.Cv()),
                     Type = kind,
-                });
+                };
+                this.MouseEvent?.Invoke(evt);
+
+                for (int i = drawable.Count - 1; i >= 0; i--)
+                {
+                    if (drawable[i].Parent_MouseEvent(evt)) break;
+                }
             };
         }
+
 
         void switch_bet<T>(Action<object, T> own, Action<T> other, T e)
         {

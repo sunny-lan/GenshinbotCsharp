@@ -33,6 +33,8 @@ namespace genshinbot.tools
         }
         private DB db = DB.Instance.Value;
 
+       
+
         YUI ui;
         private readonly LocationManager lm;
         private Tab tab;
@@ -186,7 +188,15 @@ namespace genshinbot.tools
 
         private async void TestBtn_Click(object? sender, EventArgs e)
         {
-            await lm.WholeWalkTo(WholeWalk);
+            testBtn.Enabled = false;
+            try
+            {
+                await lm.WholeWalkTo(WholeWalk);
+            }
+            finally
+            {
+                testBtn.Enabled = true;
+            }
         }
 
         LocationManager.WholeWalk WholeWalk = new(null, new());

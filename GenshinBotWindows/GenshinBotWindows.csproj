@@ -67,9 +67,6 @@
     <Compile Update="yui\windows\PropertyGrid.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Update="yui\windows\Rect.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Update="yui\windows\Tab.cs">
       <SubType>Component</SubType>
     </Compile>

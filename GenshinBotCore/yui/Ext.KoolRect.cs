@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenCvSharp;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -18,6 +19,7 @@ namespace genshinbot.yui
         }
 
         public OpenCvSharp.Rect R { get; set; }
+        public Scalar Color { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public event Action<MouseEvent>? MouseEvent
         {

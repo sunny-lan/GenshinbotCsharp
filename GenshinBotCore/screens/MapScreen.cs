@@ -62,7 +62,8 @@ namespace genshinbot.screens
         public MapScreen(BotIO b, ScreenManager screenManager) : base(b, screenManager)
         {
 
-            locationMatch = new algorithm.MapLocationMatch(Data.MapDb.Features);
+            locationMatch = new algorithm.MapLocationMatch(Data.MapDb.Features
+                .Where(x=>x.Type==FeatureType.Teleporter).ToList());
             templateMatch = new algorithm.MapTemplateMatch();
 
             Screen = b.W.Screen.Watch2(b.W.Bounds);//TODO async
@@ -73,7 +74,7 @@ namespace genshinbot.screens
                     if (k.Count == 0) throw new algorithm.AlgorithmFailedException("No teleporters found");
                     return k;
                 }
-                ,error => OnMatchError?.Invoke(error)
+                , error => OnMatchError?.Invoke(error)
             );
             Screen2Coord = b.W.Size.Select3((Size size) =>
                 Features.Select(
@@ -112,7 +113,7 @@ namespace genshinbot.screens
             await ScreenManager.ExpectScreen(ScreenManager.LoadingScreen);
             await ScreenManager.LoadingScreen.WaitTillDone();
             await ScreenManager.ExpectScreen(ScreenManager.PlayingScreen);
-           // b.S(b.PlayingScreen);
+            // b.S(b.PlayingScreen);
         }
 
         /// <summary>
@@ -157,7 +158,7 @@ namespace genshinbot.screens
                 await Task.Delay(10);
 
             }
-            
+
         }
 
         /*  public static void Test()
@@ -194,8 +195,8 @@ namespace genshinbot.screens
         {
             var rig = rig1.Make();
             var screen = new MapScreen(rig, null);
-           await screen.Io.M.MouseTo(
-                await screen.ShowOnScreen(Data.MapDb.Features[0].Coordinates));
+            await screen.Io.M.MouseTo(
+                 await screen.ShowOnScreen(Data.MapDb.Features[0].Coordinates));
 
         }
         public static async Task Test3Async()

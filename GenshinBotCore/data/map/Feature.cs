@@ -10,29 +10,43 @@ namespace genshinbot.data.map
 {
     public enum FeatureType
     {
-        Teleporter
+        Teleporter,
+        RandomPoint,
     }
     public class Feature
     {
+        private static object lck = new object();
         private static int global_ctr = 0;
-        public Feature()
-        {
-            _id = global_ctr;
-            global_ctr++;
-        }
 
-        private int _id;
+        private int _id=-1;
         public int ID
         {
-            get => _id;
+            get
+            {
+                if (_id == -1)
+                {
+                    lock (lck)
+                    {
+                        _id = global_ctr;
+                        global_ctr++;
+                    }
+                }
+                return _id;
+            }
+
             set
             {
                 _id = value;
                 //Sketchy way to make sure IDs don't repeat
-                global_ctr = Math.Max(global_ctr, _id)+1;
+                lock (lck)
+                    global_ctr = Math.Max(global_ctr, _id) + 1;
             }
         }
         public FeatureType Type { get; set; }
+        public string? Name { get; set; }
         public Point2d Coordinates { get; set; }
+
+        public List<int>? Reachable { get; set; }
+
     }
 }

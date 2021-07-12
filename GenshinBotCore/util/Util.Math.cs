@@ -6,6 +6,12 @@ namespace genshinbot
 {
     public static partial class Util
     {
+        public static Point2d ProjectOnto(this Point2d a,Point2d b)
+        {
+            return b* (a.DotProduct(b) / b.DotProduct(b));
+        }
+
+        
 
         public static int Area(this Rect r)
         {
