@@ -32,7 +32,7 @@ namespace genshinbot.tools
             }
             else
             {
-                db = MapDb.Default();
+                db = new();
             }
 
             var g = GenshinWindow.FindExisting();// ("*Untitled - Notepad", null);

@@ -98,7 +98,10 @@ namespace genshinbot.algorithm
         public MapLocationMatch() { }
         public MapLocationMatch(List<Feature> features) {
             foreach (var f in features)
+            {
+               // Console.WriteLine(f.ID);
                 AddFeature(f);
+            }
         }
 
         void TestTransform(Point2d translation, double scale, List<MapTemplateMatch.Result> list,bool expectUnknown,

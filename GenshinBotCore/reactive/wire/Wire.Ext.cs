@@ -197,6 +197,23 @@ namespace genshinbot.reactive.wire
                 await tt.ConfigureAwait(false);
             }
         }
+        public static bool LockWhile(this ILiveWire<bool> o, Action t, TimeSpan? timeout = null)
+        {
+            o.WaitTrue(timeout).Wait();
+
+            bool res = true;
+            using (o.Subscribe(
+                x =>
+                {
+                    if (!x)
+                        res = false;
+                }
+            ))
+            {
+                t();
+            }
+            return res;
+        }
         public static async Task Lock<T>(this IWire<T> o, Func<Task> t, T v)
         {
 

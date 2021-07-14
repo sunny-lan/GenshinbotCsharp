@@ -25,9 +25,9 @@ namespace genshinbot.automation
 
         public ScreenshotObservable Screen { get;  }
 
-        public IMouseCapture MouseCap { get; }
+        public IMouseCapture MouseCap => w.MouseCap;
 
-        public IKeyCapture KeyCap { get; }
+        public IKeyCapture KeyCap => w.KeyCap;
 
         public ILiveWire<Rect?> ScreenBounds { get; }
 
@@ -39,9 +39,6 @@ namespace genshinbot.automation
             Mouse = new ProxyMouse(enabled, w.Mouse);
             Screen = new ProxyScreen(enabled, w.Screen);
 
-            //TODO
-            KeyCap = w.KeyCap;
-            MouseCap = w.MouseCap;
 
             ScreenBounds = w.ScreenBounds.Relay2(enabled);
 

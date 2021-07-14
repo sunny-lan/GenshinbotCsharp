@@ -9,7 +9,7 @@ namespace genshinbot.data.db
 {
     public class SettingsScreenDb
     {
-        public static DbInst<SettingsScreenDb> Instance = new("screens/settings.json");
+        public readonly static DbInst<SettingsScreenDb> Instance = new("screens/settings.json");
         public class RD
         {
             public Rect Settings { get; set; }

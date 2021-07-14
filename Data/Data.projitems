@@ -105,6 +105,7 @@
     <Content Include="$(MSBuildThisFileDirectory)data\map\genshiniodata\assets\YuanshenOutput\markercluster-base.js" />
     <Content Include="$(MSBuildThisFileDirectory)data\map\genshiniodata\assets\YuanshenOutput\markercluster-yuan.js" />
     <Content Include="$(MSBuildThisFileDirectory)data\map\genshiniodata\assets\YuanshenOutput\Raw_Javascript.js" />
+    <Content Include="$(MSBuildThisFileDirectory)data\map\genshiniodata\db.json" />
     <Content Include="$(MSBuildThisFileDirectory)data\map\genshiniodata\json\features\dragonspine\special\teleporter.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

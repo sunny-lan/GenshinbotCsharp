@@ -44,27 +44,31 @@ namespace genshinbot.controllers
             var db = Data.MapDb;
             db.CalculateCoord2Minimap();
         }
-        List<Action<Exception>>? _onErrList;
+        List<Action<Exception>> _onErrList=new();
         Task<IWire<Pkt<Point2d>>>? _memo;
         /// <summary>
         /// memoized trackpos
         /// </summary>
         /// <returns></returns>
-        public Task<IWire<Pkt<Point2d>>> TrackPos(Action<Exception> onError = null)
+        public Task<IWire<Pkt<Point2d>>> TrackPos(Action<Exception>? onError = null)
         {
+            lock(_onErrList)
+            if(onError is not null)
+                _onErrList.Add(onError);
             if (_memo is null)
             {
-                _onErrList = new();
                 _memo = _TrackPos(err =>
                 {
-                    _memo = null;
-                    foreach (var ea in _onErrList) ea(err);
-                    _onErrList = null;
-                    Debug.WriteLine(err);
+                    lock (_onErrList)
+                    {
+                        _memo = null;
+                        if (_onErrList.Count == 0) throw err;
+                        foreach (var ea in _onErrList) ea(err);
+                        _onErrList.Clear();
+                        Debug.WriteLine(err);
+                    }
                 });
             }
-            if (onError is not null)
-                _onErrList!.Add(onError);
             return _memo;
         }
         /// <summary>
@@ -96,7 +100,7 @@ namespace genshinbot.controllers
             try
             {
                 map.OnMatchError += onError;
-                 screen2Coord = await map.Screen2Coord.Get();
+                screen2Coord = await map.Screen2Coord.Get();
             }
             finally
             {
@@ -104,6 +108,7 @@ namespace genshinbot.controllers
             }
             var miniLoc = coord2Mini.Transform(screen2Coord.ToCoord(center));
             await map.Close();
+            await Task.Delay(5000);
             return screens.PlayingScreen.TrackPos(miniLoc, onError)
                 .Select(x => coord2Mini.Inverse(x));
         }
@@ -129,7 +134,8 @@ namespace genshinbot.controllers
         {
             var opt2 = opt ?? DefaultWalkOptions;
             int idx = 0;
-            var pos = await TrackPos();
+            TaskCompletionSource TMP = new TaskCompletionSource();
+            var pos = await TrackPos(E=>TMP.SetException(E));
             var wanted = new LiveWireSource<double?>(null);
 
             if (screens.ActiveScreen.Value != screens.PlayingScreen)
@@ -161,7 +167,7 @@ namespace genshinbot.controllers
                       )*/
             using (deltaP.Subscribe(async delta =>
             {
-                // Console.WriteLine($"d={delta}");
+                 Console.WriteLine($"d={delta}");
                 await io.M.MouseMove(delta).ConfigureAwait(false);
             }))
             using (pos.Subscribe(p =>
@@ -195,7 +201,8 @@ namespace genshinbot.controllers
                 {
                     Debug.WriteLine("begin walking");
                     await io.K.KeyDown(Keys.W).ConfigureAwait(false);
-                    await wanted.Where(x => x is null).Get().ConfigureAwait(false);
+                    using (var G = wanted.Where(x => x is null).GetGetter())
+                        await Task.WhenAny(G.Get(), TMP.Task);
                     return;
                     /*backtowalking:
                     var r = await await Task.WhenAny(allDead.Get(), atDest.Get()).ConfigureAwait(false);
@@ -564,6 +571,30 @@ namespace genshinbot.controllers
             List<WalkPoint> Points
         );
 
+        public async Task Goto(Feature dst)
+        {
+            var db = MapDb.Instance.Value;
+            foreach (var src in db.Features.Where(f => f.Type == FeatureType.Teleporter))
+            {
+                var path = db.FindPath(src.ID, dst.ID);
+                if (path is not null)
+                {
+                    await TeleportTo(src);
+
+                    if (path.Count > 1)
+                    {
+                        await WalkTo(path
+                            .Skip(1)
+                            .Select(f => new WalkPoint(f.Coordinates))
+                            .ToList());
+                    }
+
+                    return;
+                }
+            }
+            throw new algorithm.AlgorithmFailedException("no path found");
+        }
+
         public async Task WholeWalkTo(WholeWalk w, WalkOptions? opt = null)
         {
             await TeleportTo(w.Teleporter);
@@ -606,6 +637,22 @@ namespace genshinbot.controllers
             {
                 await lm.WalkTo(bad);
                 Console.ReadLine();
+            }
+        }
+
+        public class Test
+        {
+            private readonly LocationManager lm;
+
+            public Test(LocationManager lm)
+            {
+                this.lm = lm;
+            }
+
+            public async Task TestGoto()
+            {
+                await lm.Goto(MapDb.Instance.
+                    Value.Features.Find(x => x.ID == 74)!);
             }
         }
     }

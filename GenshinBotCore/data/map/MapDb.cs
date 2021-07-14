@@ -11,12 +11,13 @@ namespace genshinbot.data.map
 {
     public class MapDb
     {
+        public static readonly DbInst<MapDb> Instance = new("map/db.json");
         public List<Feature> Features { get; set; } = new();
 
         public Feature? DeleteFeature(int id)
         {
             Feature? del = null;
-            Feature? parent=null;
+            Feature? parent = null;
             foreach (var f in Features)
             {
                 if (f.Reachable is not null)
@@ -35,37 +36,36 @@ namespace genshinbot.data.map
             return parent;
 
         }
-        public List<int>? FindPath(int src, int dst)
+        public List<Feature>? FindPath(int src, int dst)
         {
             Dictionary<int, Feature> mapping = new();
             foreach (var f in Features)
                 mapping[f.ID] = f;
 
-            List<int> res = new();
+            List<Feature> res = new();
             Dictionary<int, bool> visited = new();
             bool dfs(int i)
             {
                 if (visited.GetValueOrDefault(i)) return false;
                 visited[i] = true;
 
-                res.Add(i);
-                try
+                var f = mapping[i]!;
+                if (i == dst)
                 {
-                    if (i == dst)
-                    {
-                        return true;
-                    }
-                    if (mapping[i].Reachable is null) return false;
-                    foreach (var child in mapping[i].Reachable!)
-                    {
-                        if (dfs(child)) return true;
-                    }
-                    return false;
+                    res.Add(f);
+                    return true;
                 }
-                finally
+                if (f.Reachable is null) return false;
+
+                res.Add(f);
+                foreach (var child in f.Reachable!)
                 {
-                    res.Remove(res.Count - 1);
+                    if (dfs(child)) return true;
                 }
+                res.RemoveAt(res.Count - 1);
+                return false;
+
+
             }
 
             if (dfs(src))
@@ -74,13 +74,6 @@ namespace genshinbot.data.map
             else return null;
         }
 
-        public static MapDb Default()
-        {
-            return new MapDb
-            {
-                Features = new List<Feature>(),
-            };
-        }
         public Image BigMap { get; set; } = new Image
         {
             Path = "map/genshiniodata/assets/MapExtracted_12.png",

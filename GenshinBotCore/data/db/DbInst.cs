@@ -22,7 +22,7 @@ namespace genshinbot.data
             }
         }
 
-        public string DbFile { get; }
+        public string DbFilePath { get; }
 
         public override object ObjVal  => Value;
 
@@ -31,17 +31,17 @@ namespace genshinbot.data
         public DbInst(string db)
         {
             inst = new Lazy<T>(() => Data.ReadJson1<T>(db));
-            DbFile = db;
+            DbFilePath = db;
         }
 
         public void ReloadFromDisk()
         {
-            inst = new Lazy<T>(() => Data.ReadJson1<T>(DbFile));
+            inst = new Lazy<T>(() => Data.ReadJson1<T>(DbFilePath));
         }
 
         public override async Task Save()
         {
-            await Data.WriteJsonAsync<T>(DbFile, Value);
+            await Data.WriteJsonAsync<T>(DbFilePath, Value);
         }
     }
 }

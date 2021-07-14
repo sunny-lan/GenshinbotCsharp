@@ -30,6 +30,8 @@ namespace genshinbot
 
         static async Task Main(string[] args)
         {
+            Process process = Process.GetCurrentProcess();
+            process.PriorityClass = ProcessPriorityClass.Normal;
             DPIAware.Set(SHCore.PROCESS_DPI_AWARENESS.PROCESS_PER_MONITOR_DPI_AWARE);
             //TaskExceptionCatcher.Do ();
             Kernel32.AllocConsole();
@@ -42,16 +44,19 @@ namespace genshinbot
             */
             var rig = new TestingRig();
 
+            MockGenshinWindow mkMok()
+            {
+                var gw = new MockGenshinWindow(new OpenCvSharp.Size(1680, 1050));
+                gw.MapScreen.Image = Data.Imread("test/map_luhua_1050.png");
+                gw.PlayingScreen.Image = Data.Imread("test/playing_luhua_1050.png");
+                gw.CurrentScreen = gw.PlayingScreen;
+                return gw;
+            }
+
             var services = new ServiceCollection()
                 .AddSingleton<YUI>(_=>yui.windows.MainForm.make())
-              //  .AddSingleton<IWindowAutomator2>(_=> new WindowAutomator2("Genshin Impact", "UnityWndClass"))
-                .AddSingleton<IWindowAutomator2>(_=> {
-                    var gw = new MockGenshinWindow(new OpenCvSharp. Size(1680, 1050));
-                    gw.MapScreen.Image = Data.Imread("test/map_luhua_1050.png");
-                    gw.PlayingScreen.Image = Data.Imread("test/playing_luhua_1050.png");
-                    gw.CurrentScreen = gw.PlayingScreen;
-                    return gw;
-                })
+                .AddSingleton<IWindowAutomator2>(_=> new WindowAutomator2("Genshin Impact", "UnityWndClass"))
+                //.AddSingleton<IWindowAutomator2>(_=> mkMok())
                 .AddSingleton<BotIO, BaseBotIO>()
                 .AddSingleton<screens.ScreenManager>()
                 .AddSingleton<controllers.LocationManager>()
@@ -59,10 +64,10 @@ namespace genshinbot
                 .AddSingleton<tools.AutofillTool>()
                 .AddSingleton<tools.BlackbarFixer>()
                 .AddSingleton<tools.DailyDoer>()
-                .AddSingleton<tools.MapUI>();
+                .AddSingleton<tools.MapUI>()
+                .AddSingleton<controllers.LocationManager.Test>();
 
             var sp = services.BuildServiceProvider();
-             var sm = sp.GetService<screens.ScreenManager>();
 
             //  await screens.MapScreen.Testshow(rig);
 
@@ -122,10 +127,12 @@ namespace genshinbot
             //       await controllers.LocationManager.TestGoto(rig);
             // await tools.WalkRecorder.TestAsync(rig.Make());
             //  await tools.AutofillTool.ConfigureCharacterSel(rig.Make());
-            //  sm.ForceScreen(sm.PlayingScreen);
+               var sm = sp.GetRequiredService<screens.ScreenManager>();
+                sm.ForceScreen(sm.PlayingScreen);
             //4  using var kk = sp.GetService<tools.WalkEditor>();
-            using var dd = sp.GetRequiredService<tools.MapUI>();
-          //  await sp.GetService<tools.AutofillTool>()!.ConfigureAll();
+        //   using var dd = sp.GetRequiredService<tools.MapUI>();
+            //  await sp.GetService<tools.AutofillTool>()!.ConfigureAll();
+            await sp.GetRequiredService<controllers.LocationManager.Test>().TestGoto();
             //  await sp.GetService<tools.BlackbarFixer>().FixBlackBar();
             //  await tools.DailyDoer.runAsync(rig.Make());
             //algorithm.ChatReadAlg.Test();

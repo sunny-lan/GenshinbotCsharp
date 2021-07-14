@@ -12,7 +12,7 @@ namespace genshinbot.screens
     {
         public class Db
         {
-            public static DbInst<Db> Instance = new DbInst<Db>("screens/quests.json");
+            public static readonly DbInst<Db> Instance = new DbInst<Db>("screens/quests.json");
             public abstract class Tab
             {
                 public Rect Btn { get; set; }

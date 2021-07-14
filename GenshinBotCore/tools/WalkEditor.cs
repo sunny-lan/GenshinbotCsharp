@@ -15,7 +15,7 @@ namespace genshinbot.tools
     {
         public class DB
         {
-            public static DbInst<DB> Instance { get; } = new DbInst<DB>("tools/walkeditor.json");
+            public static readonly DbInst<DB> Instance = new DbInst<DB>("tools/walkeditor.json");
 
 
             public class WalkEditPoint

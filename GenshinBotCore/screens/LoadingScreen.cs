@@ -15,7 +15,7 @@ namespace genshinbot.screens
     {
         public class Db
         {
-            public static DbInst<Db> Instance = new DbInst<Db>("screens/loadingScreen.json");
+            public static readonly DbInst<Db> Instance = new DbInst<Db>("screens/loadingScreen.json");
             public class RD
             {
                 public Rect Patch { get; set; } = new Rect(10, 10, 20, 20);

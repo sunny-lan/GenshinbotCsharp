@@ -9,9 +9,8 @@ namespace genshinbot.data
     /// </summary>
     static partial class Data
     {
-        private static Lazy<map.MapDb> mapDb = new Lazy<map.MapDb>(
-                 () => ReadJson("map/db.json", map.MapDb.Default()));
-        public static map.MapDb MapDb => mapDb.Value;
+        //todo refactor
+        public static map.MapDb MapDb => map.MapDb.Instance.Value;
 
         private static Lazy<GeneralDb> general = new Lazy<GeneralDb>(
                 () => ReadJson1<GeneralDb>("generaldb.json"));

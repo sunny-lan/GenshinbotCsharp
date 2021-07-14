@@ -14,12 +14,32 @@ namespace genshinbot.reactive
 {
     public class Poller
     {
-        Wire<NoneT> wire;
+        public Wire<NoneT> wire { get; }
+        public Poller(Func<Task> a, int? delay = null)
+        {
+            var lck = new SemaphoreSlim(1);
+            wire= new Wire<NoneT>(_ => Poller.InfiniteLoop(async()=> {
+                await lck.WaitAsync().ConfigureAwait(false);
+                try
+                {
+                    await a();
+                }
+                finally
+                {
+                    lck.Release();
+                }
+
+            }, delay));
+        }
         public Poller(Action a, int? delay = null)
         {
-            wire= new Wire<NoneT>(_ => Poller.InfiniteLoop(a, delay));
+            wire = new Wire<NoneT>(_ => Poller.InfiniteLoop(a, delay));
         }
-        public static IDisposable InfiniteLoop(Action a, int? delay=null)
+        public static IDisposable InfiniteLoop(Action a, int? delay = null)
+        {
+            return InfiniteLoop(async () => a(), delay);
+        }
+        public static IDisposable InfiniteLoop(Func<Task> a, int? delay=null)
         {
             var ts = new CancellationTokenSource();
             Task.Run(async() => {
@@ -27,7 +47,7 @@ namespace genshinbot.reactive
                 while (!ts.Token.IsCancellationRequested)
                 {
                     //   Console.WriteLine(" begin poll");
-                    a();
+                    await a().ConfigureAwait(false);
                     if (delay is int dd)
                         await Task.Delay(dd, ts.Token).ConfigureAwait(false);
                 }

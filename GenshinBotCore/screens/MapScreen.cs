@@ -74,12 +74,12 @@ namespace genshinbot.screens
                     if (k.Count == 0) throw new algorithm.AlgorithmFailedException("No teleporters found");
                     return k;
                 }
-                , error => OnMatchError?.Invoke(error)
+                , error => (OnMatchError??throw error).Invoke(error)
             );
             Screen2Coord = b.W.Size.Select3((Size size) =>
                 Features.Select(
                     features => locationMatch.FindLocation2(features, size, ExpectUnknown)
-                    , error => OnMatchError?.Invoke(error)
+                    , error => (OnMatchError ?? throw error).Invoke(error)
                 )
             ).Switch2();
 

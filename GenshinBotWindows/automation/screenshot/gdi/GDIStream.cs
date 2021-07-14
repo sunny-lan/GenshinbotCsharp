@@ -54,8 +54,8 @@ namespace genshinbot.automation.screenshot.gdi
             });
 
             this.enable = enable ?? new ConstLiveWire<bool>(true);
-
-            poller = Wire.InfiniteLoop(Poll)
+            ppp = new Poller(Poll);
+            poller = ppp.wire
                 .Relay(this.enable);
         }
 
@@ -88,7 +88,7 @@ namespace genshinbot.automation.screenshot.gdi
 
         }
 
-        void Poll()
+        async Task Poll()
         {
             Debug.Assert(buf != null);
             List<Rect> updates;
@@ -109,16 +109,26 @@ namespace genshinbot.automation.screenshot.gdi
                         continue;
                     }
                     updates.Add(region);
-                } 
-
-                //Console.WriteLine("flush screenshot");
-                if (!Gdi32.GdiFlush())
-                {
-                    throw new Exception("Failed gdiflush", Kernel32.GetLastError().GetException());
                 }
+
+            }
+            try
+            {
+                //Console.WriteLine("flush screenshot");
+                await enable.LockWhile(async () =>
+                {
+                    if (!Gdi32.GdiFlush())
+                    {
+                        throw new Exception("Failed gdiflush", Kernel32.GetLastError().GetException());
+                    }
+                });
                 snapTime = DateTime.Now;
             }
-            
+            catch(LockInterruptedException)
+            {
+                return;
+            }
+
             foreach (var update in updates)
             {
                 //TODO bad!
@@ -126,8 +136,7 @@ namespace genshinbot.automation.screenshot.gdi
             }
         }
         private ILiveWire<bool> enable;
-
-
+        private Poller ppp;
         IWire<NoneT> poller;
 
         /// <summary>
@@ -187,7 +196,7 @@ namespace genshinbot.automation.screenshot.gdi
             {
                 cache[r] = allSnaps
                     .Link<(Rect r, Snap s),Snap>((snap, next)=> {
-                        if (snap.r.IntersectsWith(r))
+                        if (snap.r.Contains(r))
                         {
                             Snap res = snap.s.Select(x=>x[r]);
                             next(res);
