@@ -130,9 +130,9 @@ namespace genshinbot
                var sm = sp.GetRequiredService<screens.ScreenManager>();
                 sm.ForceScreen(sm.PlayingScreen);
             //4  using var kk = sp.GetService<tools.WalkEditor>();
-        //   using var dd = sp.GetRequiredService<tools.MapUI>();
+           using var dd = sp.GetRequiredService<tools.MapUI>();
             //  await sp.GetService<tools.AutofillTool>()!.ConfigureAll();
-            await sp.GetRequiredService<controllers.LocationManager.Test>().TestGoto();
+          //  await sp.GetRequiredService<controllers.LocationManager.Test>().TestGoto();
             //  await sp.GetService<tools.BlackbarFixer>().FixBlackBar();
             //  await tools.DailyDoer.runAsync(rig.Make());
             //algorithm.ChatReadAlg.Test();

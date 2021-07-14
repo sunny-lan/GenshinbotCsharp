@@ -71,6 +71,8 @@ namespace genshinbot.controllers
             }
             return _memo;
         }
+
+        Point2d? LastKnownPos = null;
         /// <summary>
         /// it is up to the user to call this in the correct timing! (aka no concurrent calls)
         /// </summary>

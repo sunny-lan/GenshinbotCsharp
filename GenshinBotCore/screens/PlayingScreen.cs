@@ -96,6 +96,8 @@ namespace genshinbot.screens
             await Io.K.KeyPress(Keys.Escape);
             await Task.Delay(3000);//todo
         }
+
+        algorithm.MinimapMatch.PositionTracker? posTrack = null;
         /// <summary>
         /// it is up to the user to not call this concurrently
         /// It is expected as soon as a tracking error happens, 
@@ -106,7 +108,6 @@ namespace genshinbot.screens
         public IWire<Pkt<Point2d>> TrackPos(Point2d approxPos,Action<Exception> onError)
         {
 
-            algorithm.MinimapMatch.PositionTracker? posTrack = null;
 
             //TODO async
             return Minimap.Select((Mat x) =>
