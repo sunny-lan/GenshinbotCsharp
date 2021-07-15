@@ -181,9 +181,27 @@ namespace genshinbot.automation.screenshot.gdi
                 }
                 else
                 {
-                    // first we will eliminate rects which are nested
-                    var orignal = new List<Rect>(listeningRects.Keys);
-                    pollRegions.AddRange(orignal);
+                    var k = listeningRects.Keys.ToList();
+                   for(int i=0;i<k.Count;i++)
+                    {
+                        for (int j = 0; j < k.Count; j++)
+                        {
+                            if (i == j) continue;
+                            if (k[i] == k[j])
+                            {
+                                if (j < i)
+                                    goto outer;
+                            }else 
+                            if (k[j].Contains(k[i]))
+                                goto outer;
+
+                        }
+
+                        pollRegions.Add(k[i]);
+
+                    outer:;
+                    }
+
                 }
             }
         }

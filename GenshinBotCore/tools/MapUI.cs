@@ -129,6 +129,10 @@ namespace genshinbot.tools
 
         private void initTracking(LocationManager lm)
         {
+            var throughput = sidebar.CreateLabel();
+            sidebar.SetFlex(throughput, new() { Weight = 0 });
+            lm.LastKnownPos.Throughput().Subscribe(x=>throughput.Text=$"s/s:{x}");
+
             var beginTrack = sidebar.CreateButton();
             sidebar.SetFlex(beginTrack, new() { Weight = 0 });
             beginTrack.Text = "track";
@@ -182,6 +186,9 @@ namespace genshinbot.tools
                 }
                 if (x is Point2d p)
                 {
+                    if (cursorPos.Value is null)
+                        cursorPos.SetValue(p);
+
                     r!.R = c2m.Transform(p).RectAround(5);
 
                     JumpToPlayer(lm);

@@ -214,7 +214,6 @@ namespace genshinbot.controllers
             int retryCount = 0;
             using (deltaP.Subscribe(async delta =>
             {
-                Console.WriteLine($"d={delta}");
                 Interlocked.Exchange(ref retryCount, 0);
                 await io.M.MouseMove(delta).ConfigureAwait(false);
             }, onErr: e=> { 

@@ -728,7 +728,24 @@ namespace genshinbot.reactive.wire
                 w.Subscribe(_ => onChange(), eh));
         }
 
-
+        public static IWire<double> Throughput<T>(this IWire<T> w, long sampleLen=2000)
+        {
+            var sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
+            Queue<long> time = new();
+            long recent;
+            return w.Link((Action<T, Action<double>>)((_,next) =>
+            {
+                recent = sw.ElapsedMilliseconds;
+                time.Enqueue(recent);
+                while (time.Count>0 && time.Peek()< recent - sampleLen)
+                    time.Dequeue();
+                if (time.Count > 1)
+                {
+                    next(time.Count * 1000.0 / sampleLen);
+                }
+            }));
+        }
         public static IWire<T> DistinctUntilChanged<T>(this IWire<T> w)
         {
             bool first = true;
