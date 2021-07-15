@@ -44,18 +44,66 @@ namespace genshinbot.controllers
             var db = Data.MapDb;
             db.CalculateCoord2Minimap();
         }
-        Task<IWire<Pkt<Point2d>>>? _memo;
-        Point2d? LastKnownPos = null;
+        LiveWireSource<bool> _isTracking = new(false);
+        public ILiveWire<bool> IsTracking => _isTracking;
+
+        LiveWireSource<Point2d?> _lastKnownPos = new(null);
+       public ILiveWire<Point2d?> LastKnownPos => _lastKnownPos;
+        Task<IWire<Pkt<Point2d>>>? _trackMemo = null;
+        object trackLock=new object();
         /// <summary>
         /// it is up to the user to call this in the correct timing! (aka no concurrent calls)
         /// </summary>
         /// <returns></returns>
-        public async Task<IWire<Pkt<Point2d>>> TrackPos()
+        public Task<IWire<Pkt<Point2d>>> TrackPos()
         {
 
-          //  if (_memo is not null) return await _memo;
-          //  TaskCompletionSource< IWire < Pkt < Point2d >>> sc = new ();
-            
+            async Task<IWire<Pkt<Point2d>>> meme_TrackPos()
+            {
+                try
+                {
+                    _isTracking.SetValue(true);
+                    var db = Data.MapDb;
+                    var coord2Mini = db.Coord2Minimap.Expect();
+                    var res = await _TrackPos();
+                    return res
+                        .Select(x => coord2Mini.Inverse(x))
+                        .Do(x => _lastKnownPos.SetValue(x))
+                        .Catch(e =>
+                        {
+                            lock (trackLock)
+                                _trackMemo = null;
+
+                            _lastKnownPos.SetValue(null);
+                            _isTracking.SetValue(false);
+                        });
+                }
+                catch
+                {
+                    lock (trackLock)
+                        _trackMemo = null;
+
+                    _isTracking.SetValue(false);
+                    throw;
+                }
+            }
+
+            lock (trackLock)
+            {
+                if (_trackMemo is null)
+                {
+                    _trackMemo = meme_TrackPos();
+                }
+                return _trackMemo;
+            }
+
+
+        }
+        async Task<IWire<Pkt<Point2d>>> _TrackPos()
+        {
+            //  if (_memo is not null) return await _memo;
+            //  TaskCompletionSource< IWire < Pkt < Point2d >>> sc = new ();
+
             var db = Data.MapDb;
             var coord2Mini = db.Coord2Minimap.Expect();
 
@@ -65,6 +113,9 @@ namespace genshinbot.controllers
             {
                 if (screen == map)
                 {
+                    var s2c = await map.Screen2Coord.Get();
+                    var center1 = (await map.Io.W.Bounds.Value2()).Center();
+                    _lastKnownPos.SetValue(s2c.ToCoord(center1));
                     await screens.MapScreen.Close();
                 }
                 else
@@ -72,16 +123,34 @@ namespace genshinbot.controllers
                     throw new Exception("unexpected screen");
                 }
             }
-            await screens.PlayingScreen.OpenMap();
-            var center = (await map.Io.W.Bounds.Value2()).Center();
-            algorithm.MapLocationMatch.Result? screen2Coord;
-            screen2Coord = await map.Screen2Coord.Get();
-            var miniLoc = coord2Mini.Transform(screen2Coord.ToCoord(center));
-            await map.Close();
-           var res= screens.PlayingScreen.TrackPos(miniLoc)
-                .Select(x => coord2Mini.Inverse(x));
 
-            return res;
+            if (_lastKnownPos.Value is not null)
+            {
+                var miniLoc1 = coord2Mini.Transform(_lastKnownPos.Value.Expect());
+                var res = screens.PlayingScreen.TrackPos(miniLoc1);
+                try
+                {
+                    await res.Get();
+                    return res;
+                }
+                catch (algorithm.AlgorithmFailedException)
+                {
+                    _lastKnownPos.SetValue(null);
+                }
+            }
+
+            if (_lastKnownPos.Value is null)
+            {
+                await screens.PlayingScreen.OpenMap();
+                var center = (await map.Io.W.Bounds.Value2()).Center();
+                algorithm.MapLocationMatch.Result? screen2Coord;
+                screen2Coord = await map.Screen2Coord.Get();
+                _lastKnownPos.SetValue(screen2Coord.ToCoord(center));
+            }
+
+            var miniLoc = coord2Mini.Transform(_lastKnownPos.Value.Expect());
+            await map.Close();
+            return screens.PlayingScreen.TrackPos(miniLoc);
         }
 
         public class WalkOptions
@@ -92,6 +161,8 @@ namespace genshinbot.controllers
             public int BackupTime { get; init; } = 1000;
         }
         public static WalkOptions DefaultWalkOptions = new WalkOptions();
+        private int reentrant;
+
         enum WalkStatus
         {
             Deading,
@@ -137,7 +208,7 @@ namespace genshinbot.controllers
                       )*/
             using (deltaP.Subscribe(async delta =>
             {
-                 Console.WriteLine($"d={delta}");
+                Console.WriteLine($"d={delta}");
                 await io.M.MouseMove(delta).ConfigureAwait(false);
             }))
             using (pos.Subscribe(p =>

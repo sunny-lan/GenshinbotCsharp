@@ -55,8 +55,8 @@ namespace genshinbot
 
             var services = new ServiceCollection()
                 .AddSingleton<YUI>(_=>yui.windows.MainForm.make())
-                .AddSingleton<IWindowAutomator2>(_=> new WindowAutomator2("Genshin Impact", "UnityWndClass"))
-                //.AddSingleton<IWindowAutomator2>(_=> mkMok())
+               // .AddSingleton<IWindowAutomator2>(_=> new WindowAutomator2("Genshin Impact", "UnityWndClass"))
+                .AddSingleton<IWindowAutomator2>(_=> mkMok())
                 .AddSingleton<BotIO, BaseBotIO>()
                 .AddSingleton<screens.ScreenManager>()
                 .AddSingleton<controllers.LocationManager>()

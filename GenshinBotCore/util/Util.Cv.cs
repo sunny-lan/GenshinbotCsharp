@@ -137,6 +137,10 @@ namespace genshinbot
         {
             return new Rect((p - sz.Center()).Round(), sz);
         }
+        public static Rect RectAround(this Point2d p, int sz)
+        {
+            return p.RectAround(new Size(sz, sz));
+        }
 
         public static Rect Pad(this Rect r, int sz)
         {

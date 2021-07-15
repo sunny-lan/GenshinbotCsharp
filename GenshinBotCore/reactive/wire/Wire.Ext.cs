@@ -748,6 +748,14 @@ namespace genshinbot.reactive.wire
         {
             return w.Select(x => { f(x); return x; });
         }
+        public static IWire<T> Catch<T>(this IWire<T> w, Action<Exception> f, bool bubble=true)
+        {
+            return new Wire<T>((n, eh) => w.Subscribe(n, e =>
+            {
+                f(e);
+                if (bubble) eh(e);
+            }));
+        }
         public static ILiveWire<T> Do<T>(this ILiveWire<T> w, Action<T> f)
         {
             return w.Select(x => { f(x); return x; });

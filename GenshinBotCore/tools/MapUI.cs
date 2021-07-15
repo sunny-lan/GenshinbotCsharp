@@ -68,10 +68,6 @@ namespace genshinbot.tools
                 Wrap = false,
             });
 
-            /*      beginTrack = sidebar.CreateButton();
-                  sidebar.SetFlex(beginTrack, new() { Weight = 0 });
-                  beginTrack.Text = "track";
-                  beginTrack.Click += BeginTrack_ClickAsync;*/
 
 
 
@@ -91,7 +87,6 @@ namespace genshinbot.tools
             initAddBtn();
             initDeleteBtn();
             initSaveLoad();
-            initStatusLbl();
 
             /*actionBtn1 = sidebar.CreateButton();
             sidebar.SetFlex(actionBtn1, new() { Weight = 0 });
@@ -102,7 +97,11 @@ namespace genshinbot.tools
             if (lm is LocationManager ll)
             {
                 initTesting(ll);
+                initTracking(ll);
+                initJumpToPlayer(ll);
             }
+
+            initStatusLbl();
 
             selected.Subscribe(x =>
             {
@@ -112,6 +111,60 @@ namespace genshinbot.tools
             initMapImg(ui);
             rerenderGraph();
             initCursor();
+        }
+
+        private void initJumpToPlayer(LocationManager ll)
+        {
+            var btnJmpToPlayer = sidebar.CreateButton();
+            sidebar.SetFlex(btnJmpToPlayer, new() { Weight = 0 });
+            ll.LastKnownPos.Connect(x => btnJmpToPlayer.Enabled = x is not null);
+            btnJmpToPlayer.Text = "jump";
+            btnJmpToPlayer.Click += (_,_)=>JumpToPlayer(ll);
+        }
+
+        private void JumpToPlayer(LocationManager ll)
+        {
+            vp.T = vp.T.MatchPoints(c2m.Transform(ll.LastKnownPos.Value.Expect()), vp.Size.Center());
+        }
+
+        private void initTracking(LocationManager lm)
+        {
+            var beginTrack = sidebar.CreateButton();
+            sidebar.SetFlex(beginTrack, new() { Weight = 0 });
+            beginTrack.Text = "track";
+            lm.IsTracking.Connect(trk => beginTrack.Enabled = !trk);
+            beginTrack.Click += async (_,_)=> {
+                var res=await lm.TrackPos();
+                res.Use();
+            };
+
+            yui.Rect? r=null;
+            lm.LastKnownPos.Connect(x =>
+            {
+                if(x is null!=r is null)
+                {
+                    if (x is null)
+                    {
+                        vp.Delete(r!);
+                        r = null;
+                    }
+                    else
+                    {
+                        r = vp.CreateRect();
+                        r.Color = Scalar.White;
+                        r.MouseEvent += e =>
+                        {
+                            if (e.Type == MouseEvent.Kind.Click)
+                                cursorPos.SetValue(lm.LastKnownPos.Value.Expect());
+                        };
+                        JumpToPlayer(lm);
+                    }
+                }
+                if(x is Point2d p)
+                {
+                    r!.R = c2m.Transform( p).RectAround(5);
+                }
+            });
         }
 
         void initTesting(LocationManager lm)

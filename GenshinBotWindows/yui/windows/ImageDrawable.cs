@@ -66,7 +66,7 @@ namespace genshinbot.yui.windows
         public void OnPaint(PaintEventArgs e)
         {
             if(bmp!=null)
-            e.Graphics.DrawImage(bmp, _pos.Sys());
+                    e.Graphics.DrawImage(bmp, _pos.Sys());
         }
 
         public bool Parent_MouseEvent(MouseEvent obj)
