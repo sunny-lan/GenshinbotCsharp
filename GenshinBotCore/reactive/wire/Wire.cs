@@ -179,7 +179,7 @@ namespace genshinbot.reactive.wire
                 count = subscribers.Count;
                 if(errH is not null)
                 {
-                    errSubs = new();
+                    errSubs = new(errSubs);//bruh!
                     errSubs.Add(errH);
                 }
             }

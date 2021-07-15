@@ -119,7 +119,7 @@ namespace genshinbot.tools
             sidebar.SetFlex(btnJmpToPlayer, new() { Weight = 0 });
             ll.LastKnownPos.Connect(x => btnJmpToPlayer.Enabled = x is not null);
             btnJmpToPlayer.Text = "jump";
-            btnJmpToPlayer.Click += (_,_)=>JumpToPlayer(ll);
+            btnJmpToPlayer.Click += (_, _) => JumpToPlayer(ll);
         }
 
         private void JumpToPlayer(LocationManager ll)
@@ -133,15 +133,36 @@ namespace genshinbot.tools
             sidebar.SetFlex(beginTrack, new() { Weight = 0 });
             beginTrack.Text = "track";
             lm.IsTracking.Connect(trk => beginTrack.Enabled = !trk);
-            beginTrack.Click += async (_,_)=> {
-                var res=await lm.TrackPos();
-                res.Use();
+            beginTrack.Click += async (_, _) =>
+            {
+                IWire<reactive.Pkt<Point2d>> res;
+                try
+                {
+                    res = await lm.TrackPos();
+                }
+                catch (Exception e)
+                {
+                    tab.Status = e.ToString();
+                    ui.GiveFocus(tab);
+                    return;
+                }
+                IDisposable? d = null;
+                d=res.Subscribe(_ => { }, e =>
+                {
+                    d?.Dispose();
+                    tab.Status = e.ToString();
+                    ui.GiveFocus(tab);
+
+                });
+
             };
 
-            yui.Rect? r=null;
+
+
+            yui.Rect? r = null;
             lm.LastKnownPos.Connect(x =>
             {
-                if(x is null!=r is null)
+                if (x is null != r is null)
                 {
                     if (x is null)
                     {
@@ -157,12 +178,13 @@ namespace genshinbot.tools
                             if (e.Type == MouseEvent.Kind.Click)
                                 cursorPos.SetValue(lm.LastKnownPos.Value.Expect());
                         };
-                        JumpToPlayer(lm);
                     }
                 }
-                if(x is Point2d p)
+                if (x is Point2d p)
                 {
-                    r!.R = c2m.Transform( p).RectAround(5);
+                    r!.R = c2m.Transform(p).RectAround(5);
+
+                    JumpToPlayer(lm);
                 }
             });
         }
@@ -176,14 +198,15 @@ namespace genshinbot.tools
             Wire.Combine(running, selected, (run, sel) =>
                  !run && sel is Feature).Connect(en => testBtn.Enabled = en);
             testBtn.Text = "test";
-            testBtn.Click += async(object? sender, EventArgs e) =>
+            testBtn.Click += async (object? sender, EventArgs e) =>
             {
                 try
                 {
                     running.SetValue(true);
                     var dst = (Feature)selected.Value!;
                     await lm.Goto(dst);
-                }catch(Exception E)
+                }
+                catch (Exception E)
                 {
                     tab.Status = E.Message;
                     ui.GiveFocus(tab);

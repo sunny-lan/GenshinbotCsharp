@@ -31,7 +31,7 @@ namespace genshinbot
         static async Task Main(string[] args)
         {
             Process process = Process.GetCurrentProcess();
-            process.PriorityClass = ProcessPriorityClass.Normal;
+            process.PriorityClass = ProcessPriorityClass.AboveNormal;
             DPIAware.Set(SHCore.PROCESS_DPI_AWARENESS.PROCESS_PER_MONITOR_DPI_AWARE);
             //TaskExceptionCatcher.Do ();
             Kernel32.AllocConsole();
@@ -55,8 +55,8 @@ namespace genshinbot
 
             var services = new ServiceCollection()
                 .AddSingleton<YUI>(_=>yui.windows.MainForm.make())
-               // .AddSingleton<IWindowAutomator2>(_=> new WindowAutomator2("Genshin Impact", "UnityWndClass"))
-                .AddSingleton<IWindowAutomator2>(_=> mkMok())
+                .AddSingleton<IWindowAutomator2>(_=> new WindowAutomator2("Genshin Impact", "UnityWndClass"))
+               // .AddSingleton<IWindowAutomator2>(_=> mkMok())
                 .AddSingleton<BotIO, BaseBotIO>()
                 .AddSingleton<screens.ScreenManager>()
                 .AddSingleton<controllers.LocationManager>()

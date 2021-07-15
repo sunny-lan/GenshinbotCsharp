@@ -48,9 +48,9 @@ namespace genshinbot.controllers
         public ILiveWire<bool> IsTracking => _isTracking;
 
         LiveWireSource<Point2d?> _lastKnownPos = new(null);
-       public ILiveWire<Point2d?> LastKnownPos => _lastKnownPos;
+        public ILiveWire<Point2d?> LastKnownPos => _lastKnownPos;
         Task<IWire<Pkt<Point2d>>>? _trackMemo = null;
-        object trackLock=new object();
+        object trackLock = new object();
         /// <summary>
         /// it is up to the user to call this in the correct timing! (aka no concurrent calls)
         /// </summary>
@@ -74,7 +74,6 @@ namespace genshinbot.controllers
                             lock (trackLock)
                                 _trackMemo = null;
 
-                            _lastKnownPos.SetValue(null);
                             _isTracking.SetValue(false);
                         });
                 }
@@ -159,9 +158,15 @@ namespace genshinbot.controllers
             public int WaitResponse { get; init; } = 600;
             public int DeadTrigger { get; init; } = 30;
             public int BackupTime { get; init; } = 1000;
+
+            /// <summary>
+            /// Set to null to always teleport
+            /// </summary>
+            public double? TeleportThres { get; init; } = 7;
+
+            public int MaxArrowDetectFail { get; init; } = 4;
         }
         public static WalkOptions DefaultWalkOptions = new WalkOptions();
-        private int reentrant;
 
         enum WalkStatus
         {
@@ -206,12 +211,24 @@ namespace genshinbot.controllers
                       .Select(_ => WalkStatus.Deading)
                       .GetGetter()
                       )*/
+            int retryCount = 0;
             using (deltaP.Subscribe(async delta =>
             {
                 Console.WriteLine($"d={delta}");
+                Interlocked.Exchange(ref retryCount, 0);
                 await io.M.MouseMove(delta).ConfigureAwait(false);
+            }, onErr: e=> { 
+                if(e is algorithm.AlgorithmFailedException)
+                {
+                    if(Interlocked.Increment(ref retryCount) < opt2.MaxArrowDetectFail)
+                    {
+                        Console.WriteLine($"warn: arrow detect failed: {e}");
+                        return;
+                    }
+                }
+                wanted.EmitError(e);
             }))
-            using (pos.Subscribe(p =>
+            using (pos.Subscribe((Point2d p) =>
            {
                //  Console.WriteLine($"p={p}");
                /* if (p.DistanceTo(dst) < opt2.Tolerance)
@@ -229,11 +246,11 @@ namespace genshinbot.controllers
                }
                if (idx == dst.Count)
                {
-                   wanted.SetValue(null);
+                   wanted.SetValue(double.NaN);//send nan to represent done!
                    return;
                }
                wanted.SetValue(p.AngleTo(dst[idx].Value));
-           }))
+           }, onErr: wanted.EmitError))
             {  //keep going until either atDest, or dead
 
                 //dont start till mouse ready
@@ -242,7 +259,7 @@ namespace genshinbot.controllers
                 {
                     Debug.WriteLine("begin walking");
                     await io.K.KeyDown(Keys.W).ConfigureAwait(false);
-                    await wanted.Where(x => x is null).Get();
+                    await wanted.Where(x => double.IsNaN(x??0)).Get();
                     return;
                     /*backtowalking:
                     var r = await await Task.WhenAny(allDead.Get(), atDest.Get()).ConfigureAwait(false);
@@ -419,6 +436,7 @@ namespace genshinbot.controllers
                     throw new Exception("expected playing or map screen");
             }
             await m.TeleportTo(waypoint);
+            _lastKnownPos.SetValue(waypoint.Coordinates);
 
         }
         /* 
@@ -611,28 +629,54 @@ namespace genshinbot.controllers
             List<WalkPoint> Points
         );
 
-        public async Task Goto(Feature dst)
+        public async Task Goto(Feature dst, WalkOptions? opt = null)
         {
+            var opt2 = opt ?? DefaultWalkOptions;
             var db = MapDb.Instance.Value;
-            foreach (var src in db.Features.Where(f => f.Type == FeatureType.Teleporter))
+
+            var feats = db.Features.Where(f => f.Type == FeatureType.Teleporter);
+            if (opt2.TeleportThres is double dd)
+            {
+                var kust = await TrackPos();
+                var pp = await kust.Get();
+                feats = feats.Union(db.Features.Where(f =>
+                    f.Coordinates.DistanceTo(pp) <= opt2.TeleportThres));
+            }
+
+
+            double bestLen = double.MaxValue;
+            IEnumerable<Feature>? best = null;
+            foreach (var src in feats)
             {
                 var path = db.FindPath(src.ID, dst.ID);
                 if (path is not null)
                 {
-                    await TeleportTo(src);
-
-                    if (path.Count > 1)
+                    var newLen = MapDb.Length(path);
+                    if (newLen < bestLen)
                     {
-                        await WalkTo(path
-                            .Skip(1)
-                            .Select(f => new WalkPoint(f.Coordinates))
-                            .ToList());
+                        best = path;
+                        bestLen = newLen;
                     }
-
-                    return;
                 }
             }
-            throw new algorithm.AlgorithmFailedException("no path found");
+
+            if (best is null)
+                throw new algorithm.AlgorithmFailedException("no path found");
+
+            if (best.First().Type == FeatureType.Teleporter)
+            {
+                await TeleportTo(best.First());
+                best = best.Skip(1);
+            }
+
+            var lst = best
+                    .Select(f => new WalkPoint(f.Coordinates))
+                    .ToList();
+
+            if (lst.Count > 0)
+                await WalkTo(lst, opt);
+
+
         }
 
         public async Task WholeWalkTo(WholeWalk w, WalkOptions? opt = null)

@@ -36,11 +36,15 @@ namespace genshinbot.algorithm
             filtered.Dispose();
         }
         Mat edges = new Mat();
-        Mat tmp4 = new Mat();
+        Mat green = new Mat();
+        Mat blue = new Mat();
         Mat img = new Mat();
         Mat hsv = new Mat();
         Mat arrowMask = new Mat();
         Mat red = new Mat();
+        Mat tmp = new Mat();
+        Mat redCombined = new Mat();
+        Mat maskAndred = new Mat();
         public double GetAngle(Mat img1)
         {
 
@@ -59,21 +63,47 @@ namespace genshinbot.algorithm
             //Cv2.BilateralFilter(sum, sum1, 3, 20, 20);sum = sum1;
             //not green & red
             Cv2.InRange(hsv, new Scalar(0, 200, 0, 0), new Scalar(30, 256, 256, 256), red);
-            Cv2.InRange(hsv, new Scalar(216, 200, 0, 0), new Scalar(256, 256, 256, 256), tmp4);
-            Cv2.BitwiseOr(red, tmp4, red);
-            Cv2.InRange(hsv, new Scalar(56, 200, 0, 0), new Scalar(105, 256, 256, 256), tmp4);
-            Cv2.BitwiseOr(tmp4, red, edges);
+            Cv2.InRange(hsv, new Scalar(216, 200, 0, 0), new Scalar(256, 256, 256, 256), green);
+            Cv2.InRange(hsv, new Scalar(56, 200, 0, 0), new Scalar(105, 256, 256, 256), blue);
+            
+
+            Cv2.BitwiseOr(red, green, redCombined);
+            Cv2.BitwiseOr(blue, redCombined, edges);
+
 
             var cc1 = edges.ConnectedComponentsEx();
             var center = img.Center().Round();
             var lbl = cc1.Labels[center.X, center.Y];
+           /* int[] lbls = {
+                cc1.Labels[center.X, center.Y],
+                cc1.Labels[center.X, center.Y-1],
+                cc1.Labels[center.X, center.Y+1],
+                cc1.Labels[center.X-1, center.Y],
+                cc1.Labels[center.X+1, center.Y]
+            };
             //cc1.RenderBlobs(tmp1);
+            int lbl=-1234, i=0;
+            foreach(int x in lbls)
+            {
+                if (i == 0)
+                {
+                    lbl = x;
+                    i = 1;
+                }else if (lbl == x)
+                {
+                    i++;
+                }
+                else
+                {
+                    i--;
+                }
+            }*/
 
             arrowMask.SetTo(Scalar.Black);
             cc1.FilterByLabel(edges, arrowMask, lbl);//TODO increase efficiency using own impl
-            Cv2.BitwiseAnd(arrowMask, red, red);
+            Cv2.BitwiseAnd(arrowMask, redCombined, maskAndred);
             //Cv2.BitwiseAnd(tmp1, tmp1, tmp1, mask: arrowMask);
-            Cv2.Dilate(red, red, null);
+            Cv2.Dilate(maskAndred, maskAndred, null);
 
             //Cv2.AdaptiveThreshold(sum, edges, 255, AdaptiveThresholdTypes.MeanC, ThresholdTypes.BinaryInv, 3, 10);
             //Cv2.InRange(img, db.ArrowColor.Min, db.ArrowColor.Max, filtered);
@@ -105,7 +135,7 @@ namespace genshinbot.algorithm
 
             // Cv2.DrawContours(img, new Point[][] { contour }, 0, Scalar.Blue);
             Dbg.Image(img);
-            var cc = Cv2.ConnectedComponentsEx(red);
+            var cc = Cv2.ConnectedComponentsEx(maskAndred);
             var lst = cc.Blobs.Skip(1);
             var largest = lst.First();
             foreach (var k in lst)

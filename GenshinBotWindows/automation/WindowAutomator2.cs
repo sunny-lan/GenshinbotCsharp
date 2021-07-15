@@ -55,6 +55,9 @@ namespace genshinbot.automation.windows
                 throw new AttachWindowFailedException();
             thread = User32.GetWindowThreadProcessId(hWnd, out pid);
 
+            //lower their priority
+            Process.GetProcessById((int)pid).PriorityClass = ProcessPriorityClass.BelowNormal;
+
             locationChangeHook = new WinEventHook(processOfInterest: pid);
 
             clientAreaStream = locationChangeHook.Wire

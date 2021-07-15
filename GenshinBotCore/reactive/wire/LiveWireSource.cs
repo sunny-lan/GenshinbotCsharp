@@ -7,14 +7,17 @@ namespace genshinbot.reactive.wire
     {
         LiveWire<T> wire;
         private Action? _onChange;
+        private Action<Exception>? _eh;
         T _v;
         public LiveWireSource(T v)
         {
             _v = v;
-            wire = new LiveWire<T>(() => _v, onChange =>
+            wire = new LiveWire<T>(() => _v, (onChange ,eh)=>
             {
                 this._onChange = onChange;
-                return DisposableUtil.From(() => _onChange = null);
+                _eh = eh;
+
+                return DisposableUtil.From(() => { _eh = null; _onChange = null; });
             });
         }
 
@@ -25,6 +28,11 @@ namespace genshinbot.reactive.wire
         {
             _v = v;
             _onChange?.Invoke();
+        }
+
+        public void EmitError(Exception e)
+        {
+            _eh?.Invoke(e);
         }
 
         public IDisposable Subscribe(Action<T> onValue) => wire.Subscribe(onValue);

@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Ben.Demystifier" Version="0.4.1" />
     <PackageReference Include="OneOf" Version="3.0.178" />
     <PackageReference Include="OpenCvSharp4" Version="4.5.1.20210210" />
     <PackageReference Include="System.IO.Ports" Version="5.0.1" />

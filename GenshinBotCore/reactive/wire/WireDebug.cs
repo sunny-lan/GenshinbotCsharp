@@ -1,6 +1,7 @@
 ﻿using genshinbot.diag;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,7 +13,7 @@ namespace genshinbot.reactive.wire
         public static WireDebug Instance = new WireDebug();
         public bool Enable=
             #if DEBUG 
-            false
+            true
 #else
             false
 #endif

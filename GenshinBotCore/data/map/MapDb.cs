@@ -36,6 +36,13 @@ namespace genshinbot.data.map
             return parent;
 
         }
+        public static double Length(List<Feature> path)
+        {
+            double res=0;
+            for (int i = 0; i + 1 < path.Count; i++)
+                res += path[i].Coordinates.DistanceTo(path[i + 1].Coordinates);
+            return res;
+        }
         public List<Feature>? FindPath(int src, int dst)
         {
             Dictionary<int, Feature> mapping = new();

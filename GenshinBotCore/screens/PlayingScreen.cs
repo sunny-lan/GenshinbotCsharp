@@ -107,7 +107,7 @@ namespace genshinbot.screens
         /// <returns></returns>
         public IWire<Pkt<Point2d>> TrackPos(Point2d approxPos)
         {
-
+            //var reason = EnhancedStackTrace.Current();
 
             //TODO async
             return Minimap.Select((Mat x) =>
