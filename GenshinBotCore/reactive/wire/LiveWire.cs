@@ -21,12 +21,14 @@ namespace genshinbot.reactive.wire
         Wire<T> wire;
         public bool ChecksDistinct { get; }
         public LiveWire(Func<T> getVal, Func<Action, IDisposable> enable, bool checkDistinct = false)
+            : this(getVal, (a,b)=>enable(a), checkDistinct) { }
+        public LiveWire(Func<T> getVal, Func<Action, Action<Exception>, IDisposable> enable, bool checkDistinct = false)
 
         {
             this.ChecksDistinct = checkDistinct;
             this.getVal = getVal;
 
-            this.wire = new Wire<T>(onNext =>
+            this.wire = new Wire<T>((onNext,onErr) =>
             {
 
                     void onParentChange()
@@ -47,7 +49,7 @@ namespace genshinbot.reactive.wire
                     last = getVal();
                     running = true;
                    // Console.WriteLine($"live {iid} running");
-                    var sub = enable(onParentChange);
+                    var sub = enable(onParentChange,onErr);
                     return DisposableUtil.From(() =>
                     {
                             sub.Dispose();
@@ -61,6 +63,8 @@ namespace genshinbot.reactive.wire
         {
             return wire.Subscribe(onValue);
         }
+
+        public IDisposable Subscribe(Action<T> onValue, Action<Exception> onErr) => wire.Subscribe(onValue, onErr);
 
 
         //If its running, then just use the last value

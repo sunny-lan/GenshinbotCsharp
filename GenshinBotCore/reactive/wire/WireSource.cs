@@ -26,6 +26,8 @@ namespace genshinbot.reactive.wire
             _onNext?.Invoke(v);
         }
 
+        public IDisposable Subscribe(Action<T> onValue,Action<Exception> e) => wire.Subscribe(onValue,e);
+
         public IDisposable Subscribe(Action<T> onValue) => wire.Subscribe(onValue);
     }
 }

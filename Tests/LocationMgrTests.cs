@@ -40,7 +40,7 @@ namespace GenshinBotTests
                 ScreenManager mgr = new ScreenManager(b);
                 mgr.ForceScreen(mgr.PlayingScreen);
                 LocationManager lm = new LocationManager(mgr);
-                var trackin = await lm.TrackPos(error=>Assert.True(false,error.ToString()));
+                var trackin = await lm.TrackPos();
                 var res = await trackin.Get();
 
                 Debug.WriteLine($"{playingImg},{mapImg}  found={res}");

@@ -16,5 +16,10 @@ namespace genshinbot.reactive.wire
         {
             return DisposableUtil.Empty;
         }
+
+        public IDisposable Subscribe(Action<T> onValue, Action<Exception> onErr)
+        {
+            return DisposableUtil.Empty;
+        }
     }
 }

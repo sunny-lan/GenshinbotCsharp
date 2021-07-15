@@ -117,11 +117,6 @@ namespace genshinbot.reactive
                     lock (lck) return f(last);
                 });
         }
-        public static IWire<Pkt<Out>> ProcessAsync<In, Out>(this IWire<Pkt<In>> observable, Func<In, Out> fn, Action<Exception> onError, Wire.ProcessAsyncOptions ?opt=null)
-        {
-            return observable.ProcessAsync(x => x.Select(fn),onError,opt);
-        }
-
 
         /// <summary>
         /// Performs transformation on stream of packets, keeping the CaptureTime of the packet the same
@@ -133,10 +128,9 @@ namespace genshinbot.reactive
         /// <returns></returns>
         public static IWire<Pkt<Out>> Select<In, Out>(
             this IWire<Pkt<In>> observable,
-            Func<In, Out> fn,
-            Action<Exception>? onError=null)
+            Func<In, Out> fn)
         {
-            return observable.Select((Pkt<In> x) => x.Select(fn),onError);
+            return observable.Select((Pkt<In> x) => x.Select(fn));
         }
         public static ILiveWire<Pkt<Out>> Select<In, Out>(this ILiveWire<Pkt<In>> observable, Func<In, Out> fn)
         {

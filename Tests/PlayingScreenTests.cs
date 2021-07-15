@@ -65,8 +65,7 @@ namespace GenshinBotTests
                 var rig1 = new MockTestingRig(gw);
                 PlayingScreen p = new PlayingScreen(rig1.Make(), null);
                 gw.PlayingScreen.Image = mt;
-                var res = await p.TrackPos(approxPos, 
-                    onError=>Assert.True(false, onError.ToString())).Get();
+                var res = await p.TrackPos(approxPos).Get();
                 Debug.WriteLine($"{img}, approx={approxPos} found={res}");
                 double lim = 1;
                 if (pos is Point2d pp)

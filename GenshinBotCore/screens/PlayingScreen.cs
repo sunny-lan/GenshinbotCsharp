@@ -105,7 +105,7 @@ namespace genshinbot.screens
         /// </summary>
         /// <param name="approxPos"></param>
         /// <returns></returns>
-        public IWire<Pkt<Point2d>> TrackPos(Point2d approxPos,Action<Exception> onError)
+        public IWire<Pkt<Point2d>> TrackPos(Point2d approxPos)
         {
 
 
@@ -143,7 +143,6 @@ namespace genshinbot.screens
                 approxPos = res;
                 return res;
             }
-           ,    onError
             );
         }
 

@@ -44,42 +44,18 @@ namespace genshinbot.controllers
             var db = Data.MapDb;
             db.CalculateCoord2Minimap();
         }
-        List<Action<Exception>> _onErrList=new();
         Task<IWire<Pkt<Point2d>>>? _memo;
-        /// <summary>
-        /// memoized trackpos
-        /// </summary>
-        /// <returns></returns>
-        public Task<IWire<Pkt<Point2d>>> TrackPos(Action<Exception>? onError = null)
-        {
-            lock(_onErrList)
-            if(onError is not null)
-                _onErrList.Add(onError);
-            if (_memo is null)
-            {
-                _memo = _TrackPos(err =>
-                {
-                    lock (_onErrList)
-                    {
-                        _memo = null;
-                        if (_onErrList.Count == 0) throw err;
-                        foreach (var ea in _onErrList) ea(err);
-                        _onErrList.Clear();
-                        Debug.WriteLine(err);
-                    }
-                });
-            }
-            return _memo;
-        }
-
         Point2d? LastKnownPos = null;
         /// <summary>
         /// it is up to the user to call this in the correct timing! (aka no concurrent calls)
         /// </summary>
-        /// <param name="onError"></param>
         /// <returns></returns>
-        public async Task<IWire<Pkt<Point2d>>> _TrackPos(Action<Exception> onError)
+        public async Task<IWire<Pkt<Point2d>>> TrackPos()
         {
+
+          //  if (_memo is not null) return await _memo;
+          //  TaskCompletionSource< IWire < Pkt < Point2d >>> sc = new ();
+            
             var db = Data.MapDb;
             var coord2Mini = db.Coord2Minimap.Expect();
 
@@ -99,20 +75,13 @@ namespace genshinbot.controllers
             await screens.PlayingScreen.OpenMap();
             var center = (await map.Io.W.Bounds.Value2()).Center();
             algorithm.MapLocationMatch.Result? screen2Coord;
-            try
-            {
-                map.OnMatchError += onError;
-                screen2Coord = await map.Screen2Coord.Get();
-            }
-            finally
-            {
-                map.OnMatchError -= onError;
-            }
+            screen2Coord = await map.Screen2Coord.Get();
             var miniLoc = coord2Mini.Transform(screen2Coord.ToCoord(center));
             await map.Close();
-            await Task.Delay(5000);
-            return screens.PlayingScreen.TrackPos(miniLoc, onError)
+           var res= screens.PlayingScreen.TrackPos(miniLoc)
                 .Select(x => coord2Mini.Inverse(x));
+
+            return res;
         }
 
         public class WalkOptions
@@ -136,8 +105,7 @@ namespace genshinbot.controllers
         {
             var opt2 = opt ?? DefaultWalkOptions;
             int idx = 0;
-            TaskCompletionSource TMP = new TaskCompletionSource();
-            var pos = await TrackPos(E=>TMP.SetException(E));
+            var pos = await TrackPos();
             var wanted = new LiveWireSource<double?>(null);
 
             if (screens.ActiveScreen.Value != screens.PlayingScreen)
@@ -203,8 +171,7 @@ namespace genshinbot.controllers
                 {
                     Debug.WriteLine("begin walking");
                     await io.K.KeyDown(Keys.W).ConfigureAwait(false);
-                    using (var G = wanted.Where(x => x is null).GetGetter())
-                        await Task.WhenAny(G.Get(), TMP.Task);
+                    await wanted.Where(x => x is null).Get();
                     return;
                     /*backtowalking:
                     var r = await await Task.WhenAny(allDead.Get(), atDest.Get()).ConfigureAwait(false);

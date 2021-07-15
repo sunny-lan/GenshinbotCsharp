@@ -18,6 +18,7 @@ namespace genshinbot.reactive.wire
             });
         }
 
+
         public T Value => _v;
 
         public void SetValue(T v)
@@ -27,5 +28,7 @@ namespace genshinbot.reactive.wire
         }
 
         public IDisposable Subscribe(Action<T> onValue) => wire.Subscribe(onValue);
+
+        public IDisposable Subscribe(Action<T> onValue, Action<Exception> onErr) => wire.Subscribe(onValue, onErr);
     }
 }

@@ -339,7 +339,7 @@ namespace genshinbot.tools
         {
             beginTrack.Enabled = false;
             IDisposable? d = null;
-            var pos = await lm.TrackPos(err =>
+            var pos = await lm.TrackPos(/*err =>
             {
                 vp.Delete(playerInd!);
                 playerInd = null;
@@ -347,7 +347,7 @@ namespace genshinbot.tools
                 tab.Status = err.ToString();
                 ui.GiveFocus(tab);
                 beginTrack.Enabled = true;
-            });
+            }*/);
 
             playerInd = vp.CreateRect();
             playerInd.MouseEvent += e => onMouseEvent(playerInd, e);

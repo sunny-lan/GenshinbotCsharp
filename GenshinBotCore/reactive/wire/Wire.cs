@@ -14,11 +14,13 @@ namespace genshinbot.reactive.wire
         WireDebug.Info? dbg = WireDebug.Instance.GetDebug();
 
         volatile List<Action<T>> subscribers = new List<Action<T>>();
-        Func<Action<T>, IDisposable> Enable;
+        volatile List<Action<Exception>> errSubs = new ();
+        Func<Action<T>, Action<Exception>, IDisposable> Enable;
       //  SemaphoreSlim enabled_lock = new SemaphoreSlim(1);
         SemaphoreSlim S_lock = new SemaphoreSlim(1);
         //TODO performance optimization for single subscriber case
-        public Wire(Func<Action<T>, IDisposable> enable)
+        public Wire(Func<Action<T>, IDisposable> enable) : this((onNext,onErr)=>enable(onNext)) { }
+        public Wire(Func<Action<T>,Action<Exception>, IDisposable> enable)
         {
             Enable = enable;
         }
@@ -38,8 +40,14 @@ namespace genshinbot.reactive.wire
                 Debug.Assert(!_enabled);
                 _enabled = true;
                 //Action<T> k = OnNext;
-               // Console.WriteLine($"{iid=k.GetHashCode()} enabled");
-                enabled = Enable.Invoke(OnNext);
+                // Console.WriteLine($"{iid=k.GetHashCode()} enabled");
+                try
+                {
+                    enabled = Enable.Invoke(OnNext,onErr);
+                }
+                catch (Exception ee) {
+                    onErr(ee);
+                }
             //    enabled_lock.Release();
             }
             else
@@ -50,8 +58,13 @@ namespace genshinbot.reactive.wire
                 pendingLock.Release();*/
              //   enabled_lock.Wait();
                 Debug.Assert(_enabled);
-                Debug.Assert(enabled is not null);
-                enabled.Dispose();
+                Debug.Assert(enabled is not null); try
+                {
+                    enabled.Dispose();
+                }
+                catch (Exception ee) { 
+                    onErr(ee); 
+                }
                 enabled = null;
                 _enabled = false;
                // Console.WriteLine($"{iid} disabled");
@@ -61,8 +74,28 @@ namespace genshinbot.reactive.wire
             //    enabled_lock.Release();
             }
         }
+        private void onErr(Exception e)
+        {
+            if (errSubs.Count == 0)
+            {
+                Debug.Fail("Unhandled wire exception",e.Message);
+                throw e;
+            }
+            foreach(var errHandler in errSubs)
+            {
+                try
+                {
+                    errHandler(e);
+                }catch(Exception ee)
+                {
+                    Debug.Fail("Double wire exception", ee.Message);
+                    throw;
+                }
+            }
+        }
+
         //Task? nLock;
-       // object n_lock = new object();
+        // object n_lock = new object();
         protected virtual void OnNext(T value)
         {
             //   enabled_lock.Wait();
@@ -98,7 +131,6 @@ namespace genshinbot.reactive.wire
                 //   S_lock.Release();
                 //
 
-                List<Exception> e = null;
                 foreach (var s in tmp)
                 {
                     try
@@ -108,12 +140,9 @@ namespace genshinbot.reactive.wire
                     }
                     catch (Exception ee)
                     {
-                        if (e == null) e = new List<Exception>();
-                        e.Add(ee);
+                        onErr(ee);
                     }
                 }
-            if (e != null)
-                throw new AggregateException(e);
             }
           //  Console.WriteLine($"{iid} onNext slock exit");
             //    sc.SetResult();
@@ -126,7 +155,7 @@ namespace genshinbot.reactive.wire
 
 
 
-        public IDisposable Subscribe(Action<T> onValue)
+        public IDisposable Subscribe(Action<T> onValue, Action<Exception>? errH)
         {
             VolatileBool disposed=new VolatileBool();
            // object lck = new object();
@@ -148,6 +177,11 @@ namespace genshinbot.reactive.wire
                 subscribers = new List<Action<T>>(subscribers);
                 subscribers.Add(wrapper);
                 count = subscribers.Count;
+                if(errH is not null)
+                {
+                    errSubs = new();
+                    errSubs.Add(errH);
+                }
             }
           //  Console.WriteLine($"{iid} subscribe lock exit");
          //   S_lock.Release();
@@ -173,6 +207,12 @@ namespace genshinbot.reactive.wire
                         subscribers = new List<Action<T>>(subscribers);
                         subscribers.Remove(wrapper);
                         c2 = subscribers.Count;
+
+                        if (errH is not null)
+                        {
+                            errSubs = new(errSubs);
+                            errSubs.Remove(errH);
+                        }
                         //      n_ = nLock;
                     }
                     // S_lock.Release();
@@ -199,6 +239,11 @@ namespace genshinbot.reactive.wire
             if (_enabled )
                 OnEnable(false);
             //TODO
+        }
+
+        public IDisposable Subscribe(Action<T> onValue)
+        {
+           return Subscribe(onValue, null);
         }
 
         ~Wire()

@@ -16,5 +16,6 @@ namespace genshinbot.reactive.wire
         /// <param name="onValue"></param>
         /// <returns></returns>
         IDisposable Subscribe(Action<T> onValue);
+        IDisposable Subscribe(Action<T> onValue, Action<Exception> onErr);
     }
 }
