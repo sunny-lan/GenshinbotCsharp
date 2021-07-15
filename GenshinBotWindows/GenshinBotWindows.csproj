@@ -51,6 +51,10 @@
     <Compile Update="yui\windows\Button.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Update="yui\windows\Dropdown.cs" />
+    <Compile Update="yui\windows\Textbox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Update="yui\windows\TablePanelContainer.cs" />
     <Compile Update="yui\windows\FlowLayoutContainer.cs">
       <SubType>Component</SubType>

@@ -1,7 +1,6 @@
 ﻿using genshinbot.yui;
 using OpenCvSharp;
 using System;
-using System.Collections.Generic;
 
 namespace genshinbot
 {
@@ -25,7 +24,7 @@ namespace genshinbot
         /// </summary>
         /// <param name="message"></param>
         /// <param name="title"></param>
-        PopupResult Popup(string message, string title = "", PopupType type=PopupType.Message);
+        PopupResult Popup(string message, string title = "", PopupType type = PopupType.Message);
         void GiveFocus(Tab t);
     }
 }
@@ -41,8 +40,9 @@ namespace genshinbot.yui
     }
     public enum PopupResult
     {
-        Ok,Cancel
+        Ok, Cancel
     }
+    public record InputboxResult(string input, PopupResult r);
     public interface Deletable
     {
         void Delete();
@@ -100,8 +100,14 @@ namespace genshinbot.yui
         string Label { get; set; }
         Container Content { get; }
     }
+    public interface Enablable
+    {
+        public bool Enabled { get; set; }
+    }
     public interface Container
     {
+        Dropdown CreateDropdown();
+        Textbox CreateTextbox();
         Label CreateLabel();
         Expander CreateExpander();
         Viewport CreateViewport();

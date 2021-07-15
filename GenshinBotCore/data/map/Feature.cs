@@ -12,6 +12,15 @@ namespace genshinbot.data.map
     {
         Teleporter,
         RandomPoint,
+        Statue7,
+        Domain
+    }
+    public static class FeatureExt
+    {
+        public static bool CanTeleport(this FeatureType t)
+        {
+            return t is FeatureType.Teleporter or FeatureType.Statue7 or FeatureType.Domain;
+        }
     }
     public class Feature
     {

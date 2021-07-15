@@ -113,5 +113,6 @@ namespace genshinbot.yui.windows
             }
 
         }
+
     }
 }

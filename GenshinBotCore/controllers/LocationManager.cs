@@ -425,7 +425,7 @@ namespace genshinbot.controllers
 
         public async Task TeleportTo(Feature waypoint)
         {
-            Debug.Assert(waypoint.Type == FeatureType.Teleporter);
+            Debug.Assert(waypoint.Type.CanTeleport());
             var m = screens.MapScreen;
             if (screens.ActiveScreen.Value != m)
             {
@@ -633,10 +633,10 @@ namespace genshinbot.controllers
             var opt2 = opt ?? DefaultWalkOptions;
             var db = MapDb.Instance.Value;
 
-            var feats = db.Features.Where(f => f.Type == FeatureType.Teleporter);
+            var feats = db.Features.Where(f => f.Type.CanTeleport());
             if (opt2.TeleportThres is double dd)
             {
-                var kust = await TrackPos();
+                var kust = await TrackPos();//todo use approx pos only
                 var pp = await kust.Get();
                 feats = feats.Union(db.Features.Where(f =>
                     f.Coordinates.DistanceTo(pp) <= opt2.TeleportThres));
@@ -662,7 +662,7 @@ namespace genshinbot.controllers
             if (best is null)
                 throw new algorithm.AlgorithmFailedException("no path found");
 
-            if (best.First().Type == FeatureType.Teleporter)
+            if (best.First().Type.CanTeleport())
             {
                 await TeleportTo(best.First());
                 best = best.Skip(1);

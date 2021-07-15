@@ -4,6 +4,9 @@ namespace genshinbot.yui.windows
 {
     interface BaseContainerImpl :yui.Container
     {
+        yui.Textbox yui.Container.CreateTextbox() => add(new Textbox());
+        yui.Dropdown yui.Container.CreateDropdown() => add(new Dropdown());
+        
         public T add<T>(T c) where T : Control;
         yui.Button yui.Container.CreateButton() => add(new Button());
         yui.PropertyGrid yui.Container.CreatePropertyGrid() => add(new PropertyGrid());

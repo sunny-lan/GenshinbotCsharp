@@ -101,6 +101,8 @@ namespace genshinbot.tools
                 initJumpToPlayer(ll);
             }
 
+            initFeatureEdit();
+
             initStatusLbl();
 
             selected.Subscribe(x =>
@@ -111,6 +113,54 @@ namespace genshinbot.tools
             initMapImg(ui);
             rerenderGraph();
             initCursor();
+        }
+
+        private void initFeatureEdit()
+        {
+            var txtName = sidebar.CreateTextbox();
+            selected.Connect(x =>
+            {
+                if (x is Feature f)
+                {
+                    txtName.Enabled = true;
+                    txtName.Text = f.Name ?? "";
+                }
+                else
+                {
+                    txtName.Enabled = false;
+                    txtName.Text = "";
+                }
+            });
+            txtName.TextChanged += s =>
+            {
+                var f = (Feature)selected.Value!;
+                if (s.Length == 0)
+                    f.Name = null;
+                else
+                    f.Name = s;
+            };
+
+            var drpType = sidebar.CreateDropdown();
+            var opts = Enum.GetValues<FeatureType>();
+            drpType.Options = opts.Select(x => x.ToString()).ToList();
+            selected.Connect(x =>
+            {
+                if (x is Feature f)
+                {
+                    drpType.Enabled = true;
+                    drpType.Selected = Array.IndexOf(opts, f.Type);
+                }
+                else
+                {
+                    drpType.Enabled = false;
+                }
+            });
+            drpType.OptionSelected += idx =>
+            {
+                var f = (Feature)selected.Value!;
+                f.Type = opts[idx];
+            };
+
         }
 
         private void initJumpToPlayer(LocationManager ll)

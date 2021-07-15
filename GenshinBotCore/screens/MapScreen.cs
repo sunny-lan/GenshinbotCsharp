@@ -98,7 +98,7 @@ namespace genshinbot.screens
         public async Task TeleportTo(Feature teleporter)
         {
             Debug.Assert(ScreenManager.ActiveScreen.Value == this);
-            Debug.Assert(teleporter.Type == FeatureType.Teleporter);
+            Debug.Assert(teleporter.Type.CanTeleport());
             var p = await ShowOnScreen(teleporter.Coordinates);
             await Io.M.MouseTo(p);
             await Io.M.MouseClick(0);
