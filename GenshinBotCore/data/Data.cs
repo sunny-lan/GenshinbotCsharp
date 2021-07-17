@@ -34,9 +34,25 @@ namespace genshinbot.data
             },
             IgnoreNullValues = true,
         };
+         static string GetLocal(string name)
+        {
+
+            return Path.Combine(LocalPath, "data", name);
+        }
+        public static readonly string LocalPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)??".";
+        public static readonly string DataPath = GetActualPath();
+
+        private static string GetActualPath()
+        {
+            var dpath = Path.Combine(LocalPath, "dataloc.txt");
+            if (File.Exists(dpath))
+                return File.ReadAllText(dpath);
+            return Path.Combine(LocalPath, "data");
+        }
+
         public static string Get(string name)
         {
-            return Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "data", name);
+            return Path.Combine(DataPath, name);
         }
 
         public static bool Exists(string name)
