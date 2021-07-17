@@ -57,6 +57,7 @@ namespace genshinbot.yui.windows
             this.statusStrip.Size = new System.Drawing.Size(889, 32);
             this.statusStrip.TabIndex = 1;
             this.statusStrip.Text = "statusStrip1";
+            this.statusStrip.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.statusStrip_ItemClicked);
             // 
             // statusMessage
             // 

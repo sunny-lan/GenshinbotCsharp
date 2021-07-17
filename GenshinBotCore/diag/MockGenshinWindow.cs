@@ -97,9 +97,9 @@ namespace genshinbot.diag
 
         class Dummy : IMouseCapture, IKeyCapture
         {
-            public IWire<MouseEvent> MouseEvents => throw new NotImplementedException();
+            public IWire<MouseEvent> MouseEvents => EmptyWire<MouseEvent>.Instance;
 
-            public IWire<KeyEvent> KeyEvents => throw new NotImplementedException();
+            public IWire<KeyEvent> KeyEvents => EmptyWire<KeyEvent>.Instance;
         }
         Dummy d = new();
         public IMouseCapture MouseCap => d;

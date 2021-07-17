@@ -27,7 +27,7 @@ namespace genshinbot.util
 
         public static IDisposable Empty = From(() => { });
 
-        /*public static IDisposable Merge(IEnumerable< IDisposable> dispose)
+      /*  public static IDisposable Merge( IDisposable[] dispose)
         {
             return new Impl
             {

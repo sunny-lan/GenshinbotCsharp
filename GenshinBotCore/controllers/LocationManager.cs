@@ -249,7 +249,7 @@ namespace genshinbot.controllers
                    return;
                }
                wanted.SetValue(p.AngleTo(dst[idx].Value));
-           }, onErr: wanted.EmitError))
+           }, onErr: E=>wanted.EmitError(E)))
             {  //keep going until either atDest, or dead
 
                 //dont start till mouse ready

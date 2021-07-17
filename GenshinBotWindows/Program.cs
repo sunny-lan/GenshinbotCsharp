@@ -1,11 +1,11 @@
 ﻿
 
+using Autofac;
 using genshinbot.automation;
 using genshinbot.automation.windows;
 using genshinbot.data;
 using genshinbot.diag;
 using genshinbot.util;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Diagnostics;
 using System.Threading;
@@ -53,21 +53,29 @@ namespace genshinbot
                 return gw;
             }
 
-            var services = new ServiceCollection()
-                .AddSingleton<YUI>(_=>yui.windows.MainForm.make())
-                .AddSingleton<IWindowAutomator2>(_=> new WindowAutomator2("Genshin Impact", "UnityWndClass"))
-               // .AddSingleton<IWindowAutomator2>(_=> mkMok())
-                .AddSingleton<BotIO, BaseBotIO>()
-                .AddSingleton<screens.ScreenManager>()
-                .AddSingleton<controllers.LocationManager>()
-                .AddSingleton<tools.WalkEditor>()
-                .AddSingleton<tools.AutofillTool>()
-                .AddSingleton<tools.BlackbarFixer>()
-                .AddSingleton<tools.DailyDoer>()
-                .AddSingleton<tools.MapUI>()
-                .AddSingleton<controllers.LocationManager.Test>();
+            var builder = new ContainerBuilder();
 
-            var sp = services.BuildServiceProvider();
+            builder.Register<YUI>(_ => yui.windows.MainForm.make()).SingleInstance();
+            builder.Register<IWindowAutomator2>(_ => new WindowAutomator2("Genshin Impact", "UnityWndClass")).SingleInstance();
+            //builder.Register<IWindowAutomator2>(_ => mkMok()).SingleInstance();
+            builder.RegisterType<BaseBotIO>().As<BotIO>().SingleInstance();
+            builder.RegisterType<screens.ScreenManager>().SingleInstance();
+            builder.RegisterType<controllers.LocationManager>().SingleInstance();
+            builder.RegisterType<tools.AutofillTool>().SingleInstance();
+            builder.RegisterType<tools.BlackbarFixer>().SingleInstance();
+            builder.RegisterType<tools.DailyDoer>().SingleInstance();
+            builder.RegisterType<tools.MapUI>().SingleInstance();
+            builder.Register<tools.ToolSelectorUI>(sp => new tools.ToolSelectorUI(
+                sp.Resolve<YUI>(), new object[]
+                {
+                        sp.Resolve<tools.DailyDoer>(),
+                        sp.Resolve<tools.AutofillTool>(),
+                        sp.Resolve<tools.BlackbarFixer>(),
+
+                })).SingleInstance();
+            builder.RegisterType<controllers.LocationManager.Test>().SingleInstance();
+            
+            var sp = builder.Build();
 
             //  await screens.MapScreen.Testshow(rig);
 
@@ -127,12 +135,13 @@ namespace genshinbot
             //       await controllers.LocationManager.TestGoto(rig);
             // await tools.WalkRecorder.TestAsync(rig.Make());
             //  await tools.AutofillTool.ConfigureCharacterSel(rig.Make());
-               var sm = sp.GetRequiredService<screens.ScreenManager>();
-                sm.ForceScreen(sm.PlayingScreen);
+            var sm = sp.Resolve<screens.ScreenManager>();
+            sm.ForceScreen(sm.PlayingScreen);
             //4  using var kk = sp.GetService<tools.WalkEditor>();
-           using var dd = sp.GetRequiredService<tools.MapUI>();
+            var dd = sp.Resolve<tools.ToolSelectorUI>();
+            sp.Resolve<tools.MapUI>();
             //  await sp.GetService<tools.AutofillTool>()!.ConfigureAll();
-          //  await sp.GetRequiredService<controllers.LocationManager.Test>().TestGoto();
+            //  await sp.Resolve<controllers.LocationManager.Test>().TestGoto();
             //  await sp.GetService<tools.BlackbarFixer>().FixBlackBar();
             //  await tools.DailyDoer.runAsync(rig.Make());
             //algorithm.ChatReadAlg.Test();

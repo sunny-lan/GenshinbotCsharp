@@ -26,7 +26,7 @@ namespace genshinbot.tools
     {
         private IWindowAutomator2 w;
         private ILiveWire<IReadOnlyDictionary<Keys, bool>> kk;
-        private yui.windows.Overlay2 overlay;
+        private yui.windows.Overlay2 overlay;//todo extract interface
         abstract class Filler
         {
             public abstract Task<object> Fill(object o);

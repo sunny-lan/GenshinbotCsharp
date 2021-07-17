@@ -133,7 +133,8 @@ namespace genshinbot.tools
             });
             txtName.TextChanged += s =>
             {
-                var f = (Feature)selected.Value!;
+                
+                if(selected.Value is Feature f) 
                 if (s.Length == 0)
                     f.Name = null;
                 else

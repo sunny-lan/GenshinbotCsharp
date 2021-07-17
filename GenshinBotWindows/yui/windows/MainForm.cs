@@ -52,7 +52,7 @@ namespace genshinbot.yui.windows
         Tab lastSelected;
 
         public System.Func<bool> OnClose { get ; set ; }
-
+        String REALMSG;
         private void tabs_Selected(object sender, TabControlEventArgs e)
         {
 
@@ -60,7 +60,10 @@ namespace genshinbot.yui.windows
             {
 
                 statusMessage.Text = tab.Status;
-                tab.StatusChanged = s => statusMessage.Text = s;
+                tab.StatusChanged = s => Invoke((MethodInvoker)delegate {
+                    statusMessage.Text = s.Split('\n')[0] ;
+                    REALMSG = s;
+                }) ;
                 if (lastSelected != null)
                     lastSelected.StatusChanged = null;
                 lastSelected = tab;
@@ -114,5 +117,10 @@ namespace genshinbot.yui.windows
 
         }
 
+        private void statusStrip_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+            if (REALMSG != "")
+                Popup(REALMSG, "lONG");
+        }
     }
 }
