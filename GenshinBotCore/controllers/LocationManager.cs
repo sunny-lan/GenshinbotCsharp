@@ -32,7 +32,13 @@ namespace genshinbot.controllers
             if (Data.MapDb.Coord2Minimap == null)
                 CalculateCoord2Minimap();
 
+            //TODO hack
+            LastKnownPos.NonNull().Subscribe(x =>
+            {
 
+                var coord2Mini = Data.MapDb.Coord2Minimap.Expect();
+                screens.PlayingScreen.approxPos =coord2Mini.Transform(x);
+            });
 
         }
 
@@ -125,8 +131,7 @@ namespace genshinbot.controllers
 
             if (_lastKnownPos.Value is not null)
             {
-                var miniLoc1 = coord2Mini.Transform(_lastKnownPos.Value.Expect());
-                var res = screens.PlayingScreen.TrackPos(miniLoc1);
+                var res = screens.PlayingScreen.MinimapPos;
                 try
                 {
                     await res.Get();
@@ -147,9 +152,8 @@ namespace genshinbot.controllers
                 _lastKnownPos.SetValue(screen2Coord.ToCoord(center));
             }
 
-            var miniLoc = coord2Mini.Transform(_lastKnownPos.Value.Expect());
             await map.Close();
-            return screens.PlayingScreen.TrackPos(miniLoc);
+            return screens.PlayingScreen.MinimapPos;
         }
 
         public class WalkOptions
@@ -183,6 +187,7 @@ namespace genshinbot.controllers
             int idx = 0;
             var pos = await TrackPos();
             var wanted = new LiveWireSource<double?>(null);
+            var errStream = new LiveWireSource<double?>(null);
 
             if (screens.ActiveScreen.Value != screens.PlayingScreen)
             {
@@ -225,7 +230,7 @@ namespace genshinbot.controllers
                         return;
                     }
                 }
-                wanted.EmitError(e);
+                errStream.EmitError(e);
             }))
             using (pos.Subscribe((Point2d p) =>
            {
@@ -245,11 +250,11 @@ namespace genshinbot.controllers
                }
                if (idx == dst.Count)
                {
-                   wanted.SetValue(double.NaN);//send nan to represent done!
+                   errStream.SetValue(double.NaN);//send nan to represent done!
                    return;
                }
                wanted.SetValue(p.AngleTo(dst[idx].Value));
-           }, onErr: E=>wanted.EmitError(E)))
+           }, onErr: E=>errStream.EmitError(E)))
             {  //keep going until either atDest, or dead
 
                 //dont start till mouse ready
@@ -258,7 +263,7 @@ namespace genshinbot.controllers
                 {
                     Debug.WriteLine("begin walking");
                     await io.K.KeyDown(Keys.W).ConfigureAwait(false);
-                    await wanted.Where(x => double.IsNaN(x??0)).Get();
+                    await Wire.Merge( wanted,errStream).Where(x => double.IsNaN(x ?? 0)).Get();
                     return;
                     /*backtowalking:
                     var r = await await Task.WhenAny(allDead.Get(), atDest.Get()).ConfigureAwait(false);

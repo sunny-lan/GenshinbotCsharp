@@ -75,7 +75,7 @@ namespace genshinbot.screens
         public IWire<Pkt<Mat>> Arrow { get; }
         public IWire<Pkt<double>> ArrowDirection { get; }
 
-        public IWire<Point2d> MinimapPos { get; }
+        public IWire<Pkt<Point2d>> MinimapPos { get; }
 
         /*public enum TrackStatus
         {
@@ -97,54 +97,9 @@ namespace genshinbot.screens
             await Task.Delay(3000);//todo
         }
 
+        public Point2d approxPos;//TODO HACK
         algorithm.MinimapMatch.PositionTracker? posTrack = null;
-        /// <summary>
-        /// it is up to the user to not call this concurrently
-        /// It is expected as soon as a tracking error happens, 
-        /// the wire returned will never be used again
-        /// </summary>
-        /// <param name="approxPos"></param>
-        /// <returns></returns>
-        public IWire<Pkt<Point2d>> TrackPos(Point2d approxPos)
-        {
-            //var reason = EnhancedStackTrace.Current();
-
-            //TODO async
-            return Minimap.Select((Mat x) =>
-            {
-            begin:
-                Point2d res;
-                if (posTrack == null)
-                {
-                    //scale not known yet
-
-                    var res1 = scaleMatcher.FindScale(approxPos, x, out var posMatch);
-                    if (res1 is Point2d r1)
-                    {
-                        res = r1;
-                        posTrack = new algorithm.MinimapMatch.PositionTracker(posMatch);
-                    }
-                    else
-                        throw new algorithm.AlgorithmFailedException("Failed to find valid scale");
-                }
-
-                var res2 = posTrack.Track(x);
-                if (res2 is Point2d newApprox)
-                {
-                    res = newApprox;
-                }
-                else
-                {
-                    //unable to find position, check scale again
-                    posTrack = null;
-                    goto begin;
-                }
-
-                approxPos = res;
-                return res;
-            }
-            );
-        }
+       
 
         public IWire<Pkt<double>>[] PlayerHealth { get; } = new IWire<Pkt<double>>[4];
         public IWire<Pkt<bool>>[] PlayerSelect { get; } = new IWire<Pkt<bool>>[4];
@@ -244,7 +199,40 @@ namespace genshinbot.screens
                 .ToArray()
                 .AllLatest();//TODO not sure if debounce needed
 
-            
+            MinimapPos= Minimap.Select((Mat x) =>
+            {
+            begin:
+                Point2d res;
+                if (posTrack == null)
+                {
+                    //scale not known yet
+
+                    var res1 = scaleMatcher.FindScale(approxPos, x, out var posMatch);
+                    if (res1 is Point2d r1)
+                    {
+                        res = r1;
+                        posTrack = new algorithm.MinimapMatch.PositionTracker(posMatch);
+                    }
+                    else
+                        throw new algorithm.AlgorithmFailedException("Failed to find valid scale");
+                }
+
+                var res2 = posTrack.Track(x);
+                if (res2 is Point2d newApprox)
+                {
+                    res = newApprox;
+                }
+                else
+                {
+                    //unable to find position, check scale again
+                    posTrack = null;
+                    goto begin;
+                }
+
+                approxPos = res;
+                return res;
+            }
+            );
         }
 
 
