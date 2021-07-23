@@ -15,18 +15,75 @@ using Vanara.PInvoke;
 
 namespace genshinbot.hooks
 {
+    public class WindowsMessageLoop
+    {
+        public uint ThreadID { get; private set; }
+        int refCnt = 0;
+        Thread? t;
+        private const int WM_QUIT = 0x12;
+        private const int derp = 0x666;
+        Queue<(Action a, TaskCompletionSource? s)> q = new();
+        public IDisposable Use()
+        {
+            if (Interlocked.Increment(ref refCnt) == 1)
+            {
+                Debug.Assert(t == null);
+                t = new Thread(run);
+                t.Start();
+            }
+            return DisposableUtil.From(() =>
+            {
+                if (Interlocked.Decrement(ref refCnt) == 0)
+                {
+                    User32.PostThreadMessage(ThreadID, WM_QUIT, IntPtr.Zero, IntPtr.Zero);
+                    t = null;
+                }
+            });
+        }
+        void run()
+        {
+            ThreadID = Kernel32.GetCurrentThreadId();
+            while (Thread.VolatileRead(ref refCnt) > 0 || q.Count > 0)
+            {
+                MSG msg;
+                if (!User32.GetMessage(out msg, HWND.NULL, 0, 0))
+                    break;
 
+                if (msg.message == derp)
+                {
+                    lock (q)
+                        while (q.Count > 0)
+                        {
+                            var v = q.Dequeue();
+                            v.a();
+                            v.s?.SetResult();
+                        }
+                    continue;
+                }
+
+                User32.TranslateMessage(msg);
+                User32.DispatchMessage(msg);
+            }
+        }
+        public void RunLater(Action a)
+        {
+            lock (q)
+            {
+                q.Enqueue((a, null));
+            }
+            User32.PostThreadMessage(ThreadID, derp, IntPtr.Zero, IntPtr.Zero);
+
+        }
+        public static readonly WindowsMessageLoop Instance = new WindowsMessageLoop();
+    }
     /// <summary>
     /// Provides a base implementation with a message loop for all hooking classes
     /// </summary>
     /// <typeparam name="T">The event type returned by the hook</typeparam>
     public abstract class HookBase<T>
     {
-        protected uint ThreadID { get; private set; }
 
-        private const int WM_QUIT = 0x12;
 
-        private Task loopThread;
 
         /// <summary>
         /// Note: this event will be raised on the message loop thread
@@ -34,34 +91,17 @@ namespace genshinbot.hooks
         public event Action<T> OnEvent;
 
         public bool Running { get; private set; }
-
+        IDisposable? msgRef;
         public void Start()
         {
             if (Running) throw new Exception("already running");
-            Running = true;
-            loopThread = Task.Run(loop);
+            msgRef = WindowsMessageLoop.Instance.Use();
+            WindowsMessageLoop.Instance.RunLater(() => _ptr = init());
         }
 
-        private object _ptr;//prevent garbage collection of delegate
+        private object _ptr;
         protected abstract object init();
 
-        private void loop()
-        {
-            ThreadID = Kernel32.GetCurrentThreadId();
-            _ptr = init();
-
-            while (true)
-            {
-                MSG msg;
-                if (!User32.GetMessage(out msg, HWND.NULL, 0, 0))
-                    break;
-
-                User32.TranslateMessage(msg);
-                User32.DispatchMessage(msg);
-            }
-
-            cleanup();
-        }
 
         protected abstract void cleanup();
 
@@ -69,8 +109,6 @@ namespace genshinbot.hooks
         //once signaled, the event object instance shall not be accessed again by the hooker
         protected void signal(T evt)
         {
-            if (Kernel32.GetCurrentThreadId() != ThreadID)
-                throw new Exception("Cross thread call to signal");
 
             OnEvent?.Invoke(evt);
 
@@ -81,8 +119,10 @@ namespace genshinbot.hooks
         {
             if (!Running) throw new Exception("already stopped");
             Running = false;
-            User32.PostThreadMessage(ThreadID, WM_QUIT, IntPtr.Zero, IntPtr.Zero);
-            loopThread.Wait();
+            WindowsMessageLoop.Instance.RunLater(cleanup);
+            msgRef!.Dispose();
+            msgRef = null;
+            _ptr = null;
         }
 
         public IWire<T> Wire { get; }
