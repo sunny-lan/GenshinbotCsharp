@@ -623,8 +623,11 @@ namespace genshinbot.reactive.wire
              }))
             {
                 if (timeout is TimeSpan tt)
-                    _ = Task.Delay(tt).ContinueWith(_ => taskCompletionSource.SetException(
-                          new TimeoutException()));
+                    _ = Task.Delay(tt).ContinueWith(_ =>
+                    {
+                        if (!taskCompletionSource.Task.IsCompleted)
+                            taskCompletionSource.SetException(new TimeoutException());
+                    });
                 return await taskCompletionSource.Task.ConfigureAwait(false);
             }
         }

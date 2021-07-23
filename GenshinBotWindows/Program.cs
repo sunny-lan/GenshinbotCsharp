@@ -15,6 +15,7 @@ using Vanara.PInvoke;
 
 namespace genshinbot
 {
+    using WindowAutoFac = Func<string, string, IWindowAutomator2>;
     class Program
     {
 
@@ -56,7 +57,28 @@ namespace genshinbot
             var builder = new ContainerBuilder();
 
             builder.Register<YUI>(_ => yui.windows.MainForm.make()).SingleInstance();
-            builder.Register<IWindowAutomator2>(_ => new WindowAutomator2("Genshin Impact", "UnityWndClass")).SingleInstance();
+            builder.Register<ArduinoAutomator>(_ =>
+            {
+                var s = System.IO.Ports.SerialPort.GetPortNames();
+                Debug.Assert(s.Length == 1);
+                    return new ArduinoAutomator(s[0],async () => Cursor.Position.Cv());
+                
+            }).SingleInstance();
+            builder.Register<WindowAutoFac> (sp => { 
+                    var auto = sp.Resolve<ArduinoAutomator>();
+                IWindowAutomator2 factory(string a, string b)
+                {
+                    return new WindowAutomator2(
+                    a,b, auto, auto
+                    );
+                }
+                return factory;
+            }).SingleInstance(); 
+            builder.RegisterType<WindowAutomator2.Test>().SingleInstance();
+             builder.Register<IWindowAutomator2>(sp =>sp.Resolve<WindowAutoFac>()(
+                "Genshin Impact",
+                "UnityWndClass"
+                )).SingleInstance();
             //builder.Register<IWindowAutomator2>(_ => mkMok()).SingleInstance();
             builder.RegisterType<BaseBotIO>().As<BotIO>().SingleInstance();
             builder.RegisterType<screens.ScreenManager>().SingleInstance();
@@ -74,7 +96,8 @@ namespace genshinbot
 
                 })).SingleInstance();
             builder.RegisterType<controllers.LocationManager.Test>().SingleInstance();
-            
+            builder.RegisterType<automation.ArduinoAutomator.Test>().SingleInstance();
+
             var sp = builder.Build();
 
             //  await screens.MapScreen.Testshow(rig);
@@ -135,6 +158,9 @@ namespace genshinbot
             //       await controllers.LocationManager.TestGoto(rig);
             // await tools.WalkRecorder.TestAsync(rig.Make());
             //  await tools.AutofillTool.ConfigureCharacterSel(rig.Make());
+            //await sp.Resolve<ArduinoAutomator.Test>().TestMove();
+            //await sp.Resolve<WindowAutomator2.Test>().Test3();
+           
             var sm = sp.Resolve<screens.ScreenManager>();
             sm.ForceScreen(sm.PlayingScreen);
             //4  using var kk = sp.GetService<tools.WalkEditor>();

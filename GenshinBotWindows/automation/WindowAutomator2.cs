@@ -48,7 +48,10 @@ namespace genshinbot.automation.windows
         public ILiveWire<bool> Focused { get; }
 
         private List<IDisposable> disposeList = new List<IDisposable>();
-        public WindowAutomator2(string TITLE, string CLASS)
+
+        static InputSimulatorStandardAdapter thing = new InputSimulatorStandardAdapter();
+        public WindowAutomator2(string TITLE, string CLASS) : this(TITLE, CLASS, thing, thing) { }
+        public WindowAutomator2(string TITLE, string CLASS, IMouseSimulator2 mm, IKeySimulator2 kk)
         {
             hWnd = User32.FindWindow(CLASS, TITLE);
             if (hWnd == IntPtr.Zero)
@@ -126,7 +129,7 @@ namespace genshinbot.automation.windows
 
 
             Screen = new ScreenshotAdapter(this);
-            iS = new InputSim(this);
+            iS = new LockWhileFocussed(this, mm, kk);
             kbdLock = new KbdLockProxy(iS, Focused);
             mouseCap = new Lazy<MouseHookAdapter>(() => new MouseHookAdapter(Focused,
                 pt => ScreenToClient(pt)));
@@ -198,23 +201,23 @@ namespace genshinbot.automation.windows
         public IKeySimulator2 Keys => kbdLock;
         private KbdLockProxy kbdLock;
         public IMouseSimulator2 Mouse => iS;
-        private InputSim iS;
-        class InputSim : IMouseSimulator2, IKeySimulator2
+        private LockWhileFocussed iS;
+        class LockWhileFocussed : IMouseSimulator2, IKeySimulator2
         {
             IMouseSimulator2 ms;
             IKeySimulator2 ks;
             WindowAutomator2 parent;
 
-            internal InputSim(WindowAutomator2 parent)
+            internal LockWhileFocussed(WindowAutomator2 parent, IMouseSimulator2 mm, IKeySimulator2 kk)
             {
-                var a = new InputSimulatorStandardAdapter();
-                ms = a;
-                ks = a;
+                // var a = new InputSimulatorStandardAdapter();
+                ms = mm;
+                ks = kk;
                 this.parent = parent;
             }
 
 
-            ~InputSim()
+            ~LockWhileFocussed()
             {
 
             }
@@ -238,7 +241,7 @@ namespace genshinbot.automation.windows
             {
                 async Task _MouseMove()
                 {
-                    var op=await MousePos();
+                    var op = await MousePos();
                     var op2 = await ms.MousePos();
                     var p = d + op;
 
@@ -347,7 +350,7 @@ namespace genshinbot.automation.windows
         #endregion
 
         #region Tests
-        public static void Test()
+        public static void Test5()
         {
             var w = new WindowAutomator2("*Untitled - Notepad", null);
             using (w.Focused.Connect(x => Console.WriteLine(x)))
@@ -457,6 +460,90 @@ namespace genshinbot.automation.windows
                 ))
             {
                 Console.ReadLine();
+            }
+        }
+
+        public class Test
+        {
+            private readonly Func<string, string, IWindowAutomator2> w1;
+
+            public Test(Func<string, string, IWindowAutomator2> w)
+            {
+                w1 = w;
+            }
+            public async Task Test3()
+            {
+                var w = w1("Genshin Impact",
+                "UnityWndClass");
+                while (true)
+                {
+                    using (w.Focused.Subscribe(x => Console.WriteLine($"focused={x}")))
+                    {
+                        await w.Keys.KeyPress(input.Keys.Escape);
+                        await Task.Delay(1000);
+                        await w.Keys.KeyPress(input.Keys.Escape);
+                        await Task.Delay(1000);
+                        await w.Keys.KeyPress(input.Keys.W);
+                        await Task.Delay(1000);
+                        await w.Keys.KeyPress(input.Keys.A);
+                        await Task.Delay(1000);
+
+                        await w.Keys.KeyPress(input.Keys.Space);
+                        await Task.Delay(1000);
+
+                    }
+                    Console.ReadLine();
+                }
+            }
+                public async Task Test2()
+            {
+                var w = w1("*Untitled - Notepad", null);
+                while (true)
+                {
+                    using (w.Focused.Subscribe(x => Console.WriteLine($"focused={x}")))
+                    {
+                        for (int i = 0; i < 10; i++)
+                        {
+                            await w.Keys.KeyPress(input.Keys.A);
+                            await Task.Delay(100);
+
+                        }
+                        var sz = await w.Size.Value2();
+                        Console.WriteLine($"sz={sz}");
+                        for (int i = 0; i < 1000; i++)
+                        {
+                            await w.Mouse.MouseTo(sz.Bounds().RandomWithin());
+                        }
+                        for (int i = 0; i < 10; i++)
+                        {
+                            await w.Mouse.MouseTo(sz.Bounds().BottomRight);
+                            await Task.Delay(1000);
+                            await w.Mouse.MouseTo(sz.Bounds().TopLeft);
+                            await Task.Delay(1000);
+                        }
+                    }
+                    Console.ReadLine();
+                }
+
+            }
+            public void Test4()
+            {
+                IWindowAutomator2 w = w1("*Untitled - Notepad", null);
+                using (w.MouseCap.MouseEvents.Subscribe(x =>
+                     Console.WriteLine(x.Position)
+                    ))
+                using (w.KeyCap.KeyEvents.Subscribe(
+                    x => Console.WriteLine($"{x.Key} {x.Down}")
+                    ))
+                using (w.KeyCap.KbdState.KeyCombo(new input.Keys[] {
+                input.Keys.LControlKey,
+                input.Keys.B,
+            }).Subscribe(
+                    x => Console.WriteLine($"key combo {x}")
+                    ))
+                {
+                    Console.ReadLine();
+                }
             }
         }
 

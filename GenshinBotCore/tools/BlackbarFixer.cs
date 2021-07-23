@@ -1,4 +1,5 @@
 ﻿using genshinbot.reactive.wire;
+using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,8 +16,7 @@ namespace genshinbot.tools
         {
             Io = io;
         }
-
-        public async Task FixBlackBar()
+        public async Task<Size> WindowedMode()
         {
             var sz = await Io.W.Size.Value2();
             var rd = data.db.SettingsScreenDb.Instance.Value.R[sz];
@@ -33,14 +33,36 @@ namespace genshinbot.tools
             await Io.M.LeftClick(rd.DisplayMode.RandomWithin());
             await Task.Delay(5000);
 
-            var tmp= Io.W.Size.NonNull().Where(x => x != sz).Get(TimeSpan.FromSeconds(5));
+            var tmp = Io.W.Size.NonNull().Where(x => x != sz).Get(TimeSpan.FromSeconds(5));
             await Io.M.LeftClick(rd.Windowed.RandomWithin());
             var sz2 = await tmp;
+            await Task.Delay(5000);
+            return sz2;
+        }
+        public async Task FullscreenMode()
+        {
+            var sz2 = await Io.W.Size.Value2();
 
-            rd = data.db.SettingsScreenDb.Instance.Value.R[sz2];
-            tmp = Io.W.Size.NonNull().Where(x => x == sz).Get(TimeSpan.FromSeconds(5));
+            var rd = data.db.SettingsScreenDb.Instance.Value.R[sz2];
+
+            await Io.M.LeftClick(rd.DisplayMode.RandomWithin());
+            await Task.Delay(5000);
+
+            var tmp = Io.W.Size.NonNull().Where(x => x != sz2).Get(TimeSpan.FromSeconds(5));
             await Io.M.LeftClick(rd.Fullscreen.RandomWithin());
             await tmp;
+            await Task.Delay(5000);
+
+
+            await Io.K.KeyPress(automation.input.Keys.Escape);
+            await Task.Delay(5000);
+            await Io.K.KeyPress(automation.input.Keys.Escape);
+            await Task.Delay(5000);
+        }
+        public async Task FixBlackBar()
+        {
+           await WindowedMode();
+            await FullscreenMode();
         }
     }
 }
