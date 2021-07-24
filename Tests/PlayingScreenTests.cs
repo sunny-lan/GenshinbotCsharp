@@ -66,7 +66,7 @@ namespace GenshinBotTests
                 PlayingScreen p = new PlayingScreen(rig1.Make(), null);
                 gw.PlayingScreen.Image = mt;
                 p.approxPos = approxPos;
-                var res = await p.TrackPos().Get();
+                var res = await p.MinimapPos.Get();
                 Debug.WriteLine($"{img}, approx={approxPos} found={res}");
                 double lim = 1;
                 if (pos is Point2d pp)

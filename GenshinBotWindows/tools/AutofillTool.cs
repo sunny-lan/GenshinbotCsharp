@@ -551,29 +551,10 @@ namespace genshinbot.tools
             }
         }
 
-        public static async Task ConfigureDispatch(BotIO w)
-        {
-            var tool = new AutofillTool(w.W);
-            await tool.Edit(DispatchDb.Instance);
-            await DispatchDb.SaveInstanceAsync();
-        }
-        public static async Task ConfigureCharacterSel(BotIO w)
-        {
-            var tool = new AutofillTool(w.W);
-            await tool.Edit(CharacterSelectorDb.Instance.Value);
-            await CharacterSelectorDb.Instance.Save();
-        }
         public static async Task ConfigAll(BotIO w)
         {
             var tool = new AutofillTool(w.W);
             await tool.ConfigureAll();
-        }
-
-        public static async Task ConfigurePlayingScreen(BotIO w)
-        {
-            var tool = new AutofillTool(w.W);
-            await tool.Edit(screens.PlayingScreen.Db.Instance);
-            await screens.PlayingScreen.Db.SaveInstanceAsync();
         }
 
 
