@@ -102,6 +102,7 @@ namespace genshinbot.tools
             }
 
             initFeatureEdit();
+            initSearchBar();
 
             initStatusLbl();
 
@@ -113,6 +114,50 @@ namespace genshinbot.tools
             initMapImg(ui);
             rerenderGraph();
             initCursor();
+        }
+
+        private void initSearchBar()
+        {
+            var searchBar = sidebar.CreateTextbox();
+            var resultDropdown = sidebar.CreateDropdown();
+
+            LiveWireSource<string> query = new(searchBar.Text);
+            searchBar.TextChanged += query.SetValue;
+
+            ILiveWire<List<FuzzySharp.Extractor.ExtractedResult<string>>?> results=query
+                .Debounce(100)
+                .Select(newText =>
+                {
+                    if (newText.Length == 0)
+                    {
+                        return null;
+                    }
+
+
+                    var db = MapDb.Instance.Value;
+                    var res = FuzzySharp.Process.ExtractSorted(newText,
+                        db.Features.Select(f => f.Name ?? ""),cutoff:80).ToList();
+
+                    if (res.Count == 0) return null;
+                    
+                    return res;
+                });
+            results.Connect(x =>
+            {
+                resultDropdown.Enabled = x is not null;
+                if (x is not null)
+                {
+                    resultDropdown.Options = x.Select(x => x.Value).ToList();
+                    resultDropdown.Selected = 0;
+                }
+            });
+            resultDropdown.OptionSelected += idx =>
+            {
+                var db = MapDb.Instance.Value;
+                Debug.Assert(results.Value is not null);
+                selected.SetValue(db.Features[results.Value[idx].Index]);
+                JumpToCoord(db.Features[results.Value[idx].Index].Coordinates);
+            };
         }
 
         private void initFeatureEdit()
@@ -133,12 +178,12 @@ namespace genshinbot.tools
             });
             txtName.TextChanged += s =>
             {
-                
-                if(selected.Value is Feature f) 
-                if (s.Length == 0)
-                    f.Name = null;
-                else
-                    f.Name = s;
+
+                if (selected.Value is Feature f)
+                    if (s.Length == 0)
+                        f.Name = null;
+                    else
+                        f.Name = s;
             };
 
             var drpType = sidebar.CreateDropdown();
@@ -172,17 +217,20 @@ namespace genshinbot.tools
             btnJmpToPlayer.Text = "jump";
             btnJmpToPlayer.Click += (_, _) => JumpToPlayer(ll);
         }
-
+        void JumpToCoord(Point2d coord)
+        {
+            vp.T = vp.T.MatchPoints(c2m.Transform(coord), vp.Size.Center());
+        }
         private void JumpToPlayer(LocationManager ll)
         {
-            vp.T = vp.T.MatchPoints(c2m.Transform(ll.LastKnownPos.Value.Expect()), vp.Size.Center());
+            JumpToCoord(ll.LastKnownPos.Value.Expect());
         }
 
         private void initTracking(LocationManager lm)
         {
             var throughput = sidebar.CreateLabel();
             sidebar.SetFlex(throughput, new() { Weight = 0 });
-            lm.LastKnownPos.Throughput().Subscribe(x=>throughput.Text=$"s/s:{x}");
+            lm.LastKnownPos.Throughput().Subscribe(x => throughput.Text = $"s/s:{x}");
 
             var beginTrack = sidebar.CreateButton();
             sidebar.SetFlex(beginTrack, new() { Weight = 0 });
@@ -202,13 +250,13 @@ namespace genshinbot.tools
                     return;
                 }
                 IDisposable? d = null;
-                d=res.Subscribe(_ => { }, e =>
-                {
-                    d?.Dispose();
-                    tab.Status = e.ToString();
-                    ui.GiveFocus(tab);
+                d = res.Subscribe(_ => { }, e =>
+                  {
+                      d?.Dispose();
+                      tab.Status = e.ToString();
+                      ui.GiveFocus(tab);
 
-                });
+                  });
 
             };
 
@@ -239,10 +287,10 @@ namespace genshinbot.tools
                 {
                     if (cursorPos.Value is null)
                         cursorPos.SetValue(p);
+                    JumpToPlayer(lm);
 
                     r!.R = c2m.Transform(p).RectAround(5);
 
-                    JumpToPlayer(lm);
                 }
             });
         }

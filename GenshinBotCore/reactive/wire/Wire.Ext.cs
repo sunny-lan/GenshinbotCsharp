@@ -414,8 +414,7 @@ namespace genshinbot.reactive.wire
 
         public static ILiveWire<T> Debounce<T>(this ILiveWire<T> t, int debounce)
         {
-            throw new NotImplementedException();
-            /* return new LiveWire<T>(() => t.Value, onChangeOld =>
+             return new LiveWire<T>(() => t.Value, onChangeOld =>
                {
                    long ctr = 0;
                    Action onChange = () =>
@@ -428,7 +427,7 @@ namespace genshinbot.reactive.wire
                        });
                    };
                    return t.Subscribe(_ => onChange());
-               });*/
+               });
         }
 
         public static ILiveWire<T> Combine<T, In1, In2>(ILiveWire<In1> t1, ILiveWire<In2> t2,
