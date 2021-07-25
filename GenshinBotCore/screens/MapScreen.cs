@@ -34,9 +34,9 @@ namespace genshinbot.screens
                 public Rect SelectorArea { get; set; }
                 public Rect ActionBtnArea { get; set; }
 
-                public SavableMat? TeleporterSnap { get; set; }
-                public SavableMat? DomainSnap { get; set; }
-                public SavableMat? Statue7Snap { get; set; }
+                public Snap? TeleporterSnap { get; set; }
+                public Snap? DomainSnap { get; set; }
+                public Snap? Statue7Snap { get; set; }
 
             }
 
