@@ -25,11 +25,19 @@ namespace genshinbot.screens
     {
         public class Db
         {
-
+            public static DbInst<Db> Instance = new DbInst<Db>("screens/MapScreen.json");
             public class RD
             {
                 public Point2d ActionBtnLoc { get; set; }
                 public Size ActiveArea { get; set; }
+
+                public Rect SelectorArea { get; set; }
+                public Rect ActionBtnArea { get; set; }
+
+                public SavableMat? TeleporterSnap { get; set; }
+                public SavableMat? DomainSnap { get; set; }
+                public SavableMat? Statue7Snap { get; set; }
+
             }
 
             public Dictionary<Size, RD> R { get; set; } = new Dictionary<Size, RD>
@@ -47,7 +55,7 @@ namespace genshinbot.screens
             };
         }
 
-        private Db db = new Db();
+        private Db db = Db.Instance.Value;
 
 
         algorithm.MapLocationMatch locationMatch;
