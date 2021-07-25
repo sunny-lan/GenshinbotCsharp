@@ -135,6 +135,51 @@ namespace genshinbot.data.jsonconverters
         }
     }
 
+    class Size2dConverter : JsonConverter<Size2d>
+    {
+        struct Recta
+        {
+            public double Width { get; set; }
+            public double Height { get; set; }
+        }
+        public override Size2d Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            var x = JsonSerializer.Deserialize<Recta>(ref reader, options);
+            return new Size2d(x.Width, x.Height);
+        }
+
+        public override void Write(Utf8JsonWriter writer, Size2d value, JsonSerializerOptions options)
+        {
+            JsonSerializer.Serialize<Recta>(writer, new Recta
+            {
+                Width = value.Width,
+                Height = value.Height,
+            }, options);
+        }
+    }
+    class SizeConverter : JsonConverter<Size>
+    {
+        struct Recta
+        {
+            public int Width { get; set; }
+            public int Height { get; set; }
+        }
+        public override Size Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            var x = JsonSerializer.Deserialize<Recta>(ref reader, options);
+            return new Size( x.Width, x.Height);
+        }
+
+        public override void Write(Utf8JsonWriter writer, Size value, JsonSerializerOptions options)
+        {
+            JsonSerializer.Serialize<Recta>(writer, new Recta
+            {
+                Width = value.Width,
+                Height = value.Height,
+            }, options);
+        }
+    }
+
     class ScalarConverter : JsonConverter<Scalar>
     {
        

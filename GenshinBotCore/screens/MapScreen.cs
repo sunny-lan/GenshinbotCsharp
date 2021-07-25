@@ -44,19 +44,7 @@ namespace genshinbot.screens
             }
 
 
-            public Dictionary<Size, RD> R { get; set; } = new Dictionary<Size, RD>
-            {
-                [new Size(1440, 900)] = new RD
-                {
-                    ActionBtnLoc = new Point2d(1234, 846),
-                    ActiveArea = new Size(1000, 500),
-                },
-                [new Size(1680, 1050)] = new RD
-                {
-                    ActionBtnLoc = new Point2d(1496, 978),
-                    ActiveArea = new Size(1200, 700),
-                }
-            };
+            public Dictionary<Size, RD> R { get; set; } = new Dictionary<Size, RD>();
             public double FeatureSelectThres { get; set; } = 0.2;
             public double TeleportSnapThres { get; set; } = 3000000;
         }

@@ -89,6 +89,6 @@
             }
         }
     },
-    "FeatureSelectThres": 0.05,
+    "FeatureSelectThres": 0.2,
     "TeleportSnapThres": 3000000
 }
