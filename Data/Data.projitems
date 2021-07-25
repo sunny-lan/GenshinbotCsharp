@@ -36,6 +36,7 @@
     <Content Include="$(MSBuildThisFileDirectory)data\images\80c8ddfa-7308-416f-a7cd-ca7fe46f62c3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="$(MSBuildThisFileDirectory)data\images\811054c6-0837-4507-b2a1-7f26a70d351e.png" />
     <Content Include="$(MSBuildThisFileDirectory)data\images\ad106605-ce26-4444-9e63-d86b2045aa0e.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

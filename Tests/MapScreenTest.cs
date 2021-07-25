@@ -57,7 +57,29 @@ namespace GenshinBotTests
             await testAsync("map 1050 teleport and commisison",
                 new Point?[] { new(1134, 812), null, null });
         }
+        [Fact]
+        public async Task TestTeleportButton()
+        {
 
+
+            async Task testAsync(string img, bool? expRes = null)
+            {
+                var mt = Data.Imread($"test/{img}.png");
+                var gw = new MockGenshinWindow(mt.Size());
+                gw.MapScreen.Image = mt;
+                gw.CurrentScreen = gw.MapScreen;
+                var rig1 = new MockTestingRig(gw);
+                var ms = new MapScreen(rig1.Make(), null);
+                var res = await ms.CheckIsTeleportButtonOpen();
+                Console.WriteLine($"{img}: {res}");
+                if (expRes is bool b)
+                {
+                    Assert.Equal(b, res.Open);
+                }
+            }
+            await testAsync("mapscreen_bunch_of_options_1050_1", false);
+            await testAsync("map 1050 teleport and commisison", false);
+        }
 
 
 

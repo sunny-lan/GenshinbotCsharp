@@ -39,6 +39,7 @@ namespace genshinbot.screens
                 public Snap? Statue7Snap { get; set; }
 
 
+                public Snap? TeleportButtonSnap { get; set; }
 
             }
 
@@ -56,7 +57,8 @@ namespace genshinbot.screens
                     ActiveArea = new Size(1200, 700),
                 }
             };
-            public double FeatureSelectThres { get; set; } = 0.05;
+            public double FeatureSelectThres { get; set; } = 0.2;
+            public double TeleportSnapThres { get; set; } = 3000000;
         }
 
         private Db db = Db.Instance.Value;
@@ -119,10 +121,11 @@ namespace genshinbot.screens
                 return await b.W.Screen.Watch(scanRegion).Get();
             });
 
-            var match=scan.MatchTemplate(s.Image.Value, TemplateMatchModes.SqDiffNormed);
-            match.MinMaxLoc(out var minVal,out var _,out var minLoc,out var _ );
+            //TODO use global
+            using var match = scan.MatchTemplate(s.Image.Value, TemplateMatchModes.SqDiffNormed);
+            match.MinMaxLoc(out var minVal, out var _, out var minLoc, out var _);
             if (minVal <= db.FeatureSelectThres)
-                return (new Rect(minLoc+scanRegion.TopLeft, s.Region.Size), minVal);
+                return (new Rect(minLoc + scanRegion.TopLeft, s.Region.Size), minVal);
             else return (null, minVal);
         }
 
@@ -136,6 +139,18 @@ namespace genshinbot.screens
 
         public bool ExpectUnknown = true;
         private readonly BotIO b;
+        public async Task<(bool Open, double Score)> CheckIsTeleportButtonOpen()
+        {
+
+            var sz = await b.W.Size.Value2();
+            var rd = db.R[sz];
+
+            var btnImg = await b.W.Size.Lock(sz, b.W.Screen.Watch(rd.TeleportButtonSnap!.Region).Get);
+            using var templateMatch = btnImg.MatchTemplate(rd.TeleportButtonSnap!.Image.Value, TemplateMatchModes.SqDiffNormed);
+            templateMatch.MinMaxLoc(out double score, out var _);
+
+            return (score <= db.FeatureSelectThres, score);
+        }
 
         public async Task TeleportTo(Feature teleporter)
         {
@@ -145,6 +160,16 @@ namespace genshinbot.screens
             await Io.M.MouseTo(p);
             await Io.M.MouseClick(0);
             await Task.Delay(1000);
+
+            if ((await CheckIsTeleportButtonOpen()).Open is false)
+            {
+                var res = await ScanForFeatureSelect(teleporter.Type);
+                await Io.M.MouseClick(MouseBtn.Left, res.region.Expect().RandomWithin());
+                await Task.Delay(1000);
+                Debug.Assert((await CheckIsTeleportButtonOpen()).Open);
+            }
+
+
             await Io.M.MouseTo(db.R[await Io.W.Size.Value2()].ActionBtnLoc);
             await Io.M.MouseClick(0);
             //TODO b.SWait(b.LoadingScreen);

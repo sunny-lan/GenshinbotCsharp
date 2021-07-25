@@ -6,6 +6,14 @@
                 "Y": 846
             },
             "ActiveArea": {
+                "Width": 1000,
+                "Height":500 
+            },
+            "SelectorArea": {
+                "X": 0,
+                "Y": 0,
+                "Width": 0,
+                "Height": 0
             },
             "ActionBtnArea": {
                 "X": 0,
@@ -20,6 +28,8 @@
                 "Y": 978
             },
             "ActiveArea": {
+                "Width": 1200,
+                "Height": 700
             },
             "SelectorArea": {
                 "X": 1109,
@@ -65,7 +75,20 @@
                     "Width": 311,
                     "Height": 51
                 }
+            },
+            "TeleportButtonSnap": {
+                "Image": {
+                    "Path": "images/811054c6-0837-4507-b2a1-7f26a70d351e.png"
+                },
+                "Region": {
+                    "X": 1279,
+                    "Y": 967,
+                    "Width": 258,
+                    "Height": 38
+                }
             }
         }
-    }
+    },
+    "FeatureSelectThres": 0.05,
+    "TeleportSnapThres": 3000000
 }

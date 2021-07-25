@@ -37,6 +37,18 @@ namespace genshinbot.tools
             await Io.M.LeftClick(rd.Windowed.RandomWithin());
             var sz2 = await tmp;
             await Task.Delay(5000);
+
+            await Io.M.MouseTo(new Point2d(sz2.Width / 2, -5));
+            await Task.Delay(500);
+            await Io.M.MouseDown(automation.input.MouseBtn.Left);
+            await Task.Delay(200);
+
+            await Io.M.MouseMove(new Point2d(-100, 50));
+            await Task.Delay(200);
+            await Io.M.MouseUp(automation.input.MouseBtn.Left);
+            await Task.Delay(5000);
+
+
             return sz2;
         }
         public async Task FullscreenMode()

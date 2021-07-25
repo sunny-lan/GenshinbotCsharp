@@ -250,7 +250,10 @@ namespace genshinbot.tools
                     Region = r,
                 };
             });
-
+            var sizeFiller = Filler.From<Size>(async x =>
+            {
+                return (await rectFiller.FillT(new Rect(default, x))).Size;
+            });
             var matFiller = Filler.From<SavableMat>(async x =>
             {
                 return (await snapFiller.FillT(new data.Snap { })).Image;
@@ -259,6 +262,7 @@ namespace genshinbot.tools
             {
                 rectFiller,
                 rect2dFiller,
+                sizeFiller,
                 pointFiller,
                 point2DFiller,
                 matFiller,
