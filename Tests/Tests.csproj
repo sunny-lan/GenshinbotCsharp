@@ -25,6 +25,9 @@
     <None Remove="data\test\convo_wagner_1050.png" />
     <None Remove="data\test\daily_commision_1050.png" />
     <None Remove="data\test\f_katheryne_1050.png" />
+    <None Remove="data\test\map 1050 teleport and commisison.png" />
+    <None Remove="data\test\mapscreen_bunch_of_options_1050.png" />
+    <None Remove="data\test\mapscreen_bunch_of_options_1050_1.png" />
     <None Remove="data\test\map_a.png" />
     <None Remove="data\test\map_b.png" />
     <None Remove="data\test\map_c.png" />
@@ -39,7 +42,6 @@
     <None Remove="data\test\p4_selected_1600.png" />
     <None Remove="data\test\palette1.png" />
     <None Remove="data\test\palette2.png" />
-    <None Remove="data\test\teleport and commisison.png" />
     <None Remove="data\test\text.png" />
   </ItemGroup>
 
@@ -72,6 +74,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="data\test\guyun_playing_screen_1440x900.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\mapscreen_bunch_of_options_1050_1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="data\test\map_a.png">
@@ -125,7 +130,7 @@
     <Content Include="data\test\palette2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="data\test\teleport and commisison.png">
+    <Content Include="data\test\map 1050 teleport and commisison.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="data\test\text.png">
@@ -150,5 +155,6 @@
   <ItemGroup>
     <ProjectReference Include="..\GenshinBotCore\GenshinBotCore.csproj" />
   </ItemGroup>
+
 
 </Project>

@@ -38,7 +38,10 @@ namespace genshinbot.screens
                 public Snap? DomainSnap { get; set; }
                 public Snap? Statue7Snap { get; set; }
 
+
+
             }
+
 
             public Dictionary<Size, RD> R { get; set; } = new Dictionary<Size, RD>
             {
@@ -53,6 +56,7 @@ namespace genshinbot.screens
                     ActiveArea = new Size(1200, 700),
                 }
             };
+            public double FeatureSelectThres { get; set; } = 0.05;
         }
 
         private Db db = Db.Instance.Value;
@@ -71,7 +75,7 @@ namespace genshinbot.screens
         {
 
             locationMatch = new algorithm.MapLocationMatch(Data.MapDb.Features
-                .Where(x=>x.Type==FeatureType.Teleporter).ToList());
+                .Where(x => x.Type == FeatureType.Teleporter).ToList());
             templateMatch = new algorithm.MapTemplateMatch();
 
             Screen = b.W.Screen.Watch2(b.W.Bounds);//TODO async
@@ -88,8 +92,38 @@ namespace genshinbot.screens
                     features => locationMatch.FindLocation2(features, size, ExpectUnknown)
                 )
             ).Switch2();
+            this.b = b;
+        }
 
 
+
+        public async Task<(Rect? region, double score)> ScanForFeatureSelect(FeatureType f)
+        {
+            var sz = await b.W.Size.Value2();
+            var rd = db.R[sz];
+            Snap? s = f switch
+            {
+                FeatureType.Domain => rd.DomainSnap,
+                FeatureType.Teleporter => rd.TeleporterSnap,
+                FeatureType.Statue7 => rd.Statue7Snap,
+                _ => throw new NotSupportedException()
+            };
+
+            var scanRegion = Util.RectAround(
+                new Point(s!.Region.Left, rd.SelectorArea.Top),
+                new Point(s!.Region.Right, rd.SelectorArea.Bottom)
+            );
+
+            var scan = await b.W.Size.Lock(sz, async () =>
+            {
+                return await b.W.Screen.Watch(scanRegion).Get();
+            });
+
+            var match=scan.MatchTemplate(s.Image.Value, TemplateMatchModes.SqDiffNormed);
+            match.MinMaxLoc(out var minVal,out var _,out var minLoc,out var _ );
+            if (minVal <= db.FeatureSelectThres)
+                return (new Rect(minLoc+scanRegion.TopLeft, s.Region.Size), minVal);
+            else return (null, minVal);
         }
 
         public async Task Close()
@@ -101,7 +135,7 @@ namespace genshinbot.screens
 
 
         public bool ExpectUnknown = true;
-
+        private readonly BotIO b;
 
         public async Task TeleportTo(Feature teleporter)
         {

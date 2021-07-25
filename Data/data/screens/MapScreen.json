@@ -1,1 +1,71 @@
-{"R":{"1440x900":{"ActionBtnLoc":{"X":1234,"Y":846},"ActiveArea":{},"SelectorArea":{"X":0,"Y":0,"Width":0,"Height":0},"ActionBtnArea":{"X":0,"Y":0,"Width":0,"Height":0}},"1680x1050":{"ActionBtnLoc":{"X":1496,"Y":978},"ActiveArea":{},"SelectorArea":{"X":0,"Y":0,"Width":0,"Height":0},"ActionBtnArea":{"X":0,"Y":0,"Width":0,"Height":0},"TeleporterSnap":{"Image":{"Path":"images/2cf1bb97-0a18-467a-8303-2b9df23ff373.png"},"Region":{"X":1124,"Y":579,"Width":270,"Height":38}},"DomainSnap":{"Image":{"Path":"images/e4eb5928-d60d-488a-8931-1b22f9951428.png"},"Region":{"X":1116,"Y":640,"Width":42,"Height":43}},"Statue7Snap":{"Image":{"Path":"images/e610cecc-e4cd-4dfe-970c-e8ae087bbc4e.png"},"Region":{"X":1119,"Y":505,"Width":311,"Height":51}}}}}
+{
+    "R": {
+        "1440x900": {
+            "ActionBtnLoc": {
+                "X": 1234,
+                "Y": 846
+            },
+            "ActiveArea": {
+            },
+            "ActionBtnArea": {
+                "X": 0,
+                "Y": 0,
+                "Width": 0,
+                "Height": 0
+            }
+        },
+        "1680x1050": {
+            "ActionBtnLoc": {
+                "X": 1496,
+                "Y": 978
+            },
+            "ActiveArea": {
+            },
+            "SelectorArea": {
+                "X": 1109,
+                "Y": 503,
+                "Width": 419,
+                "Height": 383
+            },
+            "ActionBtnArea": {
+                "X": 0,
+                "Y": 0,
+                "Width": 0,
+                "Height": 0
+            },
+            "TeleporterSnap": {
+                "Image": {
+                    "Path": "images/2cf1bb97-0a18-467a-8303-2b9df23ff373.png"
+                },
+                "Region": {
+                    "X": 1124,
+                    "Y": 579,
+                    "Width": 270,
+                    "Height": 38
+                }
+            },
+            "DomainSnap": {
+                "Image": {
+                    "Path": "images/e4eb5928-d60d-488a-8931-1b22f9951428.png"
+                },
+                "Region": {
+                    "X": 1116,
+                    "Y": 640,
+                    "Width": 42,
+                    "Height": 43
+                }
+            },
+            "Statue7Snap": {
+                "Image": {
+                    "Path": "images/e610cecc-e4cd-4dfe-970c-e8ae087bbc4e.png"
+                },
+                "Region": {
+                    "X": 1119,
+                    "Y": 505,
+                    "Width": 311,
+                    "Height": 51
+                }
+            }
+        }
+    }
+}

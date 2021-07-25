@@ -185,6 +185,30 @@ namespace genshinbot.reactive.wire
                   );
               });
         }
+
+
+        public static async Task<U> Lock<V,U>(this ILiveWire<V> o,V v, Func<Task<U>> t)
+        {
+            if (!EqualityComparer<V>.Default.Equals(o.Value, v))
+                throw new LockInterruptedException("value changed while running task");
+
+            var taskCompletionSource = new TaskCompletionSource<U>();
+
+            using (o.Subscribe(
+                x =>
+                {
+                    if (!EqualityComparer<V>.Default.Equals(x, v))
+                        taskCompletionSource.SetException(
+                            new LockInterruptedException("value changed while running task"));
+                }
+            ))
+            {
+                var tt = await Task.WhenAny(t(), taskCompletionSource.Task).ConfigureAwait(false);
+                return await tt.ConfigureAwait(false);
+            }
+        }
+
+
         /// <summary>
         /// Fails a task if observable sends false while task isn't complete
         /// </summary>
