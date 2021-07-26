@@ -43,8 +43,10 @@ void MoveMouse(MOUSEPOINT p)
   moveMouse(MouseMoveCommand{(int16_t)p.x, (int16_t)p.y, 0});
 }
 double rengine() {
-  return random(1UL << 31) / (double)(1UL << 31);
+  double res= (double)random(1UL << 31) / (double)(1UL << 31);
+  return res;
 }
+
 MOUSEPOINT WindMouse(double x1, double y1, double x2, double y2, double gravity, double wind, double minWait, double maxWait, double maxStep, double targetArea)
 {
   double sqrt3 = sqrt(3.0);
@@ -55,7 +57,9 @@ MOUSEPOINT WindMouse(double x1, double y1, double x2, double y2, double gravity,
 
   while ((dist = hypot(x2 - x1, y2 - y1)) >= 1)
   {
-    if (Serial.available() > 0)return lastPosition;
+    if (Serial.available() > 0){
+      return lastPosition;
+    }
     wind = min(wind, dist);
 
     if (dist >= targetArea)
@@ -94,11 +98,6 @@ MOUSEPOINT WindMouse(double x1, double y1, double x2, double y2, double gravity,
     int16_t mx = static_cast<int16_t>(round(x1));
     int16_t my = static_cast<int16_t>(round(y1));
 
-    if (mx < 0 || my < 0)
-    {
-      break;
-    }
-
     if (lastPosition.x != mx || lastPosition.y != my)
     {
       MoveMouse(MOUSEPOINT{ mx - lastPosition.x, my - lastPosition.y });
@@ -132,13 +131,13 @@ MOUSEPOINT WindMouse(MOUSEPOINT p)
 }
 
 void setup() {
-  randomSeed(analogRead(0));
   Serial.setTimeout((1 << 32L) - 1L);
   // open the serial port:
   Serial.begin(2000000);
   // initialize control over the keyboard:
   Keyboard.begin();
   Mouse.begin();
+  randomSeed(analogRead(0));
   enabled = true;
 }
 template<typename T>
@@ -207,7 +206,7 @@ void loop() {
     if (tc == 'm')
       moveMouse(MouseMoveCommand{0, -500, 0});
     else if (tc == 'w')
-      WindMouse(MOUSEPOINT{0, -500, 0});
+      WindMouse(MOUSEPOINT{0, 500});
     else {
       Serial.println("no test");
       return;

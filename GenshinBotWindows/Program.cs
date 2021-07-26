@@ -67,7 +67,7 @@ namespace genshinbot
                 Debug.Assert(s.Length == 1);
                     return new ArduinoAutomator(s[0],async () => Cursor.Position.Cv());
                 
-            }).SingleInstance().As<IMouseSimulator2>().As<IKeySimulator2>();
+            }).SingleInstance().As<IMouseSimulator2>().As<IKeySimulator2>().AsSelf();
             builder.Register<WindowAutoFac> (sp => { 
                     var auto = sp.Resolve<IKeySimulator2>();
                     var auto1 = sp.Resolve<IMouseSimulator2>();
@@ -165,8 +165,9 @@ namespace genshinbot
             // await tools.WalkRecorder.TestAsync(rig.Make());
             //  await tools.AutofillTool.ConfigureCharacterSel(rig.Make());
             //await sp.Resolve<ArduinoAutomator.Test>().TestMove();
+            await sp.Resolve<ArduinoAutomator.Test>().TestWindMove();
             //await sp.Resolve<WindowAutomator2.Test>().Test3();
-            await sp.Resolve<WindMouseMover.Test>().TestMove();
+            //await sp.Resolve<WindMouseMover.Test>().TestMove();
 
 
             var sm = sp.Resolve<screens.ScreenManager>();
