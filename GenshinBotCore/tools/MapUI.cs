@@ -235,9 +235,11 @@ namespace genshinbot.tools
             var beginTrack = sidebar.CreateButton();
             sidebar.SetFlex(beginTrack, new() { Weight = 0 });
             beginTrack.Text = "track";
-            lm.IsTracking.Connect(trk => beginTrack.Enabled = !trk);
+            LiveWireSource<bool> dd=new(false);
+            dd.Connect(trk => beginTrack.Enabled = !trk);
             beginTrack.Click += async (_, _) =>
             {
+                dd.SetValue(true);
                 IWire<reactive.Pkt<Point2d>> res;
                 try
                 {
@@ -247,6 +249,7 @@ namespace genshinbot.tools
                 {
                     tab.Status = e.ToString();
                     ui.GiveFocus(tab);
+                    dd.SetValue(false);
                     return;
                 }
                 IDisposable? d = null;
@@ -255,6 +258,7 @@ namespace genshinbot.tools
                       d?.Dispose();
                       tab.Status = e.ToString();
                       ui.GiveFocus(tab);
+                      dd.SetValue(false);
 
                   });
 

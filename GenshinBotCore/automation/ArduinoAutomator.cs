@@ -18,6 +18,12 @@ namespace genshinbot.automation
         private Task init;
         public ArduinoAutomator(string port, Func<Task<Point2d>> getMousePos)
         {
+            //map keys to lowercase ascii
+            for(Keys k = Keys.A; k <= Keys.Z; k++)
+            {
+                overrides[k] = (byte)((int)k + (97 - (int)Keys.A));
+            }
+
             sp = new SerialPort(port, 2000000);
 
             sp.DataBits = 8;

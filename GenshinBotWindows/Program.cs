@@ -2,6 +2,7 @@
 
 using Autofac;
 using genshinbot.automation;
+using genshinbot.automation.input;
 using genshinbot.automation.windows;
 using genshinbot.data;
 using genshinbot.diag;
@@ -23,9 +24,12 @@ namespace genshinbot
         {
             public IWindowAutomator2 W { get; }
 
+            public IMouseSimulator2 M { get; }
+
             public BaseBotIO(IWindowAutomator2 w)
             {
                 W = w;
+                M = new WindMouseMover(w.Mouse);
             }
         }
 
@@ -63,13 +67,14 @@ namespace genshinbot
                 Debug.Assert(s.Length == 1);
                     return new ArduinoAutomator(s[0],async () => Cursor.Position.Cv());
                 
-            }).SingleInstance();
+            }).SingleInstance().As<IMouseSimulator2>().As<IKeySimulator2>();
             builder.Register<WindowAutoFac> (sp => { 
-                    var auto = sp.Resolve<ArduinoAutomator>();
+                    var auto = sp.Resolve<IKeySimulator2>();
+                    var auto1 = sp.Resolve<IMouseSimulator2>();
                 IWindowAutomator2 factory(string a, string b)
                 {
                     return new WindowAutomator2(
-                    a,b, auto, auto
+                    a,b, auto1, auto
                     );
                 }
                 return factory;
@@ -97,6 +102,7 @@ namespace genshinbot
                 })).SingleInstance();
             builder.RegisterType<controllers.LocationManager.Test>().SingleInstance();
             builder.RegisterType<automation.ArduinoAutomator.Test>().SingleInstance();
+            builder.RegisterType<WindMouseMover.Test>().SingleInstance();
 
             var sp = builder.Build();
 
@@ -160,7 +166,9 @@ namespace genshinbot
             //  await tools.AutofillTool.ConfigureCharacterSel(rig.Make());
             //await sp.Resolve<ArduinoAutomator.Test>().TestMove();
             //await sp.Resolve<WindowAutomator2.Test>().Test3();
-           
+            await sp.Resolve<WindMouseMover.Test>().TestMove();
+
+
             var sm = sp.Resolve<screens.ScreenManager>();
             sm.ForceScreen(sm.PlayingScreen);
             //4  using var kk = sp.GetService<tools.WalkEditor>();

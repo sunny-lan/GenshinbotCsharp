@@ -42,6 +42,10 @@ namespace genshinbot.automation.input
             await MouseClick(MouseBtn.Left, pos).ConfigureAwait(false);
         }
         Task MouseButton(MouseBtn btn, bool down);
+        Task MouseTo(int newX, int newY)
+        {
+            return MouseTo(new(newX, newY));
+        }
     }
 
     public interface IKeySimulator2
