@@ -53,21 +53,6 @@ namespace genshinbot.tools
                 await Task.Delay(500);
             }
         }
-        public  async Task CollectMondstadt()
-        {
-            var sz = await b.W.Size.Value2();
-            var Dispatch = DispatchDb.Instance.Rd[sz];
-
-            await Collect( Dispatch.Mondstadt.Button, Dispatch.Mondstadt.All);
-        }
-
-        public  async Task CollectLiyue()
-        {
-            var sz = await b.W.Size.Value2();
-            var Dispatch = DispatchDb.Instance.Rd[sz];
-
-            await Collect(Dispatch.Liyue.Button, Dispatch.Liyue.All);
-        }
 
         public  async Task DispatchChara( Point pos, string chara)
         {
@@ -90,20 +75,9 @@ namespace genshinbot.tools
 
         }
 
-        public async Task DispatchMondstadt()
-        {
-            var sz = await b.W.Size.Value2();
-            var Dispatch = DispatchDb.Instance.Rd[sz];
 
-            await b.M.LeftClick(Dispatch.Mondstadt.Button);
-            await Task.Delay(500);
 
-            await DispatchChara( Dispatch.Mondstadt.WhisperingWoods, "fischl");
-            await DispatchChara( Dispatch.Mondstadt.DadupaGorge, "bennett");
-            await DispatchChara( Dispatch.Mondstadt.Wolvendom, "amber");
-        }
-
-        public async Task DispatchLiyue()
+        public async Task DispatchAll()
         {
             var sz = await b.W.Size.Value2();
             var Dispatch = DispatchDb.Instance.Rd[sz];
@@ -111,23 +85,44 @@ namespace genshinbot.tools
             await b.M.LeftClick(Dispatch.Liyue.Button);
             await Task.Delay(500);
 
-            await DispatchChara( Dispatch.Liyue.GuyunStoneForest, "chongyun");
-            await DispatchChara( Dispatch.Liyue.YaoguangShoal, "keqing");
-        }
+            await DispatchChara(Dispatch.Liyue.YaoguangShoal, "keqing");
 
-        public async Task DispatchAll()
+            await b.M.LeftClick(Dispatch.Mondstadt.Button);
+            await Task.Delay(500);
+
+            await DispatchChara(Dispatch.Mondstadt.WhisperingWoods, "fischl");
+            await DispatchChara(Dispatch.Mondstadt.DadupaGorge, "bennett");
+            await DispatchChara(Dispatch.Mondstadt.Stormbearer.RandomWithin(), "amber");
+
+            await b.M.LeftClick(Dispatch.Inazuma.Button);
+            await Task.Delay(500);
+
+            await DispatchChara(Dispatch.Inazuma.Byakko.RandomWithin(), "chongyun");
+        }
+        public async Task CollectAll()
         {
-            await DispatchLiyue();
-            await DispatchMondstadt();
-        }
+            var sz = await b.W.Size.Value2();
 
+            var Dispatch = DispatchDb.Instance.Rd[sz];
+            await Collect(Dispatch.Mondstadt.Button, new[]{
+                Dispatch.Mondstadt.Stormbearer.RandomWithin(),
+                Dispatch.Mondstadt.WhisperingWoods,
+                Dispatch.Mondstadt.DadupaGorge,
+            });
+            await Collect(Dispatch.Liyue.Button, new[]{
+                Dispatch.Liyue.YaoguangShoal,
+            });
+            await Collect(Dispatch.Inazuma.Button, new[]{
+                Dispatch.Inazuma.Byakko.RandomWithin(),
+            });
+        }
         public async Task DispatchCollect()
         {
             var sz = await b.W.Size.Value2();
             await ChatBegin( kath.R[sz].Dispatch.Expect());
 
-            await CollectLiyue();
-            await CollectMondstadt();
+            await CollectAll();
+
             await DispatchAll();
 
             await b.K.KeyPress(Keys.Escape);
@@ -159,14 +154,6 @@ namespace genshinbot.tools
 
             await b.M.LeftClick(sz.Center().Round());
             await Task.Delay(2000);
-        }
-       public static async Task runAsync(BotIO w)
-        {
-            var x = new DailyDoer(w);
-            await x.CollectLiyue();
-            await x.CollectMondstadt();
-            await x.DispatchAll();
-            
         }
     }
 }

@@ -28,6 +28,7 @@ namespace genshinbot.algorithm
 
             MouseDelta = known.Select((Pkt<double> known) =>
             {
+                scale = 30;
                 double? wanted = wanted1.Value;
                 double amt = (known.CaptureTime - lastRecharge) / recharch;
                 lastRecharge = known.CaptureTime;

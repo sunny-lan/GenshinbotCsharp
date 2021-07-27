@@ -165,7 +165,7 @@ namespace genshinbot
             // await tools.WalkRecorder.TestAsync(rig.Make());
             //  await tools.AutofillTool.ConfigureCharacterSel(rig.Make());
             //await sp.Resolve<ArduinoAutomator.Test>().TestMove();
-            await sp.Resolve<ArduinoAutomator.Test>().TestWindMove();
+        //    await sp.Resolve<ArduinoAutomator.Test>().TestWindMove();
             //await sp.Resolve<WindowAutomator2.Test>().Test3();
             //await sp.Resolve<WindMouseMover.Test>().TestMove();
 
