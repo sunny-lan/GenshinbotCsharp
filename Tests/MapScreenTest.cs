@@ -83,5 +83,42 @@ namespace GenshinBotTests
 
 
 
+        [Fact(Timeout = 5000)]
+        public async Task TestIsOpen()
+        {
+            var gw = new MockGenshinWindow(new Size(1680, 1050));
+            gw.MapScreen.Image = Data.Imread("test/map_luhua_1050.png");
+            gw.PlayingScreen.Image = Data.Imread("test/playing_luhua_1050.png");
+
+
+            gw.CurrentScreen = gw.PlayingScreen;
+
+            var rig1 = new MockTestingRig(gw);
+            genshinbot.BotIO io = rig1.Make();
+            MapScreen p = new MapScreen(io, null);
+
+            var r = p.IsCurrentScreen(io)!;
+            async Task testAsync(string img, bool playing)
+            {
+                if (playing)
+                {
+                    gw.PlayingScreen.Image = Data.Imread($"test/{img}.png");
+                }
+                else
+                {
+                    gw.MapScreen.Image = Data.Imread($"test/{img}.png");
+                }
+                gw.CurrentScreen = playing ? gw.PlayingScreen : gw.MapScreen;
+                var (res, score) = await r.Get();
+                Console.WriteLine($"{img}: {score}");
+                Assert.Equal(!playing, res);
+            }
+
+            await testAsync("playing_luhua_1050", true);
+            await testAsync("map_luhua_1050", false);
+            await testAsync("mondstadt_playing_climbing_1050", true);
+            await testAsync("guyun_playing_climbing_1050", true);
+
+        }
     }
 }

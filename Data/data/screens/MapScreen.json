@@ -86,6 +86,17 @@
                     "Width": 258,
                     "Height": 38
                 }
+            },
+            "MapIcon": {
+                "Image": {
+                    "Path": "images/MapIcon_1050.png"
+                },
+                "Region": {
+                    "X": 23,
+                    "Y": 987,
+                    "Width": 79,
+                    "Height": 44
+                }
             }
         }
     },

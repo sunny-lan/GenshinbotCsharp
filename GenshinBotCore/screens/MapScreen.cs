@@ -40,13 +40,40 @@ namespace genshinbot.screens
 
 
                 public Snap? TeleportButtonSnap { get; set; }
-
+                public Snap? MapIcon { get; set; }
             }
 
 
             public Dictionary<Size, RD> R { get; set; } = new Dictionary<Size, RD>();
             public double FeatureSelectThres { get; set; } = 0.2;
             public double TeleportSnapThres { get; set; } = 3000000;
+        }
+
+
+        Mat processedIcon = new Mat(), preScreen = new Mat(), paimonTemplMatch = new Mat();
+        public override IWire<(bool, double)>? IsCurrentScreen(BotIO b)
+        {
+
+            void preprocess(Mat input, Mat output)
+            {
+                Cv2.InRange(input, new Scalar(79, 61, 53, 0), new Scalar(79, 61, 53, 255), output);
+                Cv2.Sobel(output, output, MatType.CV_8UC1, 1, 1);
+            }
+
+            return b.W.Size.Select3<Size, Snap>(sz =>
+                 db.R[sz].MapIcon.Expect()).Select3(paimon =>
+                 {
+                     preprocess(paimon.Image.Value, processedIcon);
+
+                     return b.W.Screen.Watch(paimon.Region).Depacket().Select((Mat m) =>
+                     {
+                         preprocess(m, preScreen);
+                         Cv2.MatchTemplate(preScreen, processedIcon, paimonTemplMatch, TemplateMatchModes.SqDiffNormed);
+                         paimonTemplMatch.MinMaxLoc(out double res, out double _);
+                         return (res <= 0.2, res);
+                     });
+                 }).Switch2();
+
         }
 
         private Db db = Db.Instance.Value;
