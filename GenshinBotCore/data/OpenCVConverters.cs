@@ -14,9 +14,15 @@ namespace genshinbot.data.jsonconverters
     {
         public override SavableMat Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            var x = JsonSerializer.Deserialize<SavableMatSubset>(ref reader, options);
-            if (x.Path == null || !Data.Exists(x.Path))
-                return null;
+            var x = JsonSerializer.Deserialize<SavableMatSubset>(ref reader, options)!;
+            if (x.Path == null)
+            {
+                    throw new Exception($"Savablemat image path==null!");
+            }
+
+            if (!Data.Exists(x.Path))
+                throw new Exception($"Savablemat missing image {x.Path}!");
+
             return new SavableMat
             {
                 Path = x.Path,
@@ -26,10 +32,10 @@ namespace genshinbot.data.jsonconverters
 
         public override void Write(Utf8JsonWriter writer, SavableMat value, JsonSerializerOptions options)
         {
-            
-           value.Path = value.Path ?? $"images/{Guid.NewGuid()}.png";
+
+            value.Path = value.Path ?? $"images/{Guid.NewGuid()}.png";
             Data.Imwrite(value.Path, value.Value);
-            JsonSerializer.Serialize< SavableMatSubset>(writer, value, options);
+            JsonSerializer.Serialize<SavableMatSubset>(writer, value, options);
         }
 
         class TestCls
@@ -55,7 +61,7 @@ namespace genshinbot.data.jsonconverters
         }
         public override Point2d Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            var x=JsonSerializer.Deserialize<Point>(ref reader, options);
+            var x = JsonSerializer.Deserialize<Point>(ref reader, options);
             return new Point2d(x.X, x.Y);
         }
 
@@ -96,14 +102,17 @@ namespace genshinbot.data.jsonconverters
         public override Rect Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             var x = JsonSerializer.Deserialize<Recta>(ref reader, options);
-            return new Rect(x.X, x.Y,x.Width,x.Height);
+            return new Rect(x.X, x.Y, x.Width, x.Height);
         }
 
         public override void Write(Utf8JsonWriter writer, Rect value, JsonSerializerOptions options)
         {
-            JsonSerializer.Serialize<Recta>(writer, new Recta { 
-                X = value.X, Y = value.Y ,
-                Width=value.Width,Height=value.Height,
+            JsonSerializer.Serialize<Recta>(writer, new Recta
+            {
+                X = value.X,
+                Y = value.Y,
+                Width = value.Width,
+                Height = value.Height,
             }, options);
         }
     }
@@ -167,7 +176,7 @@ namespace genshinbot.data.jsonconverters
         public override Size Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             var x = JsonSerializer.Deserialize<Recta>(ref reader, options);
-            return new Size( x.Width, x.Height);
+            return new Size(x.Width, x.Height);
         }
 
         public override void Write(Utf8JsonWriter writer, Size value, JsonSerializerOptions options)
@@ -182,25 +191,25 @@ namespace genshinbot.data.jsonconverters
 
     class ScalarConverter : JsonConverter<Scalar>
     {
-       
+
         public override Scalar Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             var x = JsonSerializer.Deserialize<double[]>(ref reader, options);
-            if(x.Length==1)return new Scalar(x[0]);
-            if(x.Length==2)return new Scalar(x[0],x[1]);
-            if(x.Length==3)return new Scalar(x[0],x[1],x[2]);
-            if(x.Length==4)return new Scalar(x[0],x[1],x[2],x[3]);
+            if (x.Length == 1) return new Scalar(x[0]);
+            if (x.Length == 2) return new Scalar(x[0], x[1]);
+            if (x.Length == 3) return new Scalar(x[0], x[1], x[2]);
+            if (x.Length == 4) return new Scalar(x[0], x[1], x[2], x[3]);
             throw new Exception();
         }
 
         public override void Write(Utf8JsonWriter writer, Scalar value, JsonSerializerOptions options)
         {
-            JsonSerializer.Serialize<double[]>(writer, new double[] { 
+            JsonSerializer.Serialize<double[]>(writer, new double[] {
                 value.Val0,
                 value.Val1,
                 value.Val2,
                 value.Val3,
-            }, options) ;
+            }, options);
         }
     }
 }

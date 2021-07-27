@@ -52,6 +52,9 @@
     <Content Include="$(MSBuildThisFileDirectory)data\images\f636bb25-8aa7-4afc-8414-5f8b29fdfb55.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="$(MSBuildThisFileDirectory)data\images\paimon_1050.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="$(MSBuildThisFileDirectory)data\map\genshiniodata\assets\Andrius.dds" />
     <Content Include="$(MSBuildThisFileDirectory)data\map\genshiniodata\assets\Anemo_Hypostasis.dds" />
     <Content Include="$(MSBuildThisFileDirectory)data\map\genshiniodata\assets\brainjuice.PNG" />

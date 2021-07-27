@@ -33,6 +33,11 @@ namespace genshinbot.data
             inst = new Lazy<T>(() => Data.ReadJson1<T>(db));
             DbFilePath = db;
         }
+        public DbInst(string db, T def)
+        {
+            inst = new Lazy<T>(() => Data.ReadJson<T>(db,def));
+            DbFilePath = db;
+        }
 
         public void ReloadFromDisk()
         {

@@ -1,13 +1,11 @@
 ﻿using genshinbot.automation;
 using genshinbot.reactive;
 using genshinbot.reactive.wire;
+using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace genshinbot.screens
@@ -21,6 +19,11 @@ namespace genshinbot.screens
         {
             this.Io = b;
             this.ScreenManager = screenManager;
+        }
+
+        public virtual IWire<(bool isThis, double score)>? IsCurrentScreen(BotIO b)
+        {
+            return null;
         }
     }
     public class ScreenManager
@@ -44,18 +47,46 @@ namespace genshinbot.screens
             LoadingScreen = new LoadingScreen(new ProxyBotIO(ActiveScreen.Select(s => s == LoadingScreen), io), this);
 
         }
-        public void ForceScreen(IScreen? s)//TODO no async needed
+        public void ForceScreen(IScreen? s)
         {
             screen.SetValue(s);
         }
         public async Task ExpectScreen(IScreen s, int timeout = 2000)
         {
-            //TODO stuff
-            ForceScreen(null);
-            await Task.Delay(timeout);
+            if (s.IsCurrentScreen(io) is null)
+            {
+                Console.WriteLine($"warn: {s.GetType().Name} IsCurrentScreen not implemented");
+                ForceScreen(null);
+                await Task.Delay(timeout);
+            }
+            else
+            {
+                Debug.Assert(s == await ExpectOneOf(new[] { s }, timeout));
+            }
             ForceScreen(s);
         }
 
+        public async Task<IScreen> ExpectOneOf(IScreen[] screens, int timeout = 2000)
+        {
+            ForceScreen(null);
+            try
+            {
+                var res = await Wire.Merge(
+                    screens.Select(screen =>
+                        screen.IsCurrentScreen(io)!
+                            .Where(isOpen => isOpen.isThis)
+                            .Select(_ => screen)
+                    )
+                ).Get(TimeSpan.FromMilliseconds(timeout));
+                ForceScreen(res);
+                return res;
+            }
+            catch (TimeoutException)
+            {
 
+                ForceScreen(null);
+                throw;
+            }
+        }
     }
 }

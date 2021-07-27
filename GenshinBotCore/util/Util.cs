@@ -86,6 +86,13 @@ namespace genshinbot
             if (t == null) Debug.Fail(assert);
             return (T)t;
         }
+
+        [System.Diagnostics.DebuggerHidden]
+        public static T Expect<T>(this T? t, string assert = "") where T : class
+        {
+            if (t == null) Debug.Fail(assert);
+            return (T)t;
+        }
         private static Random rng = new Random(1);
 
    

@@ -40,10 +40,10 @@ namespace genshinbot.automation
             Screen = new ProxyScreen(enabled, w.Screen);
 
 
-            ScreenBounds = w.ScreenBounds.Relay2(enabled);
+            ScreenBounds = w.ScreenBounds;//todo.Relay2(enabled);
 
             Focused = w.Focused;//TODO.Relay(enabled);
-            Size = w.Size.Relay2(enabled);
+            Size = w.Size;//todo.Relay2(enabled);
 
         }
         public void TryFocus()

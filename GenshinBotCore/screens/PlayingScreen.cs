@@ -43,8 +43,10 @@ namespace genshinbot.screens
 
                 public CharacterTemplate[] Characters { get; set; } = new CharacterTemplate[4];
 
-                public Snap ClimbingX { get; set; }
-                public Snap FlyingSpace { get; set; }
+                public Snap? ClimbingX { get; set; }
+                public Snap? FlyingSpace { get; set; }
+
+                public Snap? PaimonMenuButton { get; set; }
             }
 
             public Dictionary<Size, RD> R { get; set; } = new Dictionary<Size, RD>
@@ -69,6 +71,32 @@ namespace genshinbot.screens
                 = new algorithm.PlayerHealthRead.CharacterFilter();
             public double MinAliveHealth { get; set; } = 0.02;
         }
+        Mat preprocessedPaimon = new Mat(), preScreen = new Mat(), paimonTemplMatch = new Mat();
+        public override IWire<(bool,double)>? IsCurrentScreen(BotIO b)
+        {
+
+            void preprocess(Mat input, Mat output)
+            {
+                Cv2.InRange(input, new Scalar(255, 255, 255, 0), new Scalar(255, 255, 255, 255), output);
+                Cv2.Sobel(output, output, MatType.CV_8UC1, 1, 1);
+            }
+
+           return b.W.Size.Select3<Size, Snap>(sz =>
+                db.R[sz].PaimonMenuButton.Expect()).Select3(paimon =>
+            {
+                preprocess(paimon.Image.Value, preprocessedPaimon);
+
+                return b.W.Screen.Watch(paimon.Region).Depacket().Select((Mat m) =>
+                {
+                    preprocess(m, preScreen);
+                    Cv2.MatchTemplate(preScreen, preprocessedPaimon, paimonTemplMatch, TemplateMatchModes.SqDiffNormed);
+                    paimonTemplMatch.MinMaxLoc(out double res, out double _);
+                    return (res <= 0.2,res);
+                });
+            }).Switch2();
+
+        }
+
         public Db db => Db.Instance;
         private ILiveWire<Db.RD?> rd;
         public IWire<Pkt<Mat>> Minimap { get; }
@@ -99,7 +127,7 @@ namespace genshinbot.screens
 
         public Point2d approxPos;//TODO HACK
         algorithm.MinimapMatch.PositionTracker? posTrack = null;
-       
+
 
         public IWire<Pkt<double>>[] PlayerHealth { get; } = new IWire<Pkt<double>>[4];
         public IWire<Pkt<bool>>[] PlayerSelect { get; } = new IWire<Pkt<bool>>[4];
@@ -132,7 +160,7 @@ namespace genshinbot.screens
                         //  Console.WriteLine("end detect");
                         return res;
                     }
-                 //   ,error => Console.WriteLine($"ERROR! {error}")
+                //   ,error => Console.WriteLine($"ERROR! {error}")
                 )
                 //.Debug("arrow DIR")
                 ;
@@ -152,7 +180,7 @@ namespace genshinbot.screens
                     .Watch2(rd.Select2(rd =>
                         //TODO sometimes false positive
                         //only check the single pixel in the middle, for efficiency
-                        rd.Characters[cpy].Number.Center().RectAround(new Size(1,1))
+                        rd.Characters[cpy].Number.Center().RectAround(new Size(1, 1))
                     ))
                     .Select(img =>
                     {
@@ -162,19 +190,19 @@ namespace genshinbot.screens
                         var hsv = color.CvtColor(ColorConversionCodes.BGR2HSV);
                         return (hsv.Val1 > sMax);
                     }
-                  //  , error => Console.WriteLine($"ERROR! {error}")
+                    //  , error => Console.WriteLine($"ERROR! {error}")
                     );
-                   
+
             }
 
 
             ClimbingScoreX = rd.Select3(rd =>
             {
-                Debug.Assert(rd.ClimbingX is not null, 
+                Debug.Assert(rd.ClimbingX is not null,
                     $"ClimbingX is not configured in settings for size {b.W.Size.Value}");
                 var comparer = new algorithm.NormComparer(rd.ClimbingX);
                 return b.W.Screen.Watch(rd.ClimbingX.Region).Select(comparer.Compare
-                  //  , error => Console.WriteLine($"ERROR! {error}")
+                    //  , error => Console.WriteLine($"ERROR! {error}")
                     );
             }).Switch2();
             IsClimbing = ClimbingScoreX.Select(x => x < db.ClimbingXThreshold);
@@ -185,7 +213,7 @@ namespace genshinbot.screens
                     $"ClimbingX is not configured in settings for size {b.W.Size.Value}");
                 var comparer = new algorithm.NormComparer(rd.FlyingSpace);
                 return b.W.Screen.Watch(rd.FlyingSpace.Region).Select(comparer.Compare
-                   // , error => Console.WriteLine($"ERROR! {error}")
+                    // , error => Console.WriteLine($"ERROR! {error}")
                     );
             }).Switch2();
             IsFlying = FlyingScoreX.Select(x => x < db.ClimbingXThreshold);
@@ -194,44 +222,44 @@ namespace genshinbot.screens
                     wire.Select(
                         health =>
                         health < db.MinAliveHealth)
-                   // .Debug($"p{idx}")
+                // .Debug($"p{idx}")
                 )
                 .ToArray()
                 .AllLatest();//TODO not sure if debounce needed
 
-            MinimapPos= Minimap.Select((Mat x) =>
-            {
-            begin:
-                Point2d res;
-                if (posTrack == null)
-                {
+            MinimapPos = Minimap.Select((Mat x) =>
+             {
+             begin:
+                 Point2d res;
+                 if (posTrack == null)
+                 {
                     //scale not known yet
 
                     var res1 = scaleMatcher.FindScale(approxPos, x, out var posMatch);
-                    if (res1 is Point2d r1)
-                    {
-                        res = r1;
-                        posTrack = new algorithm.MinimapMatch.PositionTracker(posMatch);
-                    }
-                    else
-                        throw new algorithm.AlgorithmFailedException("Failed to find valid scale");
-                }
+                     if (res1 is Point2d r1)
+                     {
+                         res = r1;
+                         posTrack = new algorithm.MinimapMatch.PositionTracker(posMatch);
+                     }
+                     else
+                         throw new algorithm.AlgorithmFailedException("Failed to find valid scale");
+                 }
 
-                var res2 = posTrack.Track(x);
-                if (res2 is Point2d newApprox)
-                {
-                    res = newApprox;
-                }
-                else
-                {
+                 var res2 = posTrack.Track(x);
+                 if (res2 is Point2d newApprox)
+                 {
+                     res = newApprox;
+                 }
+                 else
+                 {
                     //unable to find position, check scale again
                     posTrack = null;
-                    goto begin;
-                }
+                     goto begin;
+                 }
 
-                approxPos = res;
-                return res;
-            }
+                 approxPos = res;
+                 return res;
+             }
             );
         }
 
@@ -265,7 +293,7 @@ namespace genshinbot.screens
             throw new NotImplementedException();
         }
 
-       
+
         public static async Task TestReadHealth(MockTestingRig rig1)
         {
             PlayingScreen p = new PlayingScreen(rig1.Make(), null);
@@ -273,7 +301,7 @@ namespace genshinbot.screens
                 Console.WriteLine($"p[{i}] = {await p.PlayerHealth[i].Get()}");
 
         }
-      
+
         public static void TestClimb2(ITestingRig rig1)
         {
 
