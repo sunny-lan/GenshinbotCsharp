@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Vanara.PInvoke;
 
 namespace genshinbot.yui.windows
 {
@@ -24,8 +25,19 @@ namespace genshinbot.yui.windows
 
         public Textbox()
         {
+            
 
             base.TextChanged += (_, _) => TextChanged?.Invoke(Text);
+        }
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Escape)
+            {
+                Text = "";
+                OnTextChanged(e);
+            }else
+            base.OnKeyDown(e);
         }
     }
 }

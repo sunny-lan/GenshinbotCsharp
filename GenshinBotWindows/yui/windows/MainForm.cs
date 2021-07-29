@@ -4,14 +4,29 @@ using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
+using Vanara.PInvoke;
+using System.Runtime.InteropServices;
+using System.ComponentModel;
+using System.Text;
 
+/// <summary>
+/// provides implementation of gui using windows forms
+/// </summary>
 namespace genshinbot.yui.windows
 {
-    /// <summary>
-    /// provides implementation of gui using windows forms
-    /// </summary>
     public partial class MainForm : Form, YUI
     {
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                CreateParams p = base.CreateParams;
+
+                p.ExStyle |= (int)User32.WindowStylesEx.WS_EX_NOACTIVATE;
+
+                return p;
+            }
+        }
         public static void Test()
         {
             var _f = new MainForm();
@@ -29,11 +44,75 @@ namespace genshinbot.yui.windows
             return waiter.Item1.Result;
         }
 
+        static Kernel32.SafeHINSTANCE mar = Kernel32.LoadLibrary("user32.dll");
         public MainForm()
         {
+            TopMost = true;
             InitializeComponent();
+            Load += MainForm_Load;
+            del = HookProc1;
             
         }
+
+        User32.HookProc del;
+        private void MainForm_Load(object? sender, EventArgs e)
+        {
+
+            hookID = User32.SetWindowsHookEx(
+                    User32.HookType.WH_KEYBOARD_LL,
+                    del,
+                    mar,
+                    0);
+            if (hookID.IsInvalid)
+            {
+                //Returns the error code returned by the last unmanaged function called using platform invoke that has the DllImportAttribute.SetLastError flag set. 
+                var errorCode = Marshal.GetLastWin32Error();
+
+                //Initializes and throws a new instance of the Win32Exception class with the specified error. 
+                throw new Win32Exception(errorCode);
+            }
+
+        }
+        byte[] kbdSt = new byte[256];
+        private IntPtr HookProc1(int nCode, IntPtr wParam, IntPtr lParam)
+        {
+            if (nCode >= 0)
+            {
+                if (this.WindowState is not FormWindowState.Minimized)
+                {
+                    var converted = (User32.WindowMessage)wParam;
+                    if (converted is
+                        User32.WindowMessage.WM_KEYDOWN or
+                        User32.WindowMessage.WM_KEYUP)
+                    {
+                        var focuseed = this.FindFocusedControl();
+                        if (focuseed is Textbox t)
+                        {
+                            
+                            var data = Marshal.PtrToStructure<User32.KBDLLHOOKSTRUCT>(lParam);
+                            bool down = converted is User32.WindowMessage.WM_KEYDOWN;
+                            kbdSt[data.vkCode] = (byte)(down ?0xff:0x00);
+                            uint flag = 0x002C0001;
+                            User32.SendMessage(t.Handle, (uint)wParam,
+                                (IntPtr)data.vkCode, (IntPtr)flag);
+                            //Console.WriteLine($"{(Keys)data.vkCode} {down}");
+                            if (down)
+                            {
+                                User32.ToAscii(data.vkCode, data.scanCode, kbdSt, out var c,  0);
+                                //Console.WriteLine((char)c);
+                                User32.SendMessage(t.Handle, (uint)User32.WindowMessage.WM_CHAR, 
+                                    (IntPtr)c,(IntPtr) flag);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return User32.CallNextHookEx(hookID, nCode, wParam, lParam);
+        }
+
+
+
 
         public yui.Tab CreateTab()
         {
@@ -53,6 +132,8 @@ namespace genshinbot.yui.windows
 
         public System.Func<bool> OnClose { get ; set ; }
         String REALMSG;
+        private User32.SafeHHOOK hookID;
+
         private void tabs_Selected(object sender, TabControlEventArgs e)
         {
 
@@ -76,7 +157,10 @@ namespace genshinbot.yui.windows
         {
             if(OnClose!=null)
                 e.Cancel =await Task.Run( OnClose);
-            
+            if (!e.Cancel)
+            {
+                User32.UnhookWindowsHookEx(hookID);
+            }
         }
 
 

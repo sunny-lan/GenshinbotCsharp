@@ -98,8 +98,8 @@ namespace genshinbot
             }).SingleInstance(); 
             builder.RegisterType<WindowAutomator2.Test>().SingleInstance();
              builder.Register<IWindowAutomator2>(sp =>sp.Resolve<WindowAutoFac>()(
-                "Genshin Impact",
-                "UnityWndClass"
+                "*Untitled - Notepad",
+                null
                 )).SingleInstance();
             //builder.Register<IWindowAutomator2>(_ => mkMok()).SingleInstance();
             builder.RegisterType<BaseBotIO>().As<BotIO>().SingleInstance();
