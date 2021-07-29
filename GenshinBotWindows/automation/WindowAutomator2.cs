@@ -120,7 +120,9 @@ namespace genshinbot.automation.windows
 
             Size = ScreenBounds
                 .Select(r => r?.Size)
-                .DistinctUntilChanged();
+                .DistinctUntilChanged()
+                //.Debug("SIZE")
+                ;
 
             Bounds = Size.Select(x => x?.Bounds())
                             .DistinctUntilChanged()

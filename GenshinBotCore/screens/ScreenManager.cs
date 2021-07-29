@@ -49,6 +49,7 @@ namespace genshinbot.screens
         }
         public void ForceScreen(IScreen? s)
         {
+          //  Console.WriteLine($"force: {s}");
             screen.SetValue(s);
         }
         public async Task ExpectScreen(IScreen s, int timeout = 2000)
@@ -58,12 +59,13 @@ namespace genshinbot.screens
                 Console.WriteLine($"warn: {s.GetType().Name} IsCurrentScreen not implemented");
                 ForceScreen(null);
                 await Task.Delay(timeout);
+                ForceScreen(s);
             }
             else
             {
                 Debug.Assert(s == await ExpectOneOf(new[] { s }, timeout));
+             
             }
-            ForceScreen(s);
         }
 
         public async Task<IScreen> ExpectOneOf(IScreen[] screens, int timeout = 2000)
@@ -71,13 +73,15 @@ namespace genshinbot.screens
             ForceScreen(null);
             try
             {
+             //   Console.WriteLine($"expect: {string.Join(",",screens.Select(s=>s.GetType().Name).ToArray())}");
                 var res = await Wire.Merge(
                     screens.Select(screen =>
                         screen.IsCurrentScreen(io)!
                             .Where(isOpen => isOpen.isThis)
                             .Select(_ => screen)
                     )
-                ).Get(TimeSpan.FromMilliseconds(timeout));
+                ).Get();//todo
+                await Task.Delay(200);
                 ForceScreen(res);
                 return res;
             }

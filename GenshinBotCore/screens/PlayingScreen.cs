@@ -23,14 +23,9 @@ namespace genshinbot.screens
     {
         public class Db
         {
-            public static Db Instance => inst.Value;
-            private static Lazy<Db> inst = new Lazy<Db>(
-                () => Data.ReadJson("screens/PlayingScreen.json", new Db()));
-            public static async Task SaveInstanceAsync(Db instance = null)
-            {
-                if (instance == null) instance = Instance;
-                await Data.WriteJsonAsync("screens/PlayingScreen.json", instance);
-            }
+            public static Db Instance => Inst.Value;
+            public static DbInst<Db> Inst = new DbInst<Db>("screens/PlayingScreen.json");
+          
             public class RD
             {
                 public Rect MinimapLoc { get; set; }
@@ -47,6 +42,7 @@ namespace genshinbot.screens
                 public Snap? FlyingSpace { get; set; }
 
                 public Snap? PaimonMenuButton { get; set; }
+                public Snap? BowR { get; set; }
             }
 
             public Dictionary<Size, RD> R { get; set; } = new Dictionary<Size, RD>
@@ -71,28 +67,19 @@ namespace genshinbot.screens
                 = new algorithm.PlayerHealthRead.CharacterFilter();
             public double MinAliveHealth { get; set; } = 0.02;
         }
-        Mat preprocessedPaimon = new Mat(), preScreen = new Mat(), paimonTemplMatch = new Mat();
         public override IWire<(bool,double)>? IsCurrentScreen(BotIO b)
         {
 
-            void preprocess(Mat input, Mat output)
-            {
-                Cv2.InRange(input, new Scalar(255, 255, 255, 0), new Scalar(255, 255, 255, 255), output);
-                Cv2.Sobel(output, output, MatType.CV_8UC1, 1, 1);
-            }
+            algorithm.BlackWhiteTemplateMatchAlg alg = new();
 
            return b.W.Size.Select3<Size, Snap>(sz =>
                 db.R[sz].PaimonMenuButton.Expect()).Select3(paimon =>
             {
-                preprocess(paimon.Image.Value, preprocessedPaimon);
+                alg.SetTemplate(paimon.Image.Value);
 
-                return b.W.Screen.Watch(paimon.Region).Depacket().Select((Mat m) =>
-                {
-                    preprocess(m, preScreen);
-                    Cv2.MatchTemplate(preScreen, preprocessedPaimon, paimonTemplMatch, TemplateMatchModes.SqDiffNormed);
-                    paimonTemplMatch.MinMaxLoc(out double res, out double _);
-                    return (res <= 0.2,res);
-                });
+                return b.W.Screen.Watch(paimon.Region)
+                    .Depacket()
+                    .Select(alg.Match);
             }).Switch2();
 
         }
@@ -140,6 +127,7 @@ namespace genshinbot.screens
         /// Also is true when players are disabled (jumping, falling, climbing)
         /// </summary>
         public IWire<Pkt<bool>> IsAllDead { get; }
+        public IWire<Pkt<(bool matched, double score)>> BowActivated { get; }
 
         public PlayingScreen(BotIO b, ScreenManager screenManager) : base(b, screenManager)
         {
@@ -261,6 +249,17 @@ namespace genshinbot.screens
                  return res;
              }
             );
+
+            var alg = new algorithm.BlackWhiteTemplateMatchAlg();
+
+            BowActivated = rd.Select3(rd =>
+            {
+                Debug.Assert(rd.BowR is not null,
+                    $"ClimbingX is not configured in settings for size {b.W.Size.Value}");
+                alg.SetTemplate(rd.BowR.Image.Value);
+                return b.W.Screen.Watch(rd.BowR.Region)
+                        .Select(alg.Match);
+            }).Switch2();
         }
 
 

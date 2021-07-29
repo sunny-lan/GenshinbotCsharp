@@ -15,6 +15,7 @@ using genshinbot.reactive;
 using genshinbot.diag;
 using genshinbot.reactive.wire;
 using genshinbot.automation.input;
+using genshinbot.util;
 
 namespace genshinbot.controllers
 {
@@ -118,7 +119,9 @@ namespace genshinbot.controllers
             {
                 if (screen == map)
                 {
+                    //Console.WriteLine("track: map still open, closing");
                     var s2c = await map.Screen2Coord.Get();
+                   // Console.WriteLine("track: map closed");
                     var center1 = (await map.Io.W.Bounds.Value2()).Center();
                     _lastKnownPos.SetValue(s2c.ToCoord(center1));
                     await screens.MapScreen.Close();
@@ -127,6 +130,10 @@ namespace genshinbot.controllers
                 {
                     throw new Exception("unexpected screen");
                 }
+            }
+            else
+            {
+               // Console.WriteLine("track: playing screen open");
             }
 
             if (_lastKnownPos.Value is not null)
@@ -145,14 +152,18 @@ namespace genshinbot.controllers
 
             if (_lastKnownPos.Value is null)
             {
+               // Console.WriteLine("track: lastknownpos null, opening map");
                 await screens.PlayingScreen.OpenMap();
+               // Console.WriteLine("track: map opened");
                 var center = (await map.Io.W.Bounds.Value2()).Center();
                 algorithm.MapLocationMatch.Result? screen2Coord;
                 screen2Coord = await map.Screen2Coord.Get();
                 _lastKnownPos.SetValue(screen2Coord.ToCoord(center));
             }
 
+           // Console.WriteLine("track: closing map");
             await map.Close();
+           // Console.WriteLine("track: map closed");
             return screens.PlayingScreen.MinimapPos;
         }
 
@@ -169,6 +180,7 @@ namespace genshinbot.controllers
             public double? TeleportThres { get; init; } = 7;
 
             public int MaxArrowDetectFail { get; init; } = 4;
+            public double AngleTolerance { get; internal set; } = Math.PI / 8;
         }
         public static WalkOptions DefaultWalkOptions = new WalkOptions();
 
@@ -179,7 +191,11 @@ namespace genshinbot.controllers
             NotFlyingAnymore
         }
 
-        public record WalkPoint(Point2d Value, double? Tolerance = null);
+        public record WalkPoint(
+            Point2d Value,
+            double? Tolerance = null,
+            bool ExpectClimb=false
+        );
 
         public async Task WalkTo(List<WalkPoint> dst, WalkOptions? opt = null)
         {
@@ -199,9 +215,11 @@ namespace genshinbot.controllers
 
             Debug.Assert(screens.ActiveScreen.Value == screens.PlayingScreen);
             PlayingScreen playingScreen = screens.PlayingScreen;
+            //LiveWireSource<bool> wantedRelay = new LiveWireSource<bool>(false);
             var arrowControl = new algorithm.ArrowSteering(
                 playingScreen.ArrowDirection,
-                wanted);
+                wanted//.Relay2(wantedRelay)
+                      );
 
             var deltaP = arrowControl.MouseDelta.Select(x =>
                new Point2d(x, 0));
@@ -216,7 +234,12 @@ namespace genshinbot.controllers
                       .Select(_ => WalkStatus.Deading)
                       .GetGetter()
                       )*/
+
+            //switch to c4 (expected fischl)
+           // await io.K.KeyPress(Keys.Oem4);
+            //await playingScreen.PlayerSelect[3].Where(x => x).Get();
             int retryCount = 0;
+            SemaphoreSlim bad = new SemaphoreSlim(1);
             using (deltaP.Subscribe(async delta =>
             {
                 Interlocked.Exchange(ref retryCount, 0);
@@ -255,15 +278,55 @@ namespace genshinbot.controllers
                }
                wanted.SetValue(p.AngleTo(dst[idx].Value));
            }, onErr: E=>errStream.EmitError(E)))
+           /*TODO make this work! using(Wire.CombineLatest(wanted.NonNull(), playingScreen.ArrowDirection.Depacket(), (double wanted, double known)=>
+           {
+
+               return (wanted-known)<opt2.AngleTolerance;
+           }).DistinctUntilChanged().Subscribe(async (bool run)=>
+           {
+               await bad.WaitAsync();
+               try
+               {
+                   //if angle is off utilize bow user
+                   if (!run)
+                   {
+                       wantedRelay.SetValue(false);
+                       await io.K.Key(Keys.W, run);
+                       if (!(await playingScreen.BowActivated.Get()).matched)
+                       {
+                           await io.K.KeyPress(Keys.R);
+                           await playingScreen.BowActivated.Where(x => x.matched).Get();
+                       }
+                       wantedRelay.SetValue(true);
+
+                   }
+                   else
+                   {
+                       if ((await playingScreen.BowActivated.Get()).matched)
+                       {
+                           await io.K.KeyPress(Keys.R);
+                           await playingScreen.BowActivated.Where(x => !x.matched).Get();
+                       }
+                       await io.K.Key(Keys.W, run);
+                       wantedRelay.SetValue(true);
+                   }
+               }
+               finally
+               {
+                   bad.Release();
+               }
+
+           }))*/
             {  //keep going until either atDest, or dead
 
                 //dont start till mouse ready
                 await wanted.NonNull().Get().ConfigureAwait(false);
+                
                 try
                 {
                     Debug.WriteLine("begin walking");
                     await io.K.KeyDown(Keys.W).ConfigureAwait(false);
-                    await Wire.Merge( wanted,errStream).Where(x => double.IsNaN(x ?? 0)).Get();
+                    await errStream.Where(x => double.IsNaN(x ?? 0)).Get();
                     return;
                     /*backtowalking:
                     var r = await await Task.WhenAny(allDead.Get(), atDest.Get()).ConfigureAwait(false);

@@ -22,14 +22,31 @@ namespace genshinbot
 
         class BaseBotIO : BotIO
         {
+            class MyKAdp:automation.proxy.KbdAdapter
+            {
+                Random rng = new();
+                public MyKAdp(IKeySimulator2 wrap) : base(wrap)
+                {
+                }
+
+                public override async Task KeyPress(automation.input.Keys k)
+                {
+                    await wrap.KeyDown(k);
+                    await Task.Delay(rng.Next(5,15));
+                    await wrap.KeyUp(k);
+
+                }
+            }
             public IWindowAutomator2 W { get; }
 
             public IMouseSimulator2 M { get; }
+            public IKeySimulator2 K { get; }
 
             public BaseBotIO(IWindowAutomator2 w)
             {
                 W = w;
                 M = new WindMouseMover(w.Mouse);
+                K = new MyKAdp(w.Keys);
             }
         }
 
@@ -105,6 +122,14 @@ namespace genshinbot
             builder.RegisterType<WindMouseMover.Test>().SingleInstance();
 
             var sp = builder.Build();
+            /*var sm1 = sp.Resolve<screens.ScreenManager>();
+
+            while (true)
+            {
+                var thing = await sm1.ExpectOneOf(new screens.IScreen[] {
+                        sm1.PlayingScreen,sm1.MapScreen });
+                Console.WriteLine(thing.GetType().Name);
+            }*/
 
             //  await screens.MapScreen.Testshow(rig);
 

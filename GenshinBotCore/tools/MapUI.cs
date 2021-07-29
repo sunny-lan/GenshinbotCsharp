@@ -243,10 +243,16 @@ namespace genshinbot.tools
                 IWire<reactive.Pkt<Point2d>> res;
                 try
                 {
+                  //  Console.WriteLine("begin expect");
+                    await lm.screens.ExpectOneOf(new screens.IScreen[] {
+                        lm.screens.PlayingScreen,lm.screens.MapScreen });
+                  //  Console.WriteLine("begin trck");
+
                     res = await lm.TrackPos();
                 }
                 catch (Exception e)
                 {
+                  //  Console.WriteLine("error");
                     tab.Status = e.ToString();
                     ui.GiveFocus(tab);
                     dd.SetValue(false);
@@ -314,6 +320,8 @@ namespace genshinbot.tools
                 {
                     running.SetValue(true);
                     var dst = (Feature)selected.Value!;
+                    await lm.screens.ExpectOneOf(new screens.IScreen[] {
+                        lm.screens.PlayingScreen,lm.screens.MapScreen });
                     await lm.Goto(dst);
                 }
                 catch (Exception E)

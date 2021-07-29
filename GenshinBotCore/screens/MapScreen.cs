@@ -50,28 +50,22 @@ namespace genshinbot.screens
         }
 
 
-        Mat processedIcon = new Mat(), preScreen = new Mat(), paimonTemplMatch = new Mat();
         public override IWire<(bool, double)>? IsCurrentScreen(BotIO b)
         {
 
-            void preprocess(Mat input, Mat output)
+            var alg = new algorithm.BlackWhiteTemplateMatchAlg
             {
-                Cv2.InRange(input, new Scalar(79, 61, 53, 0), new Scalar(79, 61, 53, 255), output);
-                Cv2.Sobel(output, output, MatType.CV_8UC1, 1, 1);
-            }
+                PreprocessRange = new(new Scalar(79, 61, 53, 0), new Scalar(79, 61, 53, 255))
+            };
 
             return b.W.Size.Select3<Size, Snap>(sz =>
-                 db.R[sz].MapIcon.Expect()).Select3(paimon =>
+                 db.R[sz].MapIcon.Expect()).Select3(icon =>
                  {
-                     preprocess(paimon.Image.Value, processedIcon);
+                     alg.SetTemplate(icon.Image.Value);
 
-                     return b.W.Screen.Watch(paimon.Region).Depacket().Select((Mat m) =>
-                     {
-                         preprocess(m, preScreen);
-                         Cv2.MatchTemplate(preScreen, processedIcon, paimonTemplMatch, TemplateMatchModes.SqDiffNormed);
-                         paimonTemplMatch.MinMaxLoc(out double res, out double _);
-                         return (res <= 0.2, res);
-                     });
+                     return b.W.Screen.Watch(icon.Region)
+                     .Depacket()
+                        .Select(alg.Match);
                  }).Switch2();
 
         }
@@ -85,8 +79,6 @@ namespace genshinbot.screens
         public IWire<Pkt<Mat>> Screen { get; }
         public IWire<Pkt<List<algorithm.MapTemplateMatch.Result>>> Features { get; }
         public IWire<Pkt<algorithm.MapLocationMatch.Result>> Screen2Coord { get; }
-
-        public event Action<Exception> OnMatchError;
 
         public MapScreen(BotIO b, ScreenManager screenManager) : base(b, screenManager)
         {

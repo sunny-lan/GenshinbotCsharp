@@ -7,6 +7,7 @@ using System.IO.Ports;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace genshinbot.automation
@@ -67,8 +68,13 @@ namespace genshinbot.automation
             [Keys.F2] = 0xc3,
             [Keys.F3] = 0xc4,
             [Keys.F4] = 0xc5,
+            [Keys.Oem1] = (byte)'1',
+            [Keys.Oem2] = (byte)'2',
+            [Keys.Oem3] = (byte)'3',
+            [Keys.Oem4] = (byte)'4',
 
         };
+        SemaphoreSlim send_lock = new SemaphoreSlim(1);
         public async Task Key(Keys k, bool down)
         {
             byte kk = overrides.GetValueOrDefault(k, (byte)k);
@@ -141,17 +147,24 @@ namespace genshinbot.automation
         }
         async Task _send(byte[] buf)
         {
-            byte[] buf1 = new byte[1];
-
-            // Console.WriteLine(Convert.ToHexString(buf));
-            await sp.BaseStream.WriteAsync(buf, 0, buf.Length);
-            await sp.BaseStream.FlushAsync();
-            await sp.BaseStream.ReadAsync(buf1, 0, 1);
-            if (buf1[0] != (byte)'a')
+            await send_lock.WaitAsync();
+            try
             {
-                string msg = "" + (char)buf1[0];
-                while (sp.BytesToRead > 0) msg += (char)sp.ReadChar();
-                throw new Exception(msg);
+                byte[] buf1 = new byte[1];
+                // Console.WriteLine(Convert.ToHexString(buf));
+                await sp.BaseStream.WriteAsync(buf, 0, buf.Length);
+                await sp.BaseStream.FlushAsync();
+                await sp.BaseStream.ReadAsync(buf1, 0, 1);
+                if (buf1[0] != (byte)'a')
+                {
+                    string msg = "" + (char)buf1[0];
+                    while (sp.BytesToRead > 0) msg += (char)sp.ReadChar();
+                    throw new Exception(msg);
+                }
+            }
+            finally
+            {
+                send_lock.Release();
             }
         }
 
