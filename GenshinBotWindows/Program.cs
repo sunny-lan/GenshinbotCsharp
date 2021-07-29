@@ -78,13 +78,22 @@ namespace genshinbot
             var builder = new ContainerBuilder();
 
             builder.Register<YUI>(_ => yui.windows.MainForm.make()).SingleInstance();
-            builder.Register<ArduinoAutomator>(_ =>
+            var s = System.IO.Ports.SerialPort.GetPortNames();
+            if (s.Length == 1)
             {
-                var s = System.IO.Ports.SerialPort.GetPortNames();
-                Debug.Assert(s.Length == 1);
-                    return new ArduinoAutomator(s[0],async () => Cursor.Position.Cv());
-                
-            }).SingleInstance().As<IMouseSimulator2>().As<IKeySimulator2>().AsSelf();
+                builder.Register<ArduinoAutomator>(_ =>
+                {
+                    return new ArduinoAutomator(s[0], async () => Cursor.Position.Cv());
+                }).SingleInstance().As<IMouseSimulator2>().As<IKeySimulator2>().AsSelf();
+            }
+            else {
+                builder.Register(_ =>
+                {
+                    Debug.Assert(s.Length == 1, "warn: arduino not plugged in. may result in bot detection");
+                    return new automation.input.windows.InputSimulatorStandardAdapter();
+                }).SingleInstance().As<IMouseSimulator2>().As<IKeySimulator2>();
+            }
+            
             builder.Register<WindowAutoFac> (sp => { 
                     var auto = sp.Resolve<IKeySimulator2>();
                     var auto1 = sp.Resolve<IMouseSimulator2>();
@@ -98,8 +107,8 @@ namespace genshinbot
             }).SingleInstance(); 
             builder.RegisterType<WindowAutomator2.Test>().SingleInstance();
              builder.Register<IWindowAutomator2>(sp =>sp.Resolve<WindowAutoFac>()(
-                "*Untitled - Notepad",
-                null
+                "Genshin Impact",
+                "UnityWndClass"
                 )).SingleInstance();
             //builder.Register<IWindowAutomator2>(_ => mkMok()).SingleInstance();
             builder.RegisterType<BaseBotIO>().As<BotIO>().SingleInstance();
@@ -122,8 +131,10 @@ namespace genshinbot
             builder.RegisterType<WindMouseMover.Test>().SingleInstance();
 
             var sp = builder.Build();
+            
+            
             /*var sm1 = sp.Resolve<screens.ScreenManager>();
-
+            
             while (true)
             {
                 var thing = await sm1.ExpectOneOf(new screens.IScreen[] {

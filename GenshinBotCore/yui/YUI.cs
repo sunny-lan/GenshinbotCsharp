@@ -10,6 +10,7 @@ namespace genshinbot
     /// </summary>
     public interface YUI
     {
+        void Show();
         Tab CreateTab();
 
         void RemoveTab(Tab tab);
