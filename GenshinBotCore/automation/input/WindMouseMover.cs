@@ -21,12 +21,21 @@ namespace genshinbot.automation.input
         {
             await alg.MoveMouse(p.X, p.Y, 0, 0);
         }
-
+        
 
         public override async Task MouseMove(Point2d d)
         {
             await MouseTo(d + await MousePos());
         }
+        Random rng = new Random();
+        public override async Task MouseClick(MouseBtn btn)
+        {
+
+            await wrap.MouseDown(btn).ConfigureAwait(false);
+            await Task.Delay(rng.Next(5, 15));
+            await wrap.MouseUp(btn).ConfigureAwait(false);
+        }
+
 
         public class Test
         {

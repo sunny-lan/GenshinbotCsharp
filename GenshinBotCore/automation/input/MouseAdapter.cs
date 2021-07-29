@@ -31,5 +31,10 @@ namespace genshinbot.automation.input
         {
             return wrap.MouseTo(p);
         }
+
+        public virtual Task MouseClick(MouseBtn btn)
+        {
+            return wrap.MouseClick(btn);
+        }
     }
 }
