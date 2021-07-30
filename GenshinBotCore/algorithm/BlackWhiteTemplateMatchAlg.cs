@@ -23,7 +23,7 @@ namespace genshinbot.algorithm
             void DefaultPreprocess(Mat input, Mat output)
         {
             Cv2.InRange(input, PreprocessRange.Min, PreprocessRange.Max, output);
-            Cv2.Sobel(output, output, MatType.CV_8UC1, 1, 1);
+            Cv2.Sobel(output, output, MatType.CV_32F, 1, 1);//todo untested
         }
 
         Mat preprocessedPaimon = new Mat(), preScreen = new Mat(), paimonTemplMatch = new Mat(), derp = new Mat();

@@ -33,7 +33,7 @@ namespace genshinbot.algorithm
 
             }
 
-            Mat labels = new Mat(),
+            readonly Mat Labels = new Mat(),
                 stats = new Mat(),
                 centroids = new Mat();
             public int Count { get; private set; } = -1;
@@ -41,7 +41,7 @@ namespace genshinbot.algorithm
             public void CalculateFrom(Mat img)
             {
 
-                Count = Cv2.ConnectedComponentsWithStats(img, labels, stats, centroids);
+                Count = Cv2.ConnectedComponentsWithStats(img, Labels, stats, centroids);
 
             }
 
@@ -75,7 +75,7 @@ namespace genshinbot.algorithm
 
             ~ConnectedComponents()
             {
-                labels.Dispose();
+                Labels.Dispose();
                 stats.Dispose();
                 centroids.Dispose();
             }

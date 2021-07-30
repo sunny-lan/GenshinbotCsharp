@@ -34,6 +34,7 @@ namespace genshinbot.algorithm
             s_thres.Dispose();
             v_thres.Dispose();
             filtered.Dispose();
+            //TODO
         }
         Mat edges = new Mat();
         Mat green = new Mat();
@@ -45,6 +46,7 @@ namespace genshinbot.algorithm
         Mat tmp = new Mat();
         Mat redCombined = new Mat();
         Mat maskAndred = new Mat();
+        algorithm.ConnectedComponents cc = new();
         public double GetAngle(Mat img1)
         {
 
@@ -69,8 +71,8 @@ namespace genshinbot.algorithm
 
             Cv2.BitwiseOr(red, green, redCombined);
             Cv2.BitwiseOr(blue, redCombined, edges);
-
-
+            //TODO use my own implentation of connected 
+            
             var cc1 = edges.ConnectedComponentsEx();
             var center = img.Center().Round();
             var lbl = cc1.Labels[center.X, center.Y];
