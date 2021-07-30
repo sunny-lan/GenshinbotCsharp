@@ -1,4 +1,5 @@
 ﻿using genshinbot.yui;
+using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,6 +42,7 @@ namespace genshinbot.tools
                         if (enabled)
                         {
                             enabled = false;
+                            childe.Color = Scalar.Red;
                             try
                             {
                                 var res = meth.Invoke(tool, new object[] { });
@@ -51,7 +53,11 @@ namespace genshinbot.tools
                                 tab.Status = e.ToString();
                                 ui.GiveFocus(tab);
                             }
-                            enabled = true;
+                            finally
+                            {
+                                childe.Color = Scalar.Black;
+                                enabled = true;
+                            }
                         }
                     };
                 }

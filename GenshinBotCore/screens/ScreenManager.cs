@@ -33,6 +33,7 @@ namespace genshinbot.screens
         public PlayingScreen PlayingScreen { get; }
         public MapScreen MapScreen { get; }
         public InventoryScreen InventoryScreen { get; }
+        public IScreen[] AllScreens { get; }
         public LoadingScreen LoadingScreen { get; }
 
         public ILiveWire<IScreen?> ActiveScreen => screen;
@@ -47,20 +48,21 @@ namespace genshinbot.screens
             MapScreen = new MapScreen(new ProxyBotIO(ActiveScreen.Select(s => s == MapScreen), io), this);
             LoadingScreen = new LoadingScreen(new ProxyBotIO(ActiveScreen.Select(s => s == LoadingScreen), io), this);
             InventoryScreen = new InventoryScreen(new ProxyBotIO(ActiveScreen.Select(s => s == InventoryScreen), io), this);
-
+            AllScreens = new IScreen[] { PlayingScreen, MapScreen, InventoryScreen,LoadingScreen };
         }
         public void ForceScreen(IScreen? s)
         {
           //  Console.WriteLine($"force: {s}");
             screen.SetValue(s);
         }
-        public async Task ExpectScreen(IScreen s, int timeout = 2000)
+        public async Task ExpectScreen(IScreen s, int? timeout = null, bool shortcircuit=true)
         {
+            if (shortcircuit && ActiveScreen.Value == s) return;
             if (s.IsCurrentScreen(io) is null)
             {
                 Console.WriteLine($"warn: {s.GetType().Name} IsCurrentScreen not implemented");
                 ForceScreen(null);
-                await Task.Delay(timeout);
+                await Task.Delay(timeout??2000);
                 ForceScreen(s);
             }
             else
@@ -69,18 +71,27 @@ namespace genshinbot.screens
              
             }
         }
+        public async  Task<IScreen> FigureScreen()
+        {
+            //todo
+            return await ExpectOneOf(new IScreen[] { PlayingScreen, MapScreen, InventoryScreen });
+        }
 
-        public async Task<IScreen> ExpectOneOf(IScreen[] screens, int timeout = 2000)
+        public async Task<IScreen> ExpectOneOf(IScreen[] screens, int? timeout = null)
         {
             ForceScreen(null);
             try
             {
+                //todo timeout
              //   Console.WriteLine($"expect: {string.Join(",",screens.Select(s=>s.GetType().Name).ToArray())}");
                 var res = await Wire.Merge(
                     screens.Select(screen =>
                         screen.IsCurrentScreen(io)!
-                            .Where(isOpen => isOpen.isThis)
-                            .Select(_ => screen)
+                            .Where(isOpen =>
+                            {
+                                return isOpen.isThis;
+                            })
+                            .Select(_=>screen)
                     )
                 ).Get();//todo
                 await Task.Delay(200);

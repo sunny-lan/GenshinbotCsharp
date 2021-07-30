@@ -23,7 +23,7 @@ namespace genshinbot.screens
 
             public class Theme
             {
-                public string Name { get; set; }
+                public string? Name { get; set; }
                 public Scalar Bg { get; set; }
                 public Scalar Fg { get; set; }
             }
@@ -40,6 +40,12 @@ namespace genshinbot.screens
                     Name="light",
                     Bg=Scalar.FromRgb(r:255,g:255,b:255),
                     Fg=Scalar.FromRgb(r:103,g:103,b:103),
+                },
+                new Theme
+                {
+                    Name="black",
+                    Bg=Scalar.FromRgb(r:0,g:0,b:0),
+                    Fg=Scalar.FromRgb(r:255,g:255,b:255),
                 },
             };
 

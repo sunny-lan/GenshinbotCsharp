@@ -39,6 +39,7 @@ namespace genshinbot.screens
 
                 public Rect UseButton { get; set; }
 
+                public Snap? BagIcon { get; set; }
             }
 
             public Dictionary<Size, RD> R { get; set; } = new();
@@ -58,6 +59,24 @@ namespace genshinbot.screens
 
         public InventoryScreen(BotIO b, ScreenManager s):base(b,s)
         {
+        }
+
+        public override IWire<(bool isThis, double score)>? IsCurrentScreen(BotIO b)
+        {
+            var db = Db.Instance.Value;
+            algorithm.BlackWhiteTemplateMatchAlg alg = new() { 
+                Preprocess=(a,b)=> { a.CopyTo(b); }, //just use standard template match
+            };
+
+            return b.W.Size.Select3<Size, Snap>(sz =>
+                 db.R[sz].BagIcon.Expect()).Select3(icon =>
+                 {
+                     alg.SetTemplate(icon.Image.Value);
+
+                     return b.W.Screen.Watch(icon.Region)
+                        .Depacket()
+                        .Select(alg.Match);
+                 }).Switch2();
         }
 
         public async Task<(int r, int c,Rect2d bound, double score)> FindItem(Mat item)

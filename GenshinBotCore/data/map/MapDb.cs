@@ -12,6 +12,9 @@ namespace genshinbot.data.map
     public class MapDb
     {
         public static readonly DbInst<MapDb> Instance = new("map/db.json");
+
+        public Feature MondstadtTeleporter => Features.Where(f =>
+                 f.Type is FeatureType.Teleporter && f.Name == "mondstadt").Single();
         public List<Feature> Features { get; set; } = new();
 
         public Feature? DeleteFeature(int id)

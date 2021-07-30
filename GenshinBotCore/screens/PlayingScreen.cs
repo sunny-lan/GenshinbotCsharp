@@ -112,6 +112,12 @@ namespace genshinbot.screens
             await Task.Delay(3000);//todo
         }
 
+        public async Task OpenInventory()
+        {
+            await Io.K.KeyPress(Keys.B);
+            await ScreenManager.ExpectScreen(ScreenManager.InventoryScreen);
+        }
+
         public Point2d approxPos;//TODO HACK
         algorithm.MinimapMatch.PositionTracker? posTrack = null;
 
