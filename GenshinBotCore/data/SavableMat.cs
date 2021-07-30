@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace genshinbot.data
 {
+    
     public class SavableMatSubset
     {
         public string Path { get; set; }
@@ -11,6 +12,13 @@ namespace genshinbot.data
     }
     public class SavableMat : SavableMatSubset
     {
+        public string ?SuggestedFilePrefix;
+        public SavableMat() { }
+        public SavableMat(string? suggestedFilePrefix)
+        {
+            SuggestedFilePrefix = suggestedFilePrefix;
+        }
+
         private Mat? _value;
         private object lck = new object();
         public Mat Value

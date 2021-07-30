@@ -33,7 +33,7 @@ namespace genshinbot.data.jsonconverters
         public override void Write(Utf8JsonWriter writer, SavableMat value, JsonSerializerOptions options)
         {
 
-            value.Path = value.Path ?? $"images/{Guid.NewGuid()}.png";
+            value.Path = value.Path ?? $"images/{value.SuggestedFilePrefix??""}-{Guid.NewGuid()}.png";
             Data.Imwrite(value.Path, value.Value);
             JsonSerializer.Serialize<SavableMatSubset>(writer, value, options);
         }

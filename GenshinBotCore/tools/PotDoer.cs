@@ -33,13 +33,11 @@ namespace genshinbot.tools
         }
         private readonly InventoryScreen inventory;
         private readonly ScreenManager screens;
-        private readonly LocationManager locationManager;
 
-        public PotDoer(ScreenManager screenManager , LocationManager locationManager)
+        public PotDoer(ScreenManager screenManager )
         {
             this.inventory = screenManager.InventoryScreen;
             this.screens = screenManager;
-            this.locationManager = locationManager;
         }
 
         public async Task UsePot()

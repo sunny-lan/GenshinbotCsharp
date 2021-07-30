@@ -20,11 +20,14 @@
     <None Remove="data\test\arrow_fail.png" />
     <None Remove="data\test\arrow_fail_2.png" />
     <None Remove="data\test\bad arrow.png" />
+    <None Remove="data\test\Berry_crop.png" />
     <None Remove="data\test\convo_kath_1050.png" />
+    <None Remove="data\test\convo_kath_isolated.png" />
     <None Remove="data\test\convo_option_kath_1050.png" />
     <None Remove="data\test\convo_wagner_1050.png" />
     <None Remove="data\test\daily_commision_1050.png" />
     <None Remove="data\test\f_katheryne_1050.png" />
+    <None Remove="data\test\f_max_crop.png" />
     <None Remove="data\test\map 1050 teleport and commisison.png" />
     <None Remove="data\test\mapscreen_bunch_of_options_1050.png" />
     <None Remove="data\test\mapscreen_bunch_of_options_1050_1.png" />
@@ -55,7 +58,13 @@
     <Content Include="data\test\bad arrow.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="data\test\Berry_crop.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="data\test\convo_kath_1050.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\test\convo_kath_isolated.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="data\test\convo_option_kath_1050.png">
@@ -136,6 +145,9 @@
     <Content Include="data\test\text.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="data\test\f_max_crop.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
@@ -155,6 +167,7 @@
   <ItemGroup>
     <ProjectReference Include="..\GenshinBotCore\GenshinBotCore.csproj" />
   </ItemGroup>
+
 
 
 </Project>
