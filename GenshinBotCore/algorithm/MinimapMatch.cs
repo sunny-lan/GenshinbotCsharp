@@ -59,6 +59,7 @@ namespace genshinbot.algorithm.MinimapMatch
         }
 
         Mat subImg;
+        readonly Mat miniScaled = new();
 
         public Point2d? Match(Mat minimap)
         {
@@ -76,7 +77,7 @@ namespace genshinbot.algorithm.MinimapMatch
             }
 
             //perform scaling, filtering
-            using var miniScaled = minimap.Resize(default, fx: Scale, fy: Scale);
+            Cv2.Resize(minimap, miniScaled, default, fx: Scale, fy: Scale);
 
             miniF.Filter(miniScaled);
 
@@ -158,11 +159,17 @@ namespace genshinbot.algorithm.MinimapMatch
 
         public Mat output = new Mat();
         public Mat mask = new Mat();
+        readonly Mat v = new Mat();
+        readonly Mat s = new Mat();
+        private readonly Mat hsv =new Mat();
+
         ~FilterStage()
         {
-            
+            hsv.Dispose();   
             output.Dispose();
             mask.Dispose();
+            v.Dispose();
+            s.Dispose();
         }
         public FilterStage(bool minimap, Settings db)
         {
@@ -174,10 +181,10 @@ namespace genshinbot.algorithm.MinimapMatch
         {
             double amplify = 1;
 
-            using var hsv = orig.CvtColor(ColorConversionCodes.BGR2HSV);
+            Cv2.CvtColor(orig, hsv, ColorConversionCodes.BGR2HSV);
             //TODO use CV.ExtractChannel
-            using var s = hsv.ExtractChannel(1);
-            using var v = hsv.ExtractChannel(2);
+            Cv2.ExtractChannel(hsv, s,1);
+            Cv2.ExtractChannel(hsv, v,2);
 
 
             Cv2.Laplacian(v, output, MatType.CV_32F, scale: amplify);
