@@ -32,6 +32,7 @@ namespace genshinbot.data
                 new jsonconverters.MatConverter(),
                 new jsonconverters.SizeConverter(),
                 new jsonconverters.Size2dConverter(),
+                new Array2DConverter(),
 
             },
             IgnoreNullValues = true,

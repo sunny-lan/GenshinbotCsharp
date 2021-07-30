@@ -1,17 +1,18 @@
-﻿    
+﻿
 using OpenCvSharp;
 using System;
+using System.Diagnostics;
 
 namespace genshinbot
 {
     public static partial class Util
     {
-        public static Point2d ProjectOnto(this Point2d a,Point2d b)
+        public static Point2d ProjectOnto(this Point2d a, Point2d b)
         {
-            return b* (a.DotProduct(b) / b.DotProduct(b));
+            return b * (a.DotProduct(b) / b.DotProduct(b));
         }
 
-        
+
 
         public static int Area(this Rect r)
         {
@@ -38,13 +39,25 @@ namespace genshinbot
         /// <returns></returns>
         public static double Normalize(this double v, double in1, double in2)
         {
+            if (in1 == in2)
+            {
+                if (v == in1) return 0;
+                else if (v < in1) return double.NegativeInfinity;
+                else if (v > in1) return double.PositiveInfinity;
+            }
             return (v - in1) / (in2 - in1);
         }
         public static double Map(this double v, double in1, double in2, double out1, double out2)
         {
             return v.Normalize(in1, in2).Denormalize(out1, out2);
         }
-
+        public static Point2d Map(this Point2d v, Point2d in1, Point2d in2, Point2d out1, Point2d out2)
+        {
+            return new(
+                v.X.Map(in1.X, in2.X, out1.X, out2.X),
+                v.Y.Map(in1.Y, in2.Y, out1.Y, out2.Y)
+            );
+        }
         public static bool Contains(this Rect r, Point2d p)
         {
             return r.cvt().Contains(p);

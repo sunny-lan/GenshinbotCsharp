@@ -48,7 +48,7 @@ namespace genshinbot.yui.windows
             {
                 if (_img != null)
                 {
-                    this.Bounds = _t.Transform(new Rect2d(_pos, _img.Size().cvt())).round().Sys();
+                    this.Bounds = _t.Transform(new Rect2d(_pos, _img.Size().cvt())).Round().Sys();
                 }
             }
 

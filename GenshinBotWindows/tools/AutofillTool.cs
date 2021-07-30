@@ -22,7 +22,7 @@ using static genshinbot.reactive.Ext;
 
 namespace genshinbot.tools
 {
-    public class AutofillTool
+    public class AutofillTool:ITool
     {
         private IWindowAutomator2 w;
         private ILiveWire<IReadOnlyDictionary<Keys, bool>> kk;
@@ -194,7 +194,7 @@ namespace genshinbot.tools
                   using (Indent.Inc())
                   {
                       //show original
-                      overlay.Rect = x.round();
+                      overlay.Rect = x.Round();
 
                       Prompt("Top left", 1);
                       var tl = await point2DFiller.FillT(x.TopLeft);
@@ -204,7 +204,7 @@ namespace genshinbot.tools
                       ClearPrompt(1);
 
                       var res = Util.RectAround(tl, br);
-                      overlay.Rect = res.round();
+                      overlay.Rect = res.Round();
 
                       Prompt($"{Select.Description} to return, {Cancel.Description} to revert", 1);
                       var key = await WaitComboAsync(
@@ -229,7 +229,7 @@ namespace genshinbot.tools
             var rectFiller = Filler.From<Rect>(async x =>
             {
                 var r = await rect2dFiller.FillT(x.cvt());
-                return r.round();
+                return r.Round();
             });
             var snapFiller = Filler.From<data.Snap>(async x =>
             {
@@ -242,6 +242,8 @@ namespace genshinbot.tools
 
                 var r = await rectFiller.FillT(x.Region);
                 overlay.Image = null;
+
+                if (r.Area() < 1) return null;
 
                 return new data.Snap
                 {

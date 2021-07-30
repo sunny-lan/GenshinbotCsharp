@@ -38,7 +38,7 @@ namespace genshinbot.data
         }
         ~SavableMat()
         {
-            Value?.Dispose();
+            _value?.Dispose();
         }
     }
 }

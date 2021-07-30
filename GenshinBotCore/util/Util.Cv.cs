@@ -4,8 +4,11 @@ using System;
 
 namespace genshinbot
 {
-    public static partial class Util { 
-    
+    public static partial class Util {
+        public static Rect2d WithSize(this Point2d p, Size2d pp)
+        {
+            return new Rect2d(p, pp);
+        }
         public static Point2d Closest(this Point2d p, Point2d[] pp)
         {
             Point2d r = default;
@@ -15,16 +18,31 @@ namespace genshinbot
                     r = x;
             return r;
         }
-
-        public static Point2d Center(this Rect img)
+        public static Point2d Add(this Point2d p, Size2d pp)
+        {
+            return new(p.X + pp.Width, p.Y + pp.Height);
+        }
+        public static Point2d Center2d(this Rect2d img)
         {
             return new Point2d((img.Left + img.Right) / 2.0, (img.Top + img.Bottom) / 2.0);
+        }
+        public static Point2d Center2d(this Rect img)
+        {
+            return img.cvt().Center2d();
+        }
+        public static Point Center(this Rect img)
+        {
+            return img.Center2d().Round();
         }
         public static Point2d Center(this Mat img)
         {
             return new Point2d(img.Width / 2.0, img.Height / 2.0);
         }
         public static Point2d Center(this Size img)
+        {
+            return new Point2d(img.Width / 2.0, img.Height / 2.0);
+        }
+        public static Point2d Center(this Size2d img)
         {
             return new Point2d(img.Width / 2.0, img.Height / 2.0);
         }
@@ -49,9 +67,17 @@ namespace genshinbot
         {
             return new Rect2d(a.X,a.Y,a.Width,a.Height);
         }
-        public static Rect round(this Rect2d a)
+        public static Rect Round(this Rect2d a)
         {
             return new Rect(a.Location.Round(),a.Size.round());
+        }
+        public static Size2d Smallify(this Size2d a, double amount, double minSz=1)
+        {
+            return new Size2d(Math.Max(minSz, a.Width - amount), Math.Max(minSz, a.Height - amount));
+        }
+        public static Rect2d Smallify(this Rect2d a, double amount, double minSz = 1)
+        {
+            return a.Center2d().RectAround2d(a.Size.Smallify(amount,minSz));
         }
         public static Size cv(this System.Drawing.Size s)
         {
@@ -131,15 +157,47 @@ namespace genshinbot
         {
             return new Point(rng.Next(r.Left, r.Right), rng.Next(r.Top, r.Bottom));
         }
-        public static Point Origin = new Point(0, 0);
+        public static Point RandomWithin(this Rect2d r)
+        {
+            return r.Floor().RandomWithin();
+        }
 
+        public static Rect Floor(this Rect2d r)
+        {
+            return RectAround(r.TopLeft.Ceil(), r.BottomRight.Floor());
+        }
+        public static Point Floor(this Point2d r)
+        {
+            return new(Math.Floor(r.X), Math.Floor(r.Y));
+        }
+        public static Point Ceil(this Point2d r)
+        {
+            return new(Math.Ceiling(r.X), Math.Ceiling(r.Y));
+        }
+        public static Point Origin = new Point(0, 0);
+        public static Rect RectAround(this Point p, Size sz)
+        {
+            return p.Cvt().RectAround(sz);
+        }
         public static Rect RectAround(this Point2d p, Size sz)
         {
-            return new Rect((p - sz.Center()).Round(), sz);
+            return p.RectAround2d(sz.cvt()).Round();
         }
         public static Rect RectAround(this Point2d p, int sz)
         {
             return p.RectAround(new Size(sz, sz));
+        }
+        public static Rect2d RectAround2d(this Point2d p, Size sz)
+        {
+            return p.RectAround2d(sz.cvt());
+        }
+        public static Rect2d RectAround2d(this Point2d p, Size2d sz)
+        {
+            return new Rect2d(p - sz.Center(), sz);
+        }
+        public static Rect2d RectAround2d(this Point2d p, int sz)
+        {
+            return p.RectAround2d(new Size2d(sz, sz));
         }
 
         public static Rect Pad(this Rect r, int sz)

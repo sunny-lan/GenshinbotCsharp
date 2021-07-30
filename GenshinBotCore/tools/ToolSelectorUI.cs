@@ -12,7 +12,7 @@ namespace genshinbot.tools
         private readonly Tab tab;
         private readonly YUI ui;
 
-        public ToolSelectorUI(YUI ui, object[] tools)
+        public ToolSelectorUI(YUI ui, IEnumerable<ITool> tools)
         {
             this.ui = ui;
             tab = ui.CreateTab();

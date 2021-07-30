@@ -1,0 +1,53 @@
+{
+    "R": {
+        "1680x1050": {
+            "TabButtons": {
+                "FirstCell": {
+                    "X": 484,
+                    "Y": 30,
+                    "Width": 39,
+                    "Height": 30
+                },
+                "BottomRight": {
+                    "X": 1162,
+                    "Y": 30
+                },
+                "WholeRect": {
+                    "X": 484,
+                    "Y": 30,
+                    "Width": 717,
+                    "Height": 30
+                },
+                "Columns": 9,
+                "Rows": 1
+            },
+            "Items": {
+                "FirstCell": {
+                    "X": 180,
+                    "Y": 105,
+                    "Width": 110,
+                    "Height": 133
+                },
+                "BottomRight": {
+                    "X": 948,
+                    "Y": 717
+                },
+                "WholeRect": {
+                    "X": 180,
+                    "Y": 105,
+                    "Width": 878,
+                    "Height": 745
+                },
+                "Columns": 7,
+                "Rows": 5
+            },
+            "UseButton": {
+                "X": 1431,
+                "Y": 976,
+                "Width": 93,
+                "Height": 36
+            }
+        }
+    },
+    "ItemDetectThres": 0.2
+}

@@ -13,7 +13,7 @@ using static genshinbot.data.GeneralDb;
 
 namespace genshinbot.tools
 {
-    public class DailyDoer
+    public class DailyDoer:ITool
     {
         BotIO b;
 

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace genshinbot.tools
 {
-    public class BlackbarFixer
+    public class BlackbarFixer:ITool
     {
         BotIO Io;
 

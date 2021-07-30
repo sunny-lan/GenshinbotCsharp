@@ -63,7 +63,7 @@ namespace genshinbot.algorithm.MinimapMatch
         public Point2d? Match(Mat minimap)
         {
             var bigSz = minimap.Size().Scale(Scale).Pad(db.BigPadding);
-            var subRect = SubImageCenterPos.RectAround(bigSz);
+            var subRect = SubImageCenterPos.RectAround2d(bigSz).Round();
             var bounds = db.BigMap.ImgRect();
             subRect = subRect.Intersect(bounds);
             if ( lastRect != subRect)
@@ -299,7 +299,7 @@ namespace genshinbot.algorithm.MinimapMatch
                 var scaledMini1 = minimap.Resize(default, fx: s, fy: s);
 
                 //get subimage in minimap big image
-                var scaRot = approxPos.RectAround(scaledMini1.Size());
+                var scaRot = approxPos.RectAround2d(scaledMini1.Size()).Round();
                 var big1 = bigMap[scaRot.Intersect(bigMap.ImgRect())];
 
                 scaleAlgs[idx].Run(big1, scaledMini1, out double sAResp, out double angle, out double scale);

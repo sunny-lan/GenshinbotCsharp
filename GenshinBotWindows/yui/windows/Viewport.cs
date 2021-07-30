@@ -54,7 +54,7 @@ namespace genshinbot.yui.windows
         {
             var transformed = T.Transform(r.cvt());
             //TODO not sure if this is less performant
-            Invalidate(transformed.round().Sys());
+            Invalidate(transformed.Round().Sys());
         }
 
         protected override bool DoubleBuffered => true;

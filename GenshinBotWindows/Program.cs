@@ -104,19 +104,16 @@ namespace genshinbot
             //builder.Register<IWindowAutomator2>(_ => mkMok()).SingleInstance();
             builder.RegisterType<BaseBotIO>().As<BotIO>().SingleInstance();
             builder.RegisterType<screens.ScreenManager>().SingleInstance();
+            builder.Register(sp => sp.Resolve<screens.ScreenManager>().InventoryScreen);
+            builder.Register(sp => sp.Resolve<screens.ScreenManager>().MapScreen);
+            builder.Register(sp => sp.Resolve<screens.ScreenManager>().PlayingScreen);
             builder.RegisterType<controllers.LocationManager>().SingleInstance();
-            builder.RegisterType<tools.AutofillTool>().SingleInstance();
-            builder.RegisterType<tools.BlackbarFixer>().SingleInstance();
-            builder.RegisterType<tools.DailyDoer>().SingleInstance();
+            builder.RegisterType<tools.AutofillTool>().As<tools.ITool>().SingleInstance();
+            builder.RegisterType<tools.BlackbarFixer>().As<tools.ITool>().SingleInstance();
+            builder.RegisterType<tools.DailyDoer>().As<tools.ITool>().SingleInstance();
+            builder.RegisterType<tools.PotDoer>().As<tools.ITool>().SingleInstance();
             builder.RegisterType<tools.MapUI>().SingleInstance();
-            builder.Register<tools.ToolSelectorUI>(sp => new tools.ToolSelectorUI(
-                sp.Resolve<YUI>(), new object[]
-                {
-                        sp.Resolve<tools.DailyDoer>(),
-                        sp.Resolve<tools.AutofillTool>(),
-                        sp.Resolve<tools.BlackbarFixer>(),
-
-                })).SingleInstance();
+            builder.RegisterType<tools.ToolSelectorUI>().SingleInstance();
             builder.RegisterType<controllers.LocationManager.Test>().SingleInstance();
             builder.RegisterType<automation.ArduinoAutomator.Test>().SingleInstance();
             builder.RegisterType<WindMouseMover.Test>().SingleInstance();

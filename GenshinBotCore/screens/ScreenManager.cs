@@ -32,6 +32,7 @@ namespace genshinbot.screens
 
         public PlayingScreen PlayingScreen { get; }
         public MapScreen MapScreen { get; }
+        public InventoryScreen InventoryScreen { get; }
         public LoadingScreen LoadingScreen { get; }
 
         public ILiveWire<IScreen?> ActiveScreen => screen;
@@ -45,6 +46,7 @@ namespace genshinbot.screens
             PlayingScreen = new PlayingScreen(new ProxyBotIO(ActiveScreen.Select(s => s == PlayingScreen), io), this);
             MapScreen = new MapScreen(new ProxyBotIO(ActiveScreen.Select(s => s == MapScreen), io), this);
             LoadingScreen = new LoadingScreen(new ProxyBotIO(ActiveScreen.Select(s => s == LoadingScreen), io), this);
+            InventoryScreen = new InventoryScreen(new ProxyBotIO(ActiveScreen.Select(s => s == InventoryScreen), io), this);
 
         }
         public void ForceScreen(IScreen? s)
